@@ -61,7 +61,7 @@ handoffs:
     model: Claude Opus 4.6 (copilot)
 
   - label: Docstrings Expert
-    agent: Docstring Author
+    agent: Docstring Expert
     prompt: |
       You are being handed off from the Code Reviewer. A code review report has just been produced and saved to disk. Read the report before doing anything.
 
@@ -74,7 +74,7 @@ handoffs:
     model: Claude Opus 4.6 (copilot)
 
   - label: Unit Tests Expert
-    agent: Unit Test Author
+    agent: Unit Test Expert
     prompt: |
       You are being handed off from the Code Reviewer. A code review report has just been produced and saved to disk. Read the report before doing anything.
 
@@ -87,7 +87,7 @@ handoffs:
     model: Claude Opus 4.6 (copilot)
 
   - label: Type Annotations Expert
-    agent: Type Annotation Author
+    agent: Type Annotation Expert
     prompt: |
       You are being handed off from the Code Reviewer. A code review report has just been produced and saved to disk. Read the report before doing anything.
 
@@ -100,7 +100,7 @@ handoffs:
     model: Claude Opus 4.6 (copilot)
 
   - label: README Expert
-    agent: README Author
+    agent: README Expert
     prompt: |
       You are being handed off from the Code Reviewer. A code review report has just been produced and saved to disk. Read the report before doing anything.
 
@@ -109,6 +109,41 @@ handoffs:
       After completing each finding, commit the changes with a message citing the finding ID.
 
       Return a structured summary: finding ID, README path, and sections written or updated for each finding you addressed.
+    send: true
+    model: Claude Opus 4.6 (copilot)
+
+  - label: Python Code Expert
+    agent: Python Expert
+    prompt: |
+      You are being handed off from the Code Reviewer. A code review report has just been produced and saved to disk. Read the report before doing anything.
+
+      Your scope: address every finding tagged `Delegation: → Python Expert` in the report. These are findings involving Python language-level issues — non-idiomatic patterns, deprecated APIs, stdlib misuse (os.path instead of pathlib, manual loops instead of itertools/functools), modern type syntax violations, OOP anti-patterns, async anti-patterns, security issues, or concurrency bugs that are Python-runtime-specific (not framework-specific).
+
+      For each finding:
+      1. Read the cited Location and understand the current code and its call sites.
+      2. Verify the recommended fix against the Python version pinned in the project (check `pyproject.toml` for `requires-python`).
+      3. Apply the idiomatic Python 3.12+ replacement per your acceptance criteria.
+      4. Run the module's existing test suite to confirm no regressions.
+
+      Return a structured summary: finding ID, anti-pattern found, idiomatic replacement applied, test result, and commit SHA for each finding you addressed.
+    send: true
+    model: Claude Opus 4.6 (copilot)
+
+  - label: BigQuery Code Expert
+    agent: BigQuery Expert
+    prompt: |
+      You are being handed off from the Code Reviewer. A code review report has just been produced and saved to disk. Read the report before doing anything.
+
+      Your scope: address every finding tagged `Delegation: → BigQuery Expert` in the report. These are findings involving BigQuery anti-patterns — pull-into-Python-then-loop, missing partition filters, SELECT *, string-interpolated SQL values, missing parameterization, deprecated BigQuery APIs, or any other BigQuery code quality issue.
+
+      For each finding:
+      1. Read the cited Location and understand the current data flow (source → transformations → output).
+      2. Fetch the pinned `google-cloud-bigquery` version from `uv.lock` and verify all APIs against current docs BEFORE writing any code.
+      3. Apply the push-down / idiomatic BigQuery replacement per your acceptance criteria.
+      4. Run a dry_run to verify partition pruning and scan volume are within expectations.
+      5. Run the module's existing test suite to confirm no regressions.
+
+      Return a structured summary: finding ID, anti-pattern found, BigQuery replacement applied, dry_run verification result, and commit SHA for each finding you addressed.
     send: true
     model: Claude Opus 4.6 (copilot)
 ---

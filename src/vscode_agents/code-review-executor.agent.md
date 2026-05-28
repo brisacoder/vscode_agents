@@ -7,7 +7,7 @@ model: Claude Opus 4.6 (copilot)
 agents: [*]
 handoffs:
   - label: Write Docstrings
-    agent: Docstring Author
+    agent: Docstring Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
 
@@ -21,7 +21,7 @@ handoffs:
     model: Claude Opus 4.6 (copilot)
 
   - label: Write Unit Tests
-    agent: Unit Test Author
+    agent: Unit Test Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
 
@@ -35,7 +35,7 @@ handoffs:
     model: Claude Opus 4.6 (copilot)
 
   - label: Write Type Annotations
-    agent: Type Annotation Author
+    agent: Type Annotation Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
 
@@ -49,7 +49,7 @@ handoffs:
     model: Claude Opus 4.6 (copilot)
 
   - label: Write README
-    agent: README Author
+    agent: README Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
 
@@ -98,6 +98,61 @@ handoffs:
       7. Mark it `done` in the ledger Plan table and append a History entry (files touched, diff summary, EXPLAIN verification, performance improvement if measured, commit SHA).
 
       Return a structured summary: finding ID, anti-pattern found, DuckDB replacement applied, EXPLAIN verification result, and commit SHA for each finding you addressed.
+    send: true
+    model: Claude Opus 4.6 (copilot)
+
+  - label: LangGraph Author
+    agent: LangGraph Expert
+    prompt: |
+      You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
+
+      Your scope: address every finding in the ledger that is currently `pending` AND tagged as delegated to you (look for `delegated to LangGraph Expert` in the State or Notes column). These are findings involving LangGraph defects — graph flow problems, state channel/reducer misuse, routing completeness, Send() dispatch issues, exception strategy, or checkpoint/interrupt configuration.
+
+      For each finding:
+      1. Read the cited Location and map the graph context (state schema channels/reducers, routing edges, Send paths, checkpointer/interrupt configuration).
+      2. Fetch the pinned `langgraph` version from `uv.lock` and verify all framework-specific APIs against current docs BEFORE writing any code.
+      3. Apply the smallest safe fix that preserves existing behavior while correcting the graph contract.
+      4. Run the module's existing tests and add targeted tests if the finding is behavioral and currently unguarded.
+      5. Mark it `done` in the ledger Plan table and append a History entry (files touched, diff summary, test result, commit SHA).
+
+      Return a structured summary: finding ID, LangGraph defect fixed, files touched, test result, and commit SHA for each finding you addressed.
+    send: true
+    model: Claude Opus 4.6 (copilot)
+
+  - label: Python Author
+    agent: Python Expert
+    prompt: |
+      You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
+
+      Your scope: address every finding in the ledger that is currently `pending` AND tagged as delegated to you (look for `delegated to Python Expert` in the State or Notes column). These are findings involving Python language-level issues — non-idiomatic patterns, deprecated APIs, stdlib misuse (os.path instead of pathlib, manual loops instead of itertools/functools), modern type syntax violations, OOP anti-patterns, async anti-patterns, security issues, or concurrency bugs that are Python-runtime-specific (not framework-specific).
+
+      For each finding:
+      1. Read the cited Location and understand the current code and its call sites.
+      2. Verify the recommended fix against the Python version pinned in the project (check `pyproject.toml` for `requires-python`).
+      3. Apply the idiomatic Python 3.12+ replacement per your acceptance criteria.
+      4. Run the module's existing test suite to confirm no regressions.
+      5. Mark it `done` in the ledger Plan table and append a History entry (files touched, diff summary, test result, commit SHA).
+
+      Return a structured summary: finding ID, anti-pattern found, idiomatic replacement applied, test result, and commit SHA for each finding you addressed.
+    send: true
+    model: Claude Opus 4.6 (copilot)
+
+  - label: BigQuery Author
+    agent: BigQuery Expert
+    prompt: |
+      You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
+
+      Your scope: address every finding in the ledger that is currently `pending` AND tagged as delegated to you (look for `delegated to BigQuery Expert` in the State or Notes column). These are findings involving BigQuery anti-patterns — pull-into-Python-then-loop, missing partition filters, SELECT *, string-interpolated SQL values, missing parameterization, deprecated BigQuery APIs, or any other BigQuery code quality issue.
+
+      For each finding:
+      1. Read the cited Location and understand the current data flow (source → transformations → output).
+      2. Fetch the pinned `google-cloud-bigquery` version from `uv.lock` and verify all APIs against current docs BEFORE writing any code.
+      3. Apply the push-down / idiomatic BigQuery replacement per your acceptance criteria.
+      4. Run a dry_run to verify partition pruning and scan volume are within expectations.
+      5. Run the module's existing test suite to confirm no regressions.
+      6. Mark it `done` in the ledger Plan table and append a History entry (files touched, diff summary, dry_run verification, commit SHA).
+
+      Return a structured summary: finding ID, anti-pattern found, BigQuery replacement applied, dry_run verification result, and commit SHA for each finding you addressed.
     send: true
     model: Claude Opus 4.6 (copilot)
 ---

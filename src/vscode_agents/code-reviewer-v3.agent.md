@@ -43,11 +43,11 @@ handoffs:
     model: Claude Opus 4.6 (copilot)
 
   - label: LangGraph Expert
-    agent: LangGraph Reviewer
+    agent: LangGraph Expert
     prompt: |
       You are being handed off from the Code Reviewer. A code review report has just been produced and saved to disk. Read the report before doing anything.
 
-      Your scope: address every finding tagged `Delegation: → LangGraph Reviewer` in the report, plus any G-type findings (LangGraph graph flow problems) and C/L findings explicitly marked as LangGraph-runtime issues.
+      Your scope: address every finding tagged `Delegation: → LangGraph Expert` in the report, plus any G-type findings (LangGraph graph flow problems) and C/L findings explicitly marked as LangGraph-runtime issues.
 
       For each finding:
       1. Read the cited Location and map the graph context (state schema channels/reducers, routing edges, Send paths, checkpointer/interrupt configuration).

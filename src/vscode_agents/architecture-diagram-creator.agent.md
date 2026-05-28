@@ -1,6 +1,6 @@
 ---
 name: architecture-diagram-creator
-description: Reads a Python file, package, or service and produces multi-page drawio (.drawio) documentation — system context, component architecture, call paths, data transformations, error paths. Use when the user wants visual documentation derived from real source, not from description. Output is a single .drawio file with multiple pages.
+description: "Use when: writing, reviewing, or optimizing architecture diagrams from Python source code. Reads a Python file, package, or service and produces multi-page drawio (.drawio) documentation — system context, component architecture, call paths, data transformations, error paths. Derives visual documentation from real source, not from description. Output is a single .drawio file with multiple pages."
 argument-hint: Path to a file, package, or repo to document, plus optional scope hint (e.g. "document only the planner-dispatcher subsystem").
 tools: [vscode, execute, read, agent, browser, 'microsoft/markitdown/*', 'playwright/*', edit, search, web, vscode.mermaid-chat-features/renderMermaidDiagram, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, todo]
 ---

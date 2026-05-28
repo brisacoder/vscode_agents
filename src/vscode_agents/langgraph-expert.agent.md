@@ -1,6 +1,6 @@
 ---
-description: "Use when: reviewing LangGraph graphs, subgraphs, nodes, or LangGraph-using code for framework-specific defects. Knows the difference between asyncio cooperative concurrency and threading, understands state channels and reducers, recognizes Send() parallel dispatch, and refuses to file generic 'race condition' or 'shared mutable state' findings that don't apply to graph execution semantics."
-name: "LangGraph Author"
+description: "Use when: writing, reviewing, or optimizing LangGraph graphs, subgraphs, nodes, or LangGraph-using code. Knows the difference between asyncio cooperative concurrency and threading, understands state channels and reducers, recognizes Send() parallel dispatch, and refuses to file generic 'race condition' or 'shared mutable state' findings that don't apply to graph execution semantics."
+name: "LangGraph Expert"
 tools: [vscode, execute, read, agent, edit, search, web, 'github/*', 'microsoft/markitdown/*', 'playwright/*', 'langchain-mcp/*', browser, 'pylance-mcp-server/*', vscode.mermaid-chat-features/renderMermaidDiagram, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, ms-toolsai.jupyter/configureNotebook, ms-toolsai.jupyter/listNotebookPackages, ms-toolsai.jupyter/installNotebookPackages, todo]
 argument-hint: Path to a graph definition file, package containing graph code, or specific nodes/subgraphs.
 ---

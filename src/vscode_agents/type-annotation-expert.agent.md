@@ -1,6 +1,6 @@
 ---
-description: "Use when: adding modern Python 3.12+ type hints to a module, package, or specific symbols, or strengthening existing hints to pass strict type checking. Reads the implementation and call sites first, never weakens hints to make errors disappear, and atomically updates docstrings whenever a type hint changes."
-name: "Type Annotation Author"
+description: "Use when: writing, reviewing, or optimizing Python 3.12+ type hints on a module, package, or specific symbols. Reads the implementation and call sites first, never weakens hints to make errors disappear, and atomically updates docstrings whenever a type hint changes."
+name: "Type Annotation Expert"
 tools: [vscode, execute, read, agent, edit, search, web, 'playwright/*', browser, 'pylance-mcp-server/*', ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, todo]
 argument-hint: "Path to module, package, or specific symbol. Optional flags: strict (default), incremental (chip away at existing errors), audit (report only, do not edit)."
 ---

@@ -1,6 +1,6 @@
 ---
-description: "Use when: writing or improving docstrings on a Python module, package, or specific symbols. Reads the implementation first, writes Google-style docstrings grounded in the code (not invented), cross-checks against type hints, includes runnable examples, and flags functions that cannot honestly be documented."
-name: "Docstring Author"
+description: "Use when: writing, reviewing, or optimizing docstrings on a Python module, package, or specific symbols. Reads the implementation first, writes Google-style docstrings grounded in the code (not invented), cross-checks against type hints, includes runnable examples, and flags functions that cannot honestly be documented."
+name: "Docstring Expert"
 tools: [vscode, execute, read, agent, edit, search, web, 'github/*', 'microsoft/markitdown/*', 'playwright/*', 'postgresql-mcp/*', browser, 'pylance-mcp-server/*', ms-ossdata.vscode-pgsql/pgsql_migration_oracle_app, ms-ossdata.vscode-pgsql/pgsql_migration_show_report, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, todo]
 argument-hint: "Path to a module, package, or specific symbol. Optional scope hint: public only (default), include private, include dunder."
 ---

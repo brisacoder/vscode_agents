@@ -465,15 +465,20 @@ The structure below is the literal content of the saved Markdown file (see Const
 
 ## Delegation Summary
 
-| Agent | Finding count | Finding IDs |
-|-------|--------------|-------------|
-| Executor (direct) | N | F1, S2, L1, ... |
-| → Pandas Expert | N | P1, P3, F4, ... |
-| → DuckDB Expert | N | P2, F5, ... |
-| → Docstring Author | N | D1, D2, ... |
-| → Unit Test Author | N | T1, T2, ... |
-| → Type Annotation Author | N | I1, A1, ... |
-| → README Author | N | DOC1, DOC2, ... |
+_This table is populated in two passes. The reviewer fills the "Executor (direct)" row and the triggered/not-triggered status for specialists. The executor updates each specialist row after that specialist's independent review completes._
+
+| Agent | Status | Finding IDs |
+|-------|--------|-------------|
+| Executor (direct) | N findings | F1, I1, S1, L1, ... |
+| → Pandas Expert | Triggered — findings pending | _(executor will update)_ |
+| → DuckDB Expert | Not triggered | — |
+| → BigQuery Expert | Not triggered | — |
+| → LangGraph Expert | Triggered — findings pending | _(executor will update)_ |
+| → Python Expert | Triggered — findings pending | _(executor will update)_ |
+| → Docstring Expert | Triggered — findings pending | _(executor will update)_ |
+| → Type Annotation Expert | Triggered — findings pending | _(executor will update)_ |
+| → Unit Test Expert | Triggered — findings pending | _(executor will update)_ |
+| → README Expert | N findings | DOC1, ... |
 
 ## 1. Fragilities
 <F1, F2, ... or "None identified — checklist trace below">
@@ -487,13 +492,13 @@ The structure below is the literal content of the saved Markdown file (see Const
 
 ## 4. Performance Issues
 ### 4a. Pandas
-<"pandas usage detected — full review delegated to Pandas Expert" or "Not applicable">
+<"Pandas usage detected in [files] — full review triggered. Executor will update this section with findings from Pandas Expert." or "Not applicable — no pandas usage.">
 ### 4b. DuckDB
-<"duckdb usage detected — full review delegated to DuckDB Expert" or "Not applicable">
+<"DuckDB usage detected in [files] — full review triggered. Executor will update this section with findings from DuckDB Expert." or "Not applicable — no duckdb usage.">
 ### 4c. BigQuery
-<"bigquery usage detected — full review delegated to BigQuery Expert" or "Not applicable">
+<"BigQuery usage detected in [files] — full review triggered. Executor will update this section with findings from BigQuery Expert." or "Not applicable — no bigquery usage.">
 ### 4d. General Performance
-<P findings handled directly by executor>
+<P findings — handled directly by executor>
 
 ## 5. Concurrency and Async Correctness
 <C1, C2, ...>
@@ -502,19 +507,19 @@ The structure below is the literal content of the saved Markdown file (see Const
 <S1, S2, ...>
 
 ## 7. LangGraph (G)
-<"LangGraph code detected — delegated to LangGraph Expert" or "Not applicable — no LangGraph code detected">
+<"LangGraph code detected in [files] — full review triggered. Executor will update this section with findings from LangGraph Expert." or "Not applicable — no LangGraph code detected.">
 
 ## 8. Long-Range Bugs
 <L1, L2, ...>
 
 ## 9. Docstring Coverage (D)
-<"N public symbols across M files — delegated to Docstring Expert">
+<"N public symbols across M files — full review triggered. Executor will update this section with findings from Docstring Expert.">
 
 ## 10. Documentation Issues
-<DOC1, DOC2, ... or "None identified — README existence checked">
+<DOC1, DOC2, ... or "None identified — README existence checked.">
 
 ## 11. Test Coverage (T)
-<"Test files found: [list] — delegated to Unit Test Expert" or "No test files found — delegated to Unit Test Expert">
+<"Test files found: [list] — full review triggered. Executor will update this section with findings from Unit Test Expert." or "No test files found — full coverage review triggered. Executor will update this section."
 
 ## 12. User Experience Issues
 <U1, U2, ...>

@@ -247,19 +247,33 @@ Parse the report into two parts:
 
 **Part A — Direct findings** (F, I, A, P, C, S, L, DOC, U): build the Plan with topological ordering per the rules below.
 
-**Part B — Specialist Review Triggers**: read the `## Specialist Review Triggers` section of the report. For each triggered specialist, add a **Review** entry to the Plan with a special type `review`:
+**Part B — Specialist Review Triggers**: read the `## Specialist Review Triggers` section of the report. For each triggered specialist, add a **Review** entry to the Plan:
 
 | Order | ID | Type | Specialist | Path | Depends on | State |
 |---|---|---|---|---|---|---|
-| early | SR-D | review | Docstring Expert | `path/to/package/` | — | pending |
-| early | SR-T | review | Unit Test Expert | `path/to/tests/` | — | pending |
-| early | SR-TY | review | Type Annotation Expert | `path/to/package/` | — | pending |
 | early | SR-G | review | LangGraph Expert | `path/to/graph/` | — | pending |
+| early | SR-PA | review | Pandas Expert | `path/to/package/` | — | pending |
+| early | SR-DB | review | DuckDB Expert | `path/to/package/` | — | pending |
 | early | SR-PY | review | Python Expert | `path/to/package/` | — | pending |
+| early | SR-D | review | Docstring Expert | `path/to/package/` | — | pending |
+| early | SR-TY | review | Type Annotation Expert | `path/to/package/` | — | pending |
+| early | SR-T | review | Unit Test Expert | `path/to/tests/` | — | pending |
 
-Specialist reviews run early (before direct findings are fixed) so their findings can be merged into the plan before execution begins. They have no dependencies on each other and can be triggered in parallel.
+Trigger ALL specialist reviews before beginning any direct finding fixes — the specialists run independently while the executor works through direct findings. They have no dependencies on each other and can be triggered in parallel via their handoff buttons.
 
-**Handling specialist review returns**: when a specialist returns a findings file, read it, extract each finding, and add it to the Plan as a spawned finding (ID prefixed with the specialist abbreviation: `D-`, `T-`, `TY-`, `G-`, `PY-`). Set `Depends on` appropriately (e.g., `T-` findings depend on `D-` findings for the same symbol). Mark the SR entry `done`.
+**When a specialist returns**, do all four of the following before moving on:
+
+1. **Read the specialist's output** — their findings file or session summary.
+
+2. **Extract all findings** and add each to the Plan as a spawned finding. Use a prefixed ID to distinguish source (`G-1`, `G-2` for LangGraph; `PA-1` for Pandas; `DB-1` for DuckDB; `PY-1` for Python Expert; `D-1` for Docstring; `TY-1` for Type Annotation; `T-1` for Unit Test). Set `Depends on` where required (docstring findings depend on behavioral fixes to the same symbol; test findings depend on docstring findings).
+
+3. **Update the original review report file** — edit the relevant section to replace the "executor will update" placeholder with actual content:
+   - If findings were found: insert a brief summary and the path to the specialist's report, e.g. `"LangGraph Expert found 4 issues (2 High, 1 Medium, 1 Low) — see langgraph-review-...md. Key finding: missing exception node on tool node X."`
+   - If zero findings: replace with `"LangGraph Expert reviewed [N files, M LOC] — 0 issues found."` Never leave a blank placeholder. Zero findings after a real review is informative; "delegated" with no follow-up is noise.
+
+4. **Update the Delegation Summary table** in the report — replace the "Triggered — findings pending" row with the actual finding count and IDs. Example: `| → LangGraph Expert | 4 findings | G-1, G-2, G-3, G-4 |`
+
+This is mandatory. A review report that says "delegated to LangGraph Expert" with no findings listed looks identical to a review that never ran the LangGraph Expert at all. The reader cannot tell the difference. The executor is responsible for closing this gap.
 
 Parse the report into findings. Construct the Plan with topological ordering using these rules:
 

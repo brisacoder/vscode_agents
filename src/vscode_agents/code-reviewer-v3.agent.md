@@ -132,7 +132,14 @@ This agent is designed to find everything in **one invocation**. The historical 
 7. **Read every source file** under the target path systematically, ticking cells as they are inspected for each section. Also read test files to detect the T trigger (Unit Test Expert) — but do not analyze test quality; that is the Unit Test Expert's job.
 8. Produce **Round 1 findings** by walking each section's anti-pattern checklist (below) against the read pass.
 9. Run the **Saturation Loop** (below).
-10. Merge, write the final report, and return only the file path.
+10. **Run specialist reviews in parallel.** Evaluate the Specialist Review Triggers (see section below). For every triggered specialist, launch a subagent via the `agent` tool. All triggered specialists run concurrently — do not run them serially. Pass each the specific path(s) detected and the full review mandate from the Specialist Review Triggers table.
+
+    For each specialist result received:
+    - **Merge findings into the report.** Replace the detection-note stub in the relevant section (4a, 4b, 4c, 7, 9, 11) with the actual findings, or with `"<Specialist> reviewed N files — 0 issues found."` if the specialist found nothing. **Never leave a stub or placeholder in the saved report.**
+    - **Update the Delegation Summary row** with the actual finding count and IDs.
+    - **Assign IDs** to specialist findings using a prefix: `G-` (LangGraph), `PA-` (Pandas), `DB-` (DuckDB), `PY-` (Python), `D-` (Docstring), `TY-` (Type Annotation), `T-` (Unit Test).
+
+11. Merge all findings (direct + specialist), sort the Prioritized Summary by severity, write the **final complete report**, and return only the file path. The saved report has no stubs, no placeholders, and no sections that say "will be updated."
 
 ## Saturation Loop
 
@@ -338,7 +345,7 @@ Do not produce T findings. Do not check assertion quality, marker compliance, AC
 
 ## Specialist Review Triggers
 
-After completing the main review (sections F, I, A, P, C, S, L, DOC, U), evaluate each specialist domain and record triggers. Triggered specialists run **full independent reviews** using their own saturation loops and hunter personas — they are not handed a findings list to fix.
+After the Saturation Loop (step 9), evaluate each specialist domain. Record which are triggered, then run all triggered specialists in parallel as subagents (step 10). Their findings are merged into this report before it is saved — the report is not complete until all specialists have returned.
 
 | Domain | Trigger condition | Specialist |
 |---|---|---|
@@ -352,23 +359,21 @@ After completing the main review (sections F, I, A, P, C, S, L, DOC, U), evaluat
 | Tests | Any `test_*.py` or `*_test.py` file in or adjacent to the reviewed path | Unit Test Expert |
 | README | Any installable package directory | README Expert |
 
-Record active triggers in the report's `## Specialist Review Triggers` section:
+Record active triggers in the report's `## Specialist Review Triggers` section. This section is used by step 10 to know which subagents to launch — it is an internal work list, not user-facing output.
 
 ```
 ## Specialist Review Triggers
 
-- **Pandas Expert**: full review of `path/to/package/` — pandas usage detected in `pipeline.py`
-- **DuckDB Expert**: not triggered (no duckdb usage)
-- **BigQuery Expert**: not triggered (no bigquery usage)
-- **LangGraph Expert**: full review of `path/to/graph_code/` — LangGraph usage in `nodes.py`, `state.py`
-- **Python Expert**: full review of `path/to/package/`
-- **Docstring Expert**: full review of `path/to/package/` — 14 public symbols across 5 files
-- **Type Annotation Expert**: full review of `path/to/package/`
-- **Unit Test Expert**: full review of `path/to/tests/` — test files: `test_nodes.py`, `test_state.py`
-- **README Expert**: full review of `path/to/package/`
+- **Pandas Expert**: `path/to/package/` — pandas detected in `pipeline.py`
+- **DuckDB Expert**: not triggered
+- **BigQuery Expert**: not triggered
+- **LangGraph Expert**: `path/to/graph_code/` — LangGraph detected in `nodes.py`, `state.py`
+- **Python Expert**: `path/to/package/`
+- **Docstring Expert**: `path/to/package/` — 14 public symbols across 5 files
+- **Type Annotation Expert**: `path/to/package/`
+- **Unit Test Expert**: `path/to/tests/` — test files: `test_nodes.py`, `test_state.py`
+- **README Expert**: `path/to/package/`
 ```
-
-The Code Review Executor uses these triggers to invoke each specialist with a full review mandate, not a targeted fix assignment.
 
 ## Severity Rubric
 
@@ -465,20 +470,18 @@ The structure below is the literal content of the saved Markdown file (see Const
 
 ## Delegation Summary
 
-_This table is populated in two passes. The reviewer fills the "Executor (direct)" row and the triggered/not-triggered status for specialists. The executor updates each specialist row after that specialist's independent review completes._
-
-| Agent | Status | Finding IDs |
-|-------|--------|-------------|
-| Executor (direct) | N findings | F1, I1, S1, L1, ... |
-| → Pandas Expert | Triggered — findings pending | _(executor will update)_ |
-| → DuckDB Expert | Not triggered | — |
-| → BigQuery Expert | Not triggered | — |
-| → LangGraph Expert | Triggered — findings pending | _(executor will update)_ |
-| → Python Expert | Triggered — findings pending | _(executor will update)_ |
-| → Docstring Expert | Triggered — findings pending | _(executor will update)_ |
-| → Type Annotation Expert | Triggered — findings pending | _(executor will update)_ |
-| → Unit Test Expert | Triggered — findings pending | _(executor will update)_ |
-| → README Expert | N findings | DOC1, ... |
+| Agent | Finding count | Finding IDs |
+|-------|--------------|-------------|
+| Reviewer (direct) | N | F1, I1, S1, L1, ... |
+| → Pandas Expert | N | PA-1, PA-2, ... |
+| → DuckDB Expert | N | DB-1, ... |
+| → BigQuery Expert | not triggered | — |
+| → LangGraph Expert | N | G-1, G-2, ... |
+| → Python Expert | N | PY-1, ... |
+| → Docstring Expert | N | D-1, D-2, ... |
+| → Type Annotation Expert | N | TY-1, ... |
+| → Unit Test Expert | N | T-1, ... |
+| → README Expert | N | DOC1, ... |
 
 ## 1. Fragilities
 <F1, F2, ... or "None identified — checklist trace below">
@@ -492,13 +495,13 @@ _This table is populated in two passes. The reviewer fills the "Executor (direct
 
 ## 4. Performance Issues
 ### 4a. Pandas
-<"Pandas usage detected in [files] — full review triggered. Executor will update this section with findings from Pandas Expert." or "Not applicable — no pandas usage.">
+<Pandas Expert findings (PA-1, PA-2, ...), or "Pandas Expert reviewed N files — 0 issues found.", or "Not applicable — no pandas usage.">
 ### 4b. DuckDB
-<"DuckDB usage detected in [files] — full review triggered. Executor will update this section with findings from DuckDB Expert." or "Not applicable — no duckdb usage.">
+<DuckDB Expert findings (DB-1, ...), or "DuckDB Expert reviewed N files — 0 issues found.", or "Not applicable — no duckdb usage.">
 ### 4c. BigQuery
-<"BigQuery usage detected in [files] — full review triggered. Executor will update this section with findings from BigQuery Expert." or "Not applicable — no bigquery usage.">
+<BigQuery Expert findings (BQ-1, ...), or "BigQuery Expert reviewed N files — 0 issues found.", or "Not applicable — no bigquery usage.">
 ### 4d. General Performance
-<P findings — handled directly by executor>
+<P findings from the reviewer's own analysis>
 
 ## 5. Concurrency and Async Correctness
 <C1, C2, ...>
@@ -507,19 +510,19 @@ _This table is populated in two passes. The reviewer fills the "Executor (direct
 <S1, S2, ...>
 
 ## 7. LangGraph (G)
-<"LangGraph code detected in [files] — full review triggered. Executor will update this section with findings from LangGraph Expert." or "Not applicable — no LangGraph code detected.">
+<LangGraph Expert findings (G-1, G-2, ...), or "LangGraph Expert reviewed N files — 0 issues found.", or "Not applicable — no LangGraph code detected.">
 
 ## 8. Long-Range Bugs
 <L1, L2, ...>
 
-## 9. Docstring Coverage (D)
-<"N public symbols across M files — full review triggered. Executor will update this section with findings from Docstring Expert.">
+## 9. Docstrings (D)
+<Docstring Expert findings (D-1, D-2, ...), or "Docstring Expert reviewed N symbols — 0 issues found.">
 
 ## 10. Documentation Issues
 <DOC1, DOC2, ... or "None identified — README existence checked.">
 
 ## 11. Test Coverage (T)
-<"Test files found: [list] — full review triggered. Executor will update this section with findings from Unit Test Expert." or "No test files found — full coverage review triggered. Executor will update this section."
+<Unit Test Expert findings (T-1, T-2, ...), or "Unit Test Expert reviewed N test files — 0 issues found.", or "Unit Test Expert: no test files found — 0 tests exist for this package."
 
 ## 12. User Experience Issues
 <U1, U2, ...>

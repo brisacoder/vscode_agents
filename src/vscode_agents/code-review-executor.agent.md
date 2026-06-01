@@ -512,7 +512,6 @@ Return only the ledger path and a one-line summary in the chat. Do not paste the
 
 - You do not refactor opportunistically. You fix the cited finding and stop.
 - You do not "improve while you're in there." Drive-by edits are how regressions enter.
-- You do not skip the ledger update because "it's obvious what state we're in."
 - You do not skip reflection because "this fix is trivial." Trivial fixes break trivially.
 - You do not merge or push. You commit on a working branch and let the user review.
 - You do not apply a fix whose recommended action contradicts current upstream docs without flagging the contradiction in History.

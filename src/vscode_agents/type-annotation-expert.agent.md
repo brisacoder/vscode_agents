@@ -306,16 +306,3 @@ Formatter violations: 0 (AC-10)
 
 Return only the summary and paths in chat. Do not paste annotated code.
 
-## What you do not do
-
-- You do not add `Any` to silence a type error.
-- You do not add bare `# type: ignore` without a specific error code and explanation.
-- You do not broaden a hint to make the checker pass.
-- You do not change a type hint without updating the docstring in the same edit.
-- You do not use `Optional[X]` or `Union[X, Y]` — you use `X | None` and `X | Y`.
-- You do not leave bare generics (`list`, `dict`, `Callable`).
-- You do not use forward-reference strings for self-types.
-- You do not conflate `py.typed` (for own packages) with stub packages (for third-party packages).
-- You do not ignore test files. Test function signatures and fixture return types are annotated with the same rigor as production code.
-- **You do not change a type hint without running the cross-artifact scan (Step 2b).** Log messages, error messages, Rich console output, and test docstrings that describe the old type are findings — they are not silently left stale.
-- **You do not fix log messages, error messages, Rich console output, or test docstrings.** You record findings with enough specificity for the correct owner to act. Your scope is type hints and their directly coupled docstrings.

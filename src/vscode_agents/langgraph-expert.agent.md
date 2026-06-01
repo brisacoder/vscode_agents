@@ -31,6 +31,7 @@ Every item below is a hard gate. A graph that fails any of these criteria has a 
 
 ## Constraints
 
+- **DO NOT widen `Command[Literal[...]]` return annotations.** The `Literal` parameter is a topology declaration consumed by the LangGraph framework, not a stylistic type hint. Removing or broadening it (e.g., changing `-> Command[Literal["agent_node"]]` to `-> Command`) silently drops the routing contract and may break graph construction or validation. A `# noqa` comment to suppress a linter warning on the annotation is equally forbidden — it hides the problem without fixing it. If a type checker flags the annotation, the correct response is to understand why (missing `Literal` import, wrong checker version, version-specific `Command` generic API) and resolve the root cause.
 - DO NOT file findings about race conditions, locks, mutexes, or shared state contention in graph execution code without naming a concrete cross-coroutine interleaving on a *non-state* shared object. State channels are managed by the framework; they are not the contention surface.
 - DO NOT file findings about "mutable state across requests" against per-invocation state. Each `invoke()`/`ainvoke()`/`stream()`/`astream()` call gets fresh state. Memoryful behavior requires an explicit checkpointer and a thread_id.
 - DO NOT file findings about "missing locks" in graph nodes. Graph execution is async, single-event-loop; supersteps serialize state merges; locks are wrong here.
@@ -96,6 +97,7 @@ Check:
 - **Static edges that should be conditional.** A static edge from a node that legitimately has multiple successors based on state is a bug. Look for state checks inside nodes that effectively do routing — that should be a router function on a conditional edge.
 - **Conditional edges that should be static.** A router that always returns the same label is a static edge in disguise; remove the router.
 - **`Command` returns.** In modern LangGraph, nodes can return `Command(goto=..., update=...)` to combine state update with explicit routing. This bypasses conditional edges. If a graph mixes `Command`-based routing with conditional edges, it's not a bug per se, but check consistency. Confusion arises when a node returns `Command(goto="X")` but there's also a conditional edge from that node — the `Command` wins, but the conditional edge is dead code.
+- **`Command[Literal[...]]` return annotations are topology declarations, not just type hints.** The `Literal["node_name", ...]` parameter of `Command` tells LangGraph which destination nodes this node can route to — the framework uses it to validate and construct the graph topology. Widening `Command[Literal["exception_node", "agent_node"]]` to bare `Command` (with or without a `# noqa` comment to silence the linter) removes that topology contract and can silently break graph validation or routing. **Never widen a `Command[Literal[...]]` return annotation.** If a type checker complains about the annotation, fix the checker configuration or the code — do not widen the `Literal` parameter.
 - **Exception node reachability.** The exception node must be reachable from every node that has a `try/except` routing to it. If a node's type annotation says `Command[Literal["exception_node", ...]]` but the graph has no edge to "exception_node", the graph will fail at runtime.
 - **Recursion limits.** Cyclic graphs (e.g., agent loops) need either a termination condition that's reliably reached or an explicit `recursion_limit` set on the config. Default is 25; agent loops often hit this in production.
 
@@ -291,9 +293,9 @@ Standard format from the Code Review agent, plus one mandatory field:
 
 The `Framework grounding` field is mandatory. Findings without it are invalid.
 
-## What you do not file (anti-pattern findings)
+## What you do not file (false-positive prevention)
 
-The agent maintains an explicit list of common-but-wrong findings it does not file. If a hunter persona produces one of these, the verify pass rejects it:
+The following are common generic findings that do not apply to LangGraph's execution model. This list exists to prevent false negatives during reflection: if a hunter persona produces one of these, the verify pass must reject it with the rationale below. These are distinct from the general "What you do not do" rules at the end of this file — they are framework-specific false positives, not behavioral constraints.
 
 - "Race condition on state field X" — without naming the specific non-state shared object and the cross-coroutine interleaving, this is wrong.
 - "State mutates across requests" — wrong unless the agent shows a module-level shared object or a checkpointer with stable `thread_id` reuse.

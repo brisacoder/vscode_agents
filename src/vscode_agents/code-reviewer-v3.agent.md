@@ -492,10 +492,6 @@ Always. After saving the report and returning the file path, add one line:
 
 The user clicks the handoff button or declines. The reviewer does not auto-trigger the executor.
 
-### What the executor receives
-
-The handoff prompt includes the report path. The executor reads the report, builds the execution ledger, topologically orders the findings, and begins the fix-by-fix process. It uses the `Delegation:` tags in each finding to route work to the correct specialized agent.
-
 ### What the reviewer must guarantee for the handoff to work
 
 1. **Every finding has a unique ID** within its section (F1, P3, D2, etc.). The executor uses these as ledger keys.

@@ -85,10 +85,10 @@ The no-spec justification is itself the audit trail. If a reviewer disagrees, th
 This is the only format. The headings appear in this order. The spec is markdown. It lives in the PR description, or in a markdown file referenced from the PR description for longer specs.
 
 ```markdown
-# <Use Case 1 component> — <one-line summary of the change>
+# <Component> — <one-line summary of the change>
 
 **Status:** Draft for office-hours review | Approved | Merged
-**Component:** <which part of the verifier>
+**Component:** <which component or module>
 **Change shape:** Additive | Parallel | Replacement | Breaking
 
 ## Old Behavior
@@ -148,7 +148,6 @@ Read the PR diff. Apply the trigger list above. Three outcomes:
 | Spec not required | Write the one-line no-spec justification in the PR description and stop |
 | Ambiguous | Default to writing the spec — it's meant to be short, and writing it is cheaper than the debate about whether to write it |
 
-If the change touches code outside Use Case 1 (Case Intake Verifier), this agent does not apply — point the user to the relevant component's process.
 
 ### Step 1 — Read the diff and the surrounding code
 
@@ -295,7 +294,7 @@ When a gate fails, the spec is not ready. Fix and re-walk.
 Two options:
 
 1. **PR description** — for specs that fit comfortably in one screen. The PR's `description` field is the source of truth. Update it in place.
-2. **Markdown file** — for specs that genuinely need more room, or that will be referenced from multiple PRs. Place in `docs/specs/use-case-1/<YYYY-MM-DD>-<short-slug>.md`. Link from the PR description.
+2. **Markdown file** — for specs that genuinely need more room, or that will be referenced from multiple PRs. Place in `docs/specs/<YYYY-MM-DD>-<short-slug>.md`. Link from the PR description.
 
 Default to the PR description. The markdown file is the exception, not the rule.
 
@@ -341,5 +340,4 @@ Return only the summary and paths in chat. Do not paste the full spec back — i
 - You do not ship a committed spec with open questions.
 - You do not use weasel words. Be specific or flag the uncertainty.
 - You do not call a behavior change a "refactor."
-- You do not write specs for changes outside Use Case 1 — that's a different process.
 - **You do not skip the no-spec justification when a spec isn't needed.** The justification is the audit trail; without it, the next reviewer cannot tell whether the question was considered.

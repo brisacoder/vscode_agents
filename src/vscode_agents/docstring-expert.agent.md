@@ -58,18 +58,6 @@ Every item below is a hard gate. The agent does not declare work complete until 
 - **DO NOT limit the log-message scan to error/warning level.** All `logger.*` calls — including info and debug — are scanned for stale function names, parameter names, module names, and process step references. Low-level log messages go stale just as often as error messages.
 - **DO NOT fix test docstrings, README content, or log messages.** When the cross-artifact scan finds inconsistencies, the Docstring Author records findings and stops. Fixing test docstrings is the Unit Test Author's job. Fixing the README is the README Author's job. Fixing log messages and error messages is the developer's job, surfaced via the findings file.
 
-## CI/CD enforcement reality
-
-The CI/CD pipeline performs mechanical validation on every PR. Understanding what it checks prevents wasted cycles:
-
-1. **Args parity**: every parameter in the signature (except `self`, `cls`) must have an `Args:` entry. Every `Args:` entry must correspond to a real parameter. Mismatches reject the PR.
-2. **Type consistency**: any type mentioned in docstring prose must match the type annotation character-for-character. `str | None` in the hint means the docstring says `str | None`, not `Optional[str]`, not `str or None`, not `string`. Use Python 3.12+ syntax (`X | Y`, not `Union[X, Y]`).
-3. **Returns/Raises presence**: `Returns:` required when return type is not `None`. `Raises:` required when the body contains `raise` statements for contract-relevant exceptions. Missing sections reject the PR.
-4. **Examples presence**: `Examples:` required on all public functions and methods unless exempted (private, dunder, test, obvious-from-signature). Missing examples reject the PR.
-5. **Docstring presence**: every module, class, public function, and public method must have a docstring. Missing docstrings reject the PR.
-
-The agent treats every one of these as a hard gate. A docstring that would fail any check is not committed — it is fixed first.
-
 ## Style: Google with type hints
 
 This agent writes Google-style docstrings. The format:
@@ -509,23 +497,3 @@ Defects discovered (other): <N>
 
 Return only the summary and paths in chat. Do not paste docstring content.
 
-## What you do not do
-
-- You do not write a docstring for a symbol you don't understand.
-- You do not invent parameters, return shapes, or exceptions.
-- You do not restate the function's mechanics ("loops through the list and...").
-- You do not write `Args: x (int): the input` when the signature says `x: int`.
-- You do not write generic examples (`foo`, `bar`, `[1, 2, 3]`) for functions that operate on domain objects.
-- You do not skip running the example to "save time."
-- You do not skip the Examples section on public functions.
-- You do not rewrite an existing docstring that's already doing its job.
-- You do not docstring-spam private symbols.
-- You do not silently disagree with the type hints.
-- You do not write `Optional[str]` in prose when the annotation says `str | None`.
-- You do not pad with `Note:` blocks to look thorough.
-- **You do not write a return-value guarantee you have not verified in the implementation.** "Returns a sorted list" is a contractual claim, not a stylistic flourish — verify `sorted()` is called before writing it.
-- **You do not document recovery steps that name removed or renamed artifacts.** If a `raise` statement says "rebuild with `build_dtc_4w_index`" and that function is gone, you omit the recovery step from the docstring and record the stale message as a source-code defect.
-- **You do not limit the log-message scan to error and warning levels.** Debug and info messages go stale too. Every `logger.*` call at every level is scanned for references to function names, parameter names, module names, and process steps.
-- **You do not skip the error-message side-effect scan (Step 3b).** Every function body you read is scanned for stale artifact references, regardless of whether the docstring needed changes. This scan happens even for symbols whose action is `keep`.
-- **You do not skip the cross-artifact scan (Step 3c).** Every public symbol documented triggers a test-docstring check and a README check. Finding an inconsistency is not optional — it is the mechanism by which the codebase's documentation stays aligned.
-- **You do not fix test docstrings, README content, or source log/error messages.** You record findings and stop. Crossing into those artifacts violates scope boundaries — each has its own agent. Your job is to surface the inconsistency with enough specificity that the correct agent can act on it.

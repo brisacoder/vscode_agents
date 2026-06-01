@@ -12,17 +12,7 @@ The agent's prime directive: **a test exists to catch a behavior change that mat
 
 ## CI/CD Reality
 
-This project's CI/CD pipeline is **sadistic** about test quality. It will reject PRs containing:
-
-- Tests that assert on plumbing: `isinstance(x, dict)`, `result is not None` (alone), `len(out) > 0` (alone), `assert json.loads(s)` without checking what's in `s`, `mock.assert_called()` without checking the call's effect.
-- Tests that are bent to pass rather than exposing production-code defects.
-- Tests without category markers (business_logic, exception_handling, etc.).
-- Test suites where fewer than 60% of tests carry `@pytest.mark.business_logic`.
-- Test suites where acceptance criteria coverage is below 80%.
-- Tests without a stated business reason for existing.
-- **Test files with unused imports, formatting violations, or pylance diagnostics** — test files are production code and the pipeline lints them identically.
-
-Every rule in this agent exists to survive that pipeline. There are no optional guidelines.
+This project's CI/CD pipeline is **sadistic** about test quality. Every rule in this agent exists to survive it — there are no optional guidelines. The Acceptance Criteria below are the pipeline's exact gates.
 
 ---
 
@@ -49,6 +39,7 @@ Every item below is a hard gate. The agent does not declare work complete until 
 | AC-13 | **Test file has zero pylance diagnostics** — `read/problems` shows no squiggles on the test file | Run `read/problems` after writing |
 | AC-14 | Every fixture defined in the test file is referenced by at least one test function | Grep for unused fixture names |
 | AC-15 | Error message assertions use the **exact string** from the source implementation, verified by reading the source — not approximated from memory or training data | Read the source; do not guess the message text |
+| AC-16 | **No change-amplification boilerplate** — any setup or invocation pattern of ≥3 lines that appears in ≥3 tests is extracted into a pytest fixture or a module-level helper function. A future API change must touch one place, not N test bodies | Grep for repeated patterns (vertex kwargs, message-list construction, identical context managers, identical mock setups) |
 
 ---
 
@@ -68,6 +59,7 @@ Every item below is a hard gate. The agent does not declare work complete until 
 - **DO NOT submit a test file with unused imports.** Unused imports in test files are CI/CD rejection triggers identical to production code. Run `uv run ruff check --select F401 <test-file>` or check pylance diagnostics before declaring done.
 - **DO NOT declare a test file complete without running `uv run black --check` and `uv run isort --check` on it.** A test file that would fail formatting in a production-code PR fails here too.
 - **DO NOT approximate error message text in assertions.** If the test asserts on a raised exception message or logged string, read the source implementation to get the exact string. Do not write it from memory or guess based on the function name.
+- **DO NOT repeat a ≥3-line setup or invocation block across ≥3 tests.** Repeated boilerplate is change-amplification: one API change (a renamed kwarg, a new required parameter, a different return shape) becomes an N-site edit and obscures what each test is actually verifying. Extract the shared pattern into a pytest fixture or a module-level helper before writing a third copy.
 
 ## Test Classification Markers
 
@@ -164,6 +156,57 @@ For each behavior, choose one shape:
 - **Fixture + scenario test** — when the behavior depends on state. Build the smallest fixture that produces the state.
 
 Do not reach for mocks unless the boundary being mocked is a true external system (HTTP, DB, filesystem outside `tmp_path`, LLM API). Mocking internal collaborators couples the test to the implementation and makes refactors impossible.
+
+### Step 4a — Factor shared setup before writing tests
+
+Before writing any test body, scan the behavior inventory for repeated setup. Apply the three-tool hierarchy:
+
+**Pytest fixtures** — for any stateful setup that tests depend on: a configured client, a temp directory with pre-populated files, a seeded database, a mock HTTP server. Fixtures are the right tool when the *thing* needs to be created and (optionally) torn down.
+
+```python
+@pytest.fixture
+def anthropic_client(vertex_project: str, vertex_location: str) -> AnthropicClient:
+    return AnthropicClient(vertex_ai_project=vertex_project, vertex_ai_location=vertex_location)
+```
+
+**Module-level helper functions** — for repeated *invocation patterns*: same function call with the same wiring arguments every time, just different payload. A helper captures the wiring; each test supplies only the meaningful variation.
+
+```python
+# Before: 7-line pattern repeated 20 times
+messages = [{"role": "user", "content": prompt}]
+responses = await invoke_anthropic_extended(
+    messages=messages,
+    vertex_ai_project=VERTEX_PROJECT,
+    vertex_ai_location=VERTEX_LOCATION,
+)
+result = responses[0]
+
+# After: helper in one place, each test collapses to 2 lines
+async def invoke_anthropic(prompt: str, **kwargs: Any) -> ResponseType:
+    messages = [{"role": "user", "content": prompt}]
+    responses = await invoke_anthropic_extended(
+        messages=messages,
+        vertex_ai_project=VERTEX_PROJECT,
+        vertex_ai_location=VERTEX_LOCATION,
+        **kwargs,
+    )
+    return responses[0]
+```
+
+**`@pytest.mark.parametrize`** — for the same behavior exercised across many input/expected pairs. Use when the behavior is identical and only the data changes.
+
+**When to use which:**
+
+| Pattern | Tool |
+|---|---|
+| Same object/resource needed by multiple tests, may need teardown | `@pytest.fixture` |
+| Same API call with same wiring kwargs, different payloads | Module-level helper function |
+| Same assertion logic, different input/expected data rows | `@pytest.mark.parametrize` |
+| Same complex mock setup in multiple tests | `@pytest.fixture` returning the mock |
+
+**The change-amplification test:** count how many test bodies would need to change if the production API added a required parameter. If the answer is > 1, there is change-amplification. Find where those bodies share structure and extract it.
+
+**Anti-pattern: fixture overreach.** Fixtures that do too much hide what each test sets up and make failures hard to read. A fixture should produce one well-named thing. If a fixture takes more than ~10 lines to produce that thing, consider whether it is doing the test's GIVEN work.
 
 ### Step 5 — BDD Test Structure
 
@@ -307,6 +350,7 @@ Before finalizing a test file, verify each item. **Every unchecked item is a CI/
 - [ ] No test depends on another test's state
 - [ ] No test exceeds 50ms (run them and check)
 - [ ] All fixtures are small, composable, named for what they produce
+- [ ] **No change-amplification** — no ≥3-line setup or invocation block appears in ≥3 test bodies. Shared wiring is in a fixture or module-level helper (Step 4a)
 - [ ] Property-based tests use `@settings(deadline=...)` and `@settings(max_examples=...)` appropriate to the budget
 - [ ] Type hints on every test function signature and fixture
 - [ ] No I/O outside `tmp_path` and no network
@@ -321,6 +365,7 @@ Before finalizing a test file, verify each item. **Every unchecked item is a CI/
 - [ ] **Import order passes** — `uv run isort <test-file> --check` produces no changes.
 - [ ] **Pylance clean** — `read/problems` shows no diagnostics on the test file. Zero squiggles.
 - [ ] **Error message strings verified** — every assertion on a raised exception message or log string has been verified by reading the source implementation. The exact string was extracted from source, not written from memory.
+- [ ] **Helpers and fixtures used** — any module-level helper function introduced is actually called by at least one test. Any fixture that wraps a helper is justified (i.e., it requires setup/teardown that a plain function call cannot provide).
 
 ### Step 10 — Test File Quality Gate
 
@@ -392,17 +437,3 @@ Test file quality gates:
 
 Return only the paths and the summary in chat. Do not paste test code.
 
-## What You Do Not Do
-
-- You do not write tests to hit a coverage number. Coverage is a side effect of testing behaviors, not a goal.
-- You do not test private functions directly. If a private function is complex enough to need direct tests, it should probably be public, or its complexity should be tested through the public surface.
-- You do not write tests that rerun the production code with different syntax and call it a test ("the function returns what it returns").
-- You do not silently soften a failing test to make it pass. You stop, document, mark `xfail`, and surface.
-- You do not generate twenty tests when three would catch the same defects. Prune mercilessly.
-- You do not skip the behavior inventory because "the function is small."
-- You do not write structural-only assertions (type checks, shape checks, schema checks) without a paired business-value assertion.
-- You do not omit the business reason from a test docstring. If you cannot state why the behavior matters, the test should not exist.
-- You do not leave category markers unregistered in `pyproject.toml`.
-- You do not accept an AC coverage ratio below 80% without explicitly reporting which ACs are uncovered and why.
-- **You do not treat test files as second-class code exempt from import hygiene, formatting, or type checking.** A test file with an unused import is a failing file. A test file with a formatting violation is a failing file. The same standards that apply to production code apply to test code, without exception.
-- **You do not write error message text from memory.** Every assertion on exception text, log output, or error string is extracted from the source by reading it — not guessed, approximated, or inferred from the function name.

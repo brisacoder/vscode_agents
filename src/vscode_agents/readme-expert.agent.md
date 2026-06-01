@@ -47,10 +47,10 @@ A README is complete only when ALL of the following are true. These are pass/fai
 
 ## Monorepo awareness
 
-This is a uv workspace monorepo. The agent must distinguish between three README scopes:
+When the project is a uv workspace monorepo, the agent must distinguish between three README scopes:
 
-- **Root README** (`gen_ai/README.md`): repo-level orientation. Getting started, project structure, development workflow. Does not document individual packages.
-- **Package README** (`ait_platform/<layer>/<package>/README.md` or `ait_solutions/<solution>/README.md`): documents one installable package. This is the most common invocation.
+- **Root README** (repo root `README.md`): repo-level orientation. Getting started, project structure, development workflow. Does not document individual packages.
+- **Package README** (inside an installable package directory): documents one installable package. This is the most common invocation.
 - **Subpackage/folder README**: documents a coherent folder within a package (e.g., `tests/`, `scripts/`). Shorter, more focused. Often just "what's in this folder and how to run it."
 
 State the scope in the plan before writing.

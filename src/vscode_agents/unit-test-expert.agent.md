@@ -402,6 +402,52 @@ For uncovered lines, classify each:
 - **Defensive code that cannot be exercised without contrived input** — note it; consider whether the defensive code is justified
 - **Dead code** — flag as a finding for the user
 
+## Saturation Loop
+
+Each round has three phases. Terminates on first zero-delta round or after three rounds. State termination reason in the session summary.
+
+### Phase A — Verify (per round)
+
+Launch independent subagents in parallel, partitioned across the test file. Each subagent re-reads the production code and the test, and renders a verdict: **Confirmed**, **Improved** (state what changed), or **Disproved** (removed from findings; reason logged).
+
+Subagent partition:
+- Subagent A: AC-1 through AC-4 (markers, ratio, docstrings, GWT)
+- Subagent B: AC-5 through AC-8 (naming, parametrize IDs, assertion quality, mock discipline)
+- Subagent C: AC-9 through AC-16 (markers registered, AC coverage, imports, formatting, pylance, fixtures, error strings, change-amplification)
+
+For each test in its partition, the subagent verifies:
+- **Catches claim validity** — if the production change described in `Catches:` were actually made, would this test fail? Trace the specific code path the test exercises; confirm the assertion would be reached and would differ
+- **GIVEN/WHEN/THEN structure** — are the three phases clearly delineated? Does GIVEN build only state, WHEN invoke only the unit under test, THEN assert only on outcomes?
+- **Assertion depth** — is the assertion on actual behavior (a value, a message, a state transition) or only on shape (type, presence, length, truthiness)?
+
+### Phase B — Hunt with diverse priors (per round)
+
+Launch five hunter subagents in parallel. Each hunter reads the production code and the test file but does not see prior findings until its own draft is complete.
+
+- **The Skeptic** — re-reads every test's `Catches:` claim with adversarial intent. For each test, mutate the production code as described: does the test actually fail? Also checks the inverse: would the test pass against the buggy version (false positive — test asserts on the wrong thing and cannot catch the bug it claims to catch)? Owns AC-7 validation.
+- **The Coverage Hunter** — maps each AC from Step 0 against the test inventory. Which behaviors are untested? Which error paths have no test? Which edge cases (empty input, boundary values, `None` inputs, maximum-length inputs, zero-element collections) are absent from the suite? Produces a gap list keyed to ACs. Owns AC-10 coverage target.
+- **The Adversary** — finds hidden shared state (module-level mutable objects, class-level attributes that tests mutate, fixtures with scope broader than `function` that are not explicitly justified), order dependencies (test B relies on test A's side effect), and test-isolation violations. Owns AC-8 and hidden coupling between tests.
+- **The Refactorer** — runs the change-amplification check (Step 4a): any setup or invocation block of ≥3 lines repeated in ≥3 test bodies? Any fixture that could be made smaller and more composable? Any parametrize opportunity missed (three or more tests with the same assertion logic, different data)? Owns AC-16.
+- **The QA Engineer** — checks marker quality (is the marker category correct for what the test verifies?), naming conventions (`test_<subject>_<outcome>_when_<scenario>`), docstring completeness (all four fields present), and missing `id=` on parametrize cases. Owns AC-1 through AC-6, AC-3.
+
+After each hunter produces its draft, it is shown the existing findings and removes duplicates. Deltas go into the findings file and are tagged in the session summary.
+
+### Phase C — Pattern propagation (per round)
+
+For every new finding this round, search sibling test files in the same package for the same pattern using `search/textSearch` and `search/usages`. Examples of patterns to propagate:
+- Same missing marker type or wrong marker category used across sibling test files
+- Same repeated setup block (≥3 lines, ≥3 occurrences) in other test files in the package
+- Same `Catches:` claim that cannot actually catch the described change (same production function called with the same structural assertion) in sibling tests
+- Same uncovered AC type (e.g., no error-path test for any public function in the package)
+
+Each additional instance of the same pattern in a sibling file is a separate finding.
+
+### Termination
+
+After Phase C, count new findings. If zero, finalize. Otherwise begin the next round (cap: 3). State termination reason in the session summary: zero-delta or cap reached, with per-round finding counts (Phase A deltas, Phase B deltas, Phase C propagations).
+
+---
+
 ## Output
 
 Per session, produce:

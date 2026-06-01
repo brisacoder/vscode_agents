@@ -80,6 +80,39 @@ These patterns are forbidden. Encountering one triggers an immediate rewrite:
 
 ---
 
+## Security
+
+BigQuery's security surface spans SQL injection, data exfiltration, cost amplification, and credential exposure.
+
+### SQL injection (Critical)
+
+- **String-formatted SQL values** — `f"WHERE col = '{value}'"`, `.format()`, or `%`-style formatting with user-controlled values is SQL injection. **Critical.** BigQuery supports named parameters: `QueryJobConfig(query_parameters=[bigquery.ScalarQueryParameter("name", "STRING", value)])` with `@name` in the SQL string. Every external value must be parameterized.
+- **Table and column name injection** — named parameters only protect scalar values, not identifiers. If a table or dataset name comes from user input, validate it against an explicit allowlist. Never interpolate user-controlled identifiers into SQL.
+
+### Data exfiltration
+
+- **`SELECT *` on sensitive tables** — `SELECT *` exposes all columns including PII, secrets, and internal fields that may have been added since the query was written. Enumerate required columns explicitly. File as **High** on any table containing PII, credentials, or sensitive business data.
+- **Wildcard table queries over-matching** — `FROM project.dataset.table_*` with a user-controlled suffix can match more tables than intended, exposing data from other shards or time periods. Validate wildcard suffixes against expected patterns.
+- **Missing row-level security on multi-tenant datasets** — if a BigQuery dataset contains rows belonging to multiple tenants and there are no row-access policies, any query on the dataset can read all tenants' data. File as **Critical** for tables that mix tenant data without enforced row-level policies.
+
+### Cost amplification
+
+- **User-controlled queries without scan limits** — an endpoint that passes user-supplied SQL directly to BigQuery with no `maximum_bytes_billed` cap can be abused to trigger expensive full-table scans. Always set `QueryJobConfig(maximum_bytes_billed=N)` when executing queries derived from user input.
+- **Missing partition filter enforcement** — queries without partition filters on partitioned tables scan the full table. For user-controlled queries on large partitioned tables, require `require_partition_filter = True` in the table's schema.
+
+### Credential exposure
+
+- **Service account credentials in logs** — BigQuery client initialization errors (auth failures, missing credentials) often include the service account path or project ID in the exception message. Catch `google.auth.exceptions.DefaultCredentialsError` and log only a sanitized message; never surface the raw exception to end users.
+- **PII in query audit logs** — BigQuery logs the full query text (including literal values) in Cloud Audit Logs. Parameterized queries log only the parameter names, not the values. This is another reason to always parameterize: literal PII in a query string (e.g., `WHERE email = 'user@example.com'`) persists in audit logs indefinitely.
+- **Job labels for attribution** — always set `QueryJobConfig(labels={"service": "name", "env": "prod"})`. Without labels, runaway cost or abuse cannot be attributed to its source in billing reports.
+
+### Cross-project access
+
+- **Implicit cross-project reads** — a fully-qualified table reference (`project.dataset.table`) in a query gives the executing service account read access to that project's data. Verify that cross-project references are intentional and that the service account's permissions are scoped to the minimum required projects.
+- **INFORMATION_SCHEMA exposure** — `SELECT * FROM INFORMATION_SCHEMA.COLUMNS` on a dataset reveals the full schema, including column names that may be sensitive. Restrict BigQuery IAM roles to `bigquery.dataViewer` (not `bigquery.metadataViewer`) when schema discovery is not required.
+
+---
+
 ## BigQuery Fundamentals
 
 ### Authentication and Client Setup

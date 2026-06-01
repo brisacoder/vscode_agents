@@ -118,6 +118,39 @@ df = df.convert_dtypes(dtype_backend="pyarrow")
 
 ---
 
+## Security
+
+Pandas code has specific security attack surfaces beyond generic Python injection. Check these in every review pass.
+
+### Deserialization
+
+- **`pd.read_pickle()` on untrusted data** — pickle is arbitrary Python execution. Any file from user input, a network location, or an untrusted data store is a code execution vector. **Critical** if the source is user-controlled. Fix: reject pickle entirely; require Parquet, CSV, or Arrow formats for any untrusted data source.
+- **`pd.read_feather()` / `pd.read_orc()` on untrusted data** — these use Arrow IPC and ORC respectively; both have had deserialization CVEs. Require format validation and source provenance before reading.
+
+### Eval and code execution
+
+- **`df.eval()` / `pd.eval()` with user-supplied expressions** — these execute Python-like expressions. A user-controlled string passed to `df.eval()` can read global variables or call arbitrary functions depending on the engine. **Critical** if the expression string contains any user-controlled content. Fix: never pass unsanitized user input to `eval()`.
+- **`df.query()` with f-string interpolation** — `df.query(f"col == '{user_val}'")` is a Python-level injection. Use `df.query("col == @local_var", local_dict={"local_var": user_val})` for safe parameterization.
+
+### Path traversal and SSRF
+
+- **`pd.read_csv(user_path)` / `pd.read_parquet(user_path)` with user-supplied paths** — allows reading arbitrary files from the local filesystem (path traversal) or from remote URLs (SSRF via `s3://`, `gs://`, `http://` schemes pandas supports). Fix: validate and allowlist paths before passing to pandas readers. Reject URL schemes unless explicitly required.
+- **`pd.read_html(user_url)`** — fetches and parses HTML from a URL; SSRF risk when the URL is user-supplied.
+
+### Output injection
+
+- **CSV formula injection** — when `to_csv()` output is consumed downstream by Excel or Google Sheets, cells beginning with `=`, `+`, `-`, or `@` are interpreted as formulas. If DataFrame values contain user-controlled content, sanitize by prefixing dangerous cells with a tab or single quote before calling `to_csv()`. **Medium** when output is consumed by spreadsheet software.
+
+### Memory exhaustion
+
+- **Unbounded read from user-supplied files** — `pd.read_csv(untrusted_file)` without a `nrows` or file-size pre-check can exhaust memory on a crafted large file. For any endpoint that accepts file uploads, enforce a maximum file size and row count before loading into a DataFrame.
+
+### Information disclosure
+
+- **Verbose pandas error messages in user-facing responses** — dtype mismatch errors, key errors, and index errors from pandas include column names, dtypes, and sample values. Never surface raw pandas exceptions to users; catch and convert to opaque error messages at the API boundary.
+
+---
+
 ## The Pandas Toolbox — Think Before Reaching for the Obvious
 
 Before writing code, map the problem to one of these shapes. The right shape is usually 3–10 lines. The wrong shape (loops + conditionals) is usually 50+.

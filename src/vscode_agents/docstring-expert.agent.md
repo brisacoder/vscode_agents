@@ -461,6 +461,52 @@ Apply docstrings file by file. For each file:
 
 If doctests fail, the example is wrong. Do not weaken the example to make it pass. Either fix the example to match actual behavior, or — if the actual behavior is wrong — flag the symbol and revert the docstring change.
 
+## Saturation Loop
+
+Each round has three phases. Terminates on first zero-delta round or after three rounds. State termination reason in the Reflection Log appended to the findings file.
+
+### Phase A — Verify (per round)
+
+Launch independent subagents in parallel, partitioned across the symbol inventory. Each subagent re-reads the source code and the docstring written or reviewed in this session, and renders a verdict: **Confirmed**, **Improved** (state what changed), or **Disproved** (removed from findings; reason logged).
+
+Subagent partition:
+- Subagent A: AC-1 (presence), AC-2 (args parity), AC-3 (type consistency)
+- Subagent B: AC-4 (returns/raises), AC-6 (examples run), AC-7 (no invented content)
+- Subagent C: AC-11 (log scan), AC-15 (test docstring consistency), AC-16 (README consistency)
+
+For each symbol in its partition, the subagent verifies:
+- **Type consistency** — every type in docstring prose matches the annotation character-for-character; scan for `Optional[`, `Union[`, `List[`, `Dict[` in written docstrings
+- **Returns guarantees** — every guarantee stated in `Returns:` (sorted, ordered, deduplicated, never empty) is traced to the implementation; scan for the operative call (`sorted()`, `.sort()`, `ORDER BY`, `.upper()`)
+- **Args parity** — every `Args:` entry names a real parameter; every parameter (except `self`/`cls`) has an `Args:` entry
+- **Examples realism** — examples use domain inputs (shapes from real call sites), not `foo`/`bar`; each example runs or is correctly marked `# doctest: +SKIP`
+
+### Phase B — Hunt with diverse priors (per round)
+
+Launch four hunter subagents in parallel. Each hunter reads the source files and the symbol inventory but does not see prior findings until its own draft is complete.
+
+- **The Pedant** — parameter names, type format (`str | None` not `Optional[str]`, `list[T]` not `List[T]`), args parity mismatches, AC gate violations (missing `Examples:` section on a public function, missing `Returns:` where return type is non-`None`, phantom `Args:` entries for parameters that do not exist in the signature, duplicate `Args:` entries). Owns compliance with AC-1 through AC-8.
+- **The User** — reads every docstring as an external caller who has never seen the implementation. Would you understand when to call this function? Is the summary answering "why does this exist" or just restating the function name? Is the example realistic — domain inputs from actual call sites, not `foo`/`bar`? Is the body paragraph helpful or is it padding that says nothing the lines don't already say? Owns AC-5, AC-7.
+- **The Skeptic** — verifies every guarantee stated in `Returns:` against the actual implementation. "Returns a sorted list" → grep for `sorted()`/`.sort()`. "Never returns empty" → trace all return paths. "Always normalized" → find the normalization call. "Ordered by timestamp" → find the `.sort_values("timestamp")` or equivalent. Every unsubstantiated guarantee is a finding. Owns AC-11.
+- **The Stale Hunter** — cross-artifact consistency. Reads every `logger.*` call at every level (debug, info, warning, error, critical), every `raise` statement, and every test docstring for references to parameter names, function names, types, or process steps that contradict the current symbol's signature or docstring. Flags stale log messages (artifact renamed or removed), test docstring mismatches (wrong parameter names, wrong return behavior), README inconsistencies (README description diverges from docstring). Owns AC-13 through AC-16.
+
+After each hunter produces its draft, it is shown the existing findings and removes duplicates. Deltas go into the findings file and are tagged in the Reflection Log.
+
+### Phase C — Pattern propagation (per round)
+
+For every new finding this round, use `search/textSearch` and `search/usages` to locate the same pattern at sibling symbols in the same module and package. Examples of patterns to propagate:
+- Same stale type syntax (`Optional[X]`, `List[T]`) appearing in other docstrings in the same file
+- Same missing section type (missing `Returns:` where return is non-`None`) at other public functions
+- Same guarantee mismatch type ("sorted" claimed without `sorted()` call) at other symbols that make similar guarantees
+- Same stale log-message artifact referenced across multiple functions in the module
+
+Each additional instance of the same pattern at a different symbol is a separate finding.
+
+### Termination
+
+After Phase C, count new findings. If zero, finalize the findings file. Otherwise begin the next round (cap: 3). Append a Reflection Log to the findings file stating: termination reason (zero-delta or cap reached), findings per round (Phase A deltas, Phase B deltas, Phase C propagations), and any patterns that were propagated across siblings.
+
+---
+
 ## Output
 
 Per session, produce:

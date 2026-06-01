@@ -65,6 +65,35 @@ These patterns are forbidden. Encountering one triggers an immediate rewrite:
 | `con.execute(query); result = con.fetchdf()` (deprecated API) | Stale API from DuckDB 0.x | `con.execute(query).df()` or `con.sql(query).df()` |
 | Using `duckdb.query()` (removed in 1.x) | Removed; use `duckdb.sql()` | `duckdb.sql(query)` |
 
+## Security
+
+DuckDB's primary security surface is SQL injection, but the embedded nature of DuckDB and its extension system introduce additional concerns.
+
+### SQL injection (Critical)
+
+- **String-formatted SQL values** — `f"WHERE col = '{value}'"`, `.format()`, or `%`-style formatting with user-controlled values is SQL injection. **Critical.** DuckDB supports parameterized queries natively: `con.execute("SELECT * FROM t WHERE col = $1", [value])`. Every value that originates from user input, a config file, an environment variable, or any external source must be parameterized, never interpolated.
+- **Table and column name injection** — parameterized queries do not protect identifiers (table names, column names). If a table or column name comes from user input, it must be validated against an explicit allowlist before interpolation. There is no safe alternative to allowlisting for identifiers.
+
+### Path traversal and SSRF
+
+- **`read_parquet(user_path)` / `read_csv(user_path)` / `read_json(user_path)` with user-supplied paths** — DuckDB file-reading functions accept local paths and remote URLs (`http://`, `s3://`, `gcs://`). A user-supplied filename allows reading arbitrary local files (path traversal) or triggering outbound HTTP requests (SSRF). Fix: validate and allowlist all paths passed to DuckDB file functions.
+- **DuckDB HTTP extension** — if the `httpfs` extension is loaded, DuckDB can read from remote URLs transparently. Ensure `httpfs` is not loaded when processing untrusted queries, or enforce an outbound URL allowlist at the network layer.
+- **`COPY TO user_path`** — writing query results to a user-supplied file path is arbitrary file write. Treat the same as read path traversal.
+
+### Extension loading
+
+- **`LOAD 'user_extension'`** — DuckDB extensions are shared libraries. Loading a user-supplied extension name is equivalent to arbitrary code execution. Never pass user-controlled strings to `LOAD` or `INSTALL` statements.
+
+### Memory and resource exhaustion
+
+- **Unbounded query on user-supplied data** — a query with no `LIMIT` on a user-supplied table or file can exhaust memory. Enforce `SET memory_limit = 'Ng'` and add `LIMIT` clauses on queries whose input size is user-controlled.
+- **Missing SIGINT handler on long-running queries** — without `con.interrupt()` wired to a timeout, a user-triggered slow query blocks the process indefinitely. File as **Medium** on any endpoint that accepts user-controlled queries.
+
+### Information disclosure
+
+- **DuckDB error messages in user-facing responses** — catalog errors, type mismatch errors, and parse errors from DuckDB include schema information (column names, types, table names). Catch `duckdb.Error` at the API boundary and convert to opaque messages before surfacing to users.
+- **In-memory database persistence** — DuckDB in-memory databases write temporary spill files to disk under memory pressure. Ensure the temp directory is scoped to the process and cleaned up on exit; sensitive query results should not persist in temp files.
+
 ## DuckDB Fundamentals for This Codebase
 
 ### Direct Parquet Scanning — The Core Pattern

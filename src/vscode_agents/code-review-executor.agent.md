@@ -6,59 +6,47 @@ argument-hint: Path to a code-review Markdown report produced by the Code Review
 model: Claude Opus 4.6 (copilot)
 agents: [*]
 handoffs:
-  - label: Write Docstrings
+  - label: Docstring Review
     agent: Docstring Expert
     prompt: |
-      You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
+      You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory). Find the specialist trigger entry for Docstring Expert and use the path listed there.
 
-      Your scope: address every D-type finding in the ledger that is currently `pending`. Do not touch symbols not cited by a pending D finding.
+      Run a **complete independent docstring review** on that path using your full approach — all acceptance criteria (AC-1 through AC-16), all approach steps, and your full saturation loop. You are running a fresh, thorough review — not fixing a specific list of findings.
 
-      After completing each finding:
-      - Mark it `done` in the ledger Plan table and append a History entry (files touched, diff summary, commit SHA).
-
-      Return a structured summary: finding ID, symbol, file, and ledger-update status for each finding you addressed. Do not paste docstring content in your reply.
+      Save your findings file to `docstring-review-<sanitized-path>-<YYYY-MM-DD>.md` and return only the absolute path to the saved file. The executor will parse your findings and merge them into the ledger.
     send: true
     model: Claude Opus 4.6 (copilot)
 
-  - label: Write Unit Tests
+  - label: Test Quality Review
     agent: Unit Test Expert
     prompt: |
-      You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
+      You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory). Find the specialist trigger entry for Unit Test Expert and use the path listed there.
 
-      Your scope: address every T-type finding in the ledger that is currently `pending`. These are findings about missing test coverage for existing (already-fixed) behavior. Do not add tests for symbols not cited by a pending T finding.
+      Run a **complete independent test quality and coverage review** on that path using your full approach — all acceptance criteria (AC-1 through AC-16), all approach steps (Step 0 through Step 11), and your full saturation loop. You are running a fresh, thorough review — not fixing a specific list of findings.
 
-      After completing each finding:
-      - Mark it `done` in the ledger Plan table and append a History entry (test file, test names, pass/fail result, commit SHA).
-
-      Return a structured summary: finding ID, test file, test function(s) added, and pass/fail result for each finding you addressed.
+      Save your test plan and defect log to disk (per your Output section) and return only the paths. The executor will parse your findings and merge them into the ledger.
     send: true
     model: Claude Opus 4.6 (copilot)
 
-  - label: Write Type Annotations
+  - label: Type Annotation Review
     agent: Type Annotation Expert
     prompt: |
-      You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
+      You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory). Find the specialist trigger entry for Type Annotation Expert and use the path listed there.
 
-      Your scope: address every type-annotation finding (tagged `I` or `A`) in the ledger that is currently `pending`. Do not annotate symbols not cited by a pending finding.
+      Run a **complete independent type annotation review** on that path using your full approach — all acceptance criteria (AC-1 through AC-14), all approach steps (Step 1 through Step 9), and your full saturation loop. You are running a fresh, thorough review — not fixing a specific list of findings.
 
-      After completing each finding:
-      - Mark it `done` in the ledger Plan table and append a History entry (symbol, file, type-check result, commit SHA).
-
-      Return a structured summary: finding ID, symbol annotated, file, and type-check result for each finding you addressed.
+      Save your inventory, findings, and session summary to disk (per your Output section) and return only the paths. The executor will parse your findings and merge them into the ledger.
     send: true
     model: Claude Opus 4.6 (copilot)
 
-  - label: Write README
+  - label: README Review
     agent: README Expert
     prompt: |
-      You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
+      You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory). Find the specialist trigger entry for README Expert and use the path listed there.
 
-      Your scope: address every DOC-type finding in the ledger that is currently `pending`. Do not create or modify documentation not cited by a pending DOC finding.
+      Run a **complete independent README review** on that path using your full approach and all acceptance criteria (AC-1 through AC-13). Address any DOC findings in the ledger that are `pending`, then do a full quality pass on all package READMEs in the path.
 
-      After completing each finding:
-      - Mark it `done` in the ledger Plan table and append a History entry (file path, sections written/updated, commit SHA).
-
-      Return a structured summary: finding ID, README path, and sections updated for each finding you addressed.
+      Return the README path and a summary of sections written or updated. Mark completed DOC findings `done` in the ledger.
     send: true
     model: Claude Opus 4.6 (copilot)
 
@@ -254,6 +242,24 @@ The ledger is updated:
 ## Approach
 
 ### Step 1 — Build the plan
+
+Parse the report into two parts:
+
+**Part A — Direct findings** (F, I, A, P, C, S, L, DOC, U): build the Plan with topological ordering per the rules below.
+
+**Part B — Specialist Review Triggers**: read the `## Specialist Review Triggers` section of the report. For each triggered specialist, add a **Review** entry to the Plan with a special type `review`:
+
+| Order | ID | Type | Specialist | Path | Depends on | State |
+|---|---|---|---|---|---|---|
+| early | SR-D | review | Docstring Expert | `path/to/package/` | — | pending |
+| early | SR-T | review | Unit Test Expert | `path/to/tests/` | — | pending |
+| early | SR-TY | review | Type Annotation Expert | `path/to/package/` | — | pending |
+| early | SR-G | review | LangGraph Expert | `path/to/graph/` | — | pending |
+| early | SR-PY | review | Python Expert | `path/to/package/` | — | pending |
+
+Specialist reviews run early (before direct findings are fixed) so their findings can be merged into the plan before execution begins. They have no dependencies on each other and can be triggered in parallel.
+
+**Handling specialist review returns**: when a specialist returns a findings file, read it, extract each finding, and add it to the Plan as a spawned finding (ID prefixed with the specialist abbreviation: `D-`, `T-`, `TY-`, `G-`, `PY-`). Set `Depends on` appropriately (e.g., `T-` findings depend on `D-` findings for the same symbol). Mark the SR entry `done`.
 
 Parse the report into findings. Construct the Plan with topological ordering using these rules:
 

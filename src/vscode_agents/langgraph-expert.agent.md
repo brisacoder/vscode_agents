@@ -42,6 +42,34 @@ Every item below is a hard gate. A graph that fails any of these criteria has a 
 - DO NOT skip the framework-semantics grounding line. Every finding states the relevant framework concept that makes the finding apply.
 - DO NOT review LangGraph code as if it were threading code. State the concurrency model first.
 
+## Security
+
+LangGraph's security surface is dominated by prompt injection and uncontrolled tool execution, but state-based persistence introduces additional concerns.
+
+### Prompt injection (Critical)
+
+- **User content in system or assistant prompts** — if user-supplied text flows into a system prompt, a tool description, or any position where the LLM treats it as instruction rather than data, an attacker can override agent behavior, exfiltrate state, or trigger unintended tool calls. **Critical.** User content must be in the `human` role only, never interpolated into system messages, tool descriptions, or assistant-role templates.
+- **Tool output injection** — tool results (`ToolMessage` content) are fed back to the LLM as context. If a tool retrieves external content (web pages, documents, database rows) that an attacker controls, that content can instruct the LLM to behave differently. Treat tool outputs as untrusted data; use structured output formats (JSON schemas) to constrain what the LLM can act on from tool results.
+- **Indirect prompt injection** — user does not directly supply the malicious instruction; instead, the agent retrieves it from an external source (a document, a web page, a database record) that contains embedded instructions. Check every tool that fetches external content for this risk.
+
+### Tool scope and authorization (High)
+
+- **Tools without input validation** — tools that accept free-form string arguments from the LLM (e.g., file paths, SQL fragments, shell commands) are code execution vectors. Every tool must validate its inputs against an explicit schema and reject values outside the expected domain. Use `pydantic` models as tool input schemas; let validation errors return as `ToolMessage` errors rather than exceptions.
+- **IDOR via tool arguments** — if a tool accepts a resource ID (user ID, document ID, session ID) from the LLM, verify that the currently authenticated principal has access to that resource before operating on it. The LLM can be manipulated into requesting IDs it should not access.
+- **SSRF via tool arguments** — tools that accept URLs and make outbound HTTP calls can be redirected to internal services by a prompt-injected URL. Enforce an outbound URL allowlist in any tool that makes HTTP requests.
+- **Unbounded tool execution** — without a `MAX_TOOL_ROUNDS` counter, a manipulated agent can be looped indefinitely, triggering costly or destructive tool calls repeatedly. File as **High** on any graph without an explicit tool-round limit.
+
+### State and secrets (High)
+
+- **Secrets in graph state** — API keys, auth tokens, PII, or credentials stored in state channels persist across checkpointer saves and appear in log output. State should contain only the minimum data needed for routing and response generation. Secrets must be retrieved from a vault at call time inside a tool, never stored in state.
+- **Checkpointer data exposure** — if a checkpointer persists state to a database or object store, that storage must be access-controlled with the same rigor as the data it contains. `MemorySaver` in production is a High finding (process-restart data loss), but persisting to a shared database without tenant isolation is a Critical finding.
+- **PII in LLM message history** — `messages` channels accumulate the full conversation, including tool results and intermediate reasoning. If that history is checkpointed and is accessible to other principals (e.g., a multi-tenant deployment), PII from one user's session can leak to another. Enforce tenant-scoped `thread_id` isolation.
+
+### LLM output trust (Medium)
+
+- **LLM-generated content used as instructions** — if the output of one LLM call is passed as a system message or tool definition to a subsequent LLM call, an attacker who influences the first call can inject instructions into the second. Treat all LLM-generated content as untrusted data, not instructions.
+- **Structured output validation** — when using `tool_choice` or JSON-mode to force structured output, validate the output against the expected schema before acting on it. The API guarantees the structure exists but not that the values are safe or within domain.
+
 ## Required reading before any finding
 
 This agent makes no findings until it has performed the framework grounding pass:

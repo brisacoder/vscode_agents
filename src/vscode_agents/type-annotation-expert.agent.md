@@ -260,6 +260,36 @@ After all edits:
 4. Run `uv run ruff check --select F401 <target_path>` to confirm no unused imports were introduced.
 5. Use `search/changes` to review the diff. Verify every changed file has consistent docstring-to-hint agreement.
 
+## Saturation Loop
+
+Run up to 3 rounds. Each round has three phases. Stop early if a round produces zero new findings (zero-delta termination).
+
+### Phase A — Verify (per round)
+
+Two subagents each re-run their assigned checks and render **Confirmed** / **Improved** / **Disproved** for every open finding:
+
+- **Subagent A** — AC-1 through AC-7: re-runs `uvx ty check <target_path>` and compares diagnostic counts against the Step 1 baseline (AC-1, AC-2, AC-7); checks warning policy if strict mode was requested (AC-3); greps the diff for new `Any` occurrences and verifies each has a justifying comment (AC-4); greps for suppression comments and verifies specificity (AC-5); diffs every changed symbol's docstring for contradiction-free agreement with the new hint (AC-6).
+- **Subagent B** — AC-8 through AC-14: verifies stub placement is at the correct tier — third-party stubs vs. own-package `py.typed` — and that the two tiers are not confused (AC-8); runs `uv run ruff check --select F401` to confirm no unused imports were introduced (AC-11); runs `uv run black --check` and `uv run isort --check` on all edited files (AC-10); runs `uv run pytest -v` on the affected package and compares against the baseline (AC-9); re-reads the test file inventory and confirms every fixture and test function is fully annotated (AC-12); re-reads the Step 2b cross-artifact scan findings and verifies they are complete (AC-13); greps the diff for legacy generic syntax (`Optional[`, `Union[`, `List[`, `Dict[`, `Tuple[`, `Type[`), forward-reference strings for self-types, and bare generics without parameters (AC-14).
+
+### Phase B — Hunt with four personas (per round)
+
+Each persona reads the source files and the symbol inventory independently — they do not read prior-round findings before drafting, to avoid anchoring. After all four draft independently, existing findings are displayed and duplicates are removed.
+
+- **The Precision Hunter** — scans every annotation in the diff and in modified files for: remaining `Any` without a one-line justification comment above it; bare generics (`list`, `dict`, `Callable` without parameters); `Optional[X]` not yet modernized to `X | None`; `Union[X, Y]` not modernized to `X | Y`; forward-reference strings not using `Self`. Files one finding per instance, citing `file.py:line`. Owns AC-4, AC-5, AC-14.
+- **The Consistency Hunter** — looks for annotation style drift across sibling functions in the same module: one function uses `list[X]` while a sibling uses `List[X]`; one uses `X | None` while a sibling uses `Optional[X]`; one imports `Callable` from `typing` while a sibling imports from `collections.abc`. Flags all instances of a given drift pattern as a single finding covering every affected line.
+- **The Safety Checker** — examines runtime implications of the changed hints: files that use `from __future__ import annotations` and also define Pydantic models or FastAPI dependencies where annotation evaluation at runtime is required; `@runtime_checkable` Protocols where `isinstance` is called against them and the structural check may silently pass or fail after the hint change; `Annotated[...]` metadata that is evaluated at runtime by a framework. Files a finding for any case where the type hint change could break runtime behavior, describing the exact call site and the expected failure mode.
+- **The Cross-Artifact Scanner** — re-executes Step 2b for every symbol whose hint was changed this session: re-reads all `logger.*` calls at every level for stale type-name references; re-reads `raise` statements and error constructors for stale type descriptions; re-reads Rich console output (`console.print`, `console.log`, any `rich.*` call) for stale type references; re-reads test method docstrings for stale type references in `Catches:`, `Business reason:`, or behavior descriptions. Files one finding per stale reference. Owns AC-13.
+
+### Phase C — Pattern propagation (per round)
+
+For every new finding produced in Phase B, search sibling modules in the same package using `search/textSearch` for the same pattern: the same legacy syntax, the same unjustified `Any`, the same bare generic, the same stale log/error message type reference. Promote each match to its own finding so the next round's Phase A can verify it.
+
+### Termination
+
+Stop after the first round that produces zero new findings across all four hunters and propagation, or after 3 rounds — whichever comes first. Record in the findings file's Reflection section: the number of rounds run, the total findings added per round, and the zero-delta or cap condition that triggered termination.
+
+---
+
 ## Output
 
 Per session, produce:

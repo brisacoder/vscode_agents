@@ -1147,6 +1147,71 @@ Any `COUNT(DISTINCT x)` on a table with > 10M rows that does not require exact r
 
 ---
 
+## Review Categories
+
+These categories apply to BigQuery-specific code patterns. File findings only against the reviewed path.
+
+### Fragilities (F)
+- BigQuery jobs submitted without retry on transient quota / rate-limit errors (`google.api_core.exceptions.ServiceUnavailable`, `ResourcesExceeded`)
+- Missing `timeout` on long-running jobs (`QueryJobConfig.job_timeout_ms` not set)
+- Hard-coded dataset, table, or project IDs instead of parameterized references
+- Unhandled `google.api_core.exceptions.NotFound` where the table may not exist yet (dynamic table creation patterns)
+- Result sets materialized without row-count guard — unbounded `.to_dataframe()` on queries that can return millions of rows
+- Schema assumed to be stable; no handling when upstream table schema changes drop or rename columns
+
+### Inconsistencies (I)
+- Mixing legacy synchronous `client.query().result()` with newer async job patterns across sibling functions
+- Inconsistent parameterized-query usage — some queries use `QueryJobConfig` + `ScalarQueryParameter`, others use string formatting
+- Mixed schema definition styles (plain `dict` vs `bigquery.SchemaField` objects) across the same module
+- Inconsistent location / project specification — some calls specify `location=`, others rely on client default
+- Some functions return a `pd.DataFrame`, others return a `google.cloud.bigquery.table.RowIterator` — no documented contract
+
+### Ambiguities (A)
+- Query function names that do not indicate whether they return a DataFrame, row iterator, or job object
+- Parameters named `table` that accept either a full `project.dataset.table` string or a `TableReference` without type annotation
+- Boolean parameters (`dry_run`, `create_disposition`, `write_disposition`) used positionally
+- Functions that accept a SQL string without documenting whether parameterization is the caller's or callee's responsibility
+
+### Concurrency (C)
+- Synchronous `client.query().result()` blocking an `async def` function or event loop thread
+- Multiple independent BigQuery jobs that could run in parallel dispatched serially instead of via `asyncio.gather` or a job-array pattern
+- Shared `bigquery.Client` instance across threads — verify thread-safety assumptions (client is generally safe but connection pool limits apply)
+
+### Long-Range Bugs (L)
+- Schema changes to BigQuery tables (added/removed/renamed columns) not propagated to downstream consumers that select by column name
+- Functions that return a column-pruned result set whose callers assume a full `SELECT *` schema
+- Job polling helpers whose raised exceptions (`JobError`, `BadRequest`) are silently swallowed by the call chain
+- `WRITE_TRUNCATE` disposition used in a function that callers assume is non-destructive
+
+### UX (U)
+- Job failure messages that do not include the `job.job_id` for follow-up debugging
+- Bytes billed / slot milliseconds not logged for expensive queries — cost is invisible to operators
+- Raw `google.api_core.exceptions.GoogleAPIError` surfaced to callers instead of a domain-specific message
+- No indication of query progress for operations that may take minutes
+
+## Saturation Loop
+
+Run after the initial review pass. Terminates on first zero-delta round or after three rounds.
+
+### Phase A — Verify (per round)
+Launch subagents partitioned across review sections. Each receives only the findings (not the reasoning) and the source code. Renders per-finding verdict:
+- **Confirmed** — independently verified as real as described
+- **Improved** — real issue, but location, severity, scope, or fix needs correction; state what changed
+- **Disproved** — contradicted by code; removed from report, reason logged
+
+For any finding whose fix cites a BigQuery API, the subagent fetches current upstream docs for the pinned `google-cloud-bigquery` version and verifies. Treat training-data knowledge of this library as suspect.
+
+### Phase B — Hunt (per round)
+Re-read the source with fresh eyes. For each review section, challenge any "None identified" claim. Surface findings the initial pass missed. Focus especially on: unbounded materialization, missing parameterization, hardcoded project/dataset references, and blocking-in-async patterns.
+
+### Phase C — Pattern propagation (per round)
+For every new finding this round, search the codebase for the same pattern at other call sites. Each additional instance is its own finding.
+
+### Termination
+Record per-round counts in the Reflection Log. Terminate on first zero-delta round or after round 3.
+
+---
+
 ## Output
 
 For review tasks, produce a findings table:

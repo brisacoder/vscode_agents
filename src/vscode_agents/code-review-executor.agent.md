@@ -3,10 +3,10 @@ description: "Use when: applying fixes from a code-review report produced by the
 name: "Code Review Executor"
 tools: [vscode, execute, read, agent, browser, 'microsoft/markitdown/*', 'playwright/*', 'huggingface/hf-mcp-server/*', 'langchain-mcp/*', edit, search, web, 'postgresql-mcp/*', 'pylance-mcp-server/*', vscode.mermaid-chat-features/renderMermaidDiagram, ms-azuretools.vscode-containers/containerToolsConfig, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, ms-toolsai.jupyter/configureNotebook, ms-toolsai.jupyter/listNotebookPackages, ms-toolsai.jupyter/installNotebookPackages, todo]
 argument-hint: Path to a code-review Markdown report produced by the Code Review agent.
-model: Claude Opus 4.6 (copilot)
+model: Claude Opus 4.7 (anthropic)
 agents: [*]
 handoffs:
-  - label: Docstring Review — Claude Opus 4.6
+  - label: Docstring Review — Claude Opus 4.7
     agent: Docstring Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory). Find the specialist trigger entry for Docstring Expert and use the path listed there.
@@ -15,7 +15,7 @@ handoffs:
 
       Save your findings file to `docstring-review-<sanitized-path>-<YYYY-MM-DD>.md` and return only the absolute path to the saved file. The executor will parse your findings and merge them into the ledger.
     send: true
-    model: Claude Opus 4.6 (copilot)
+    model: Claude Opus 4.7 (anthropic)
 
   - label: Docstring Review — GPT-5.4
     agent: Docstring Expert
@@ -28,7 +28,7 @@ handoffs:
     send: true
     model: GPT-5.4 (copilot)
 
-  - label: Test Quality Review — Claude Opus 4.6
+  - label: Test Quality Review — Claude Opus 4.7
     agent: Unit Test Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory). Find the specialist trigger entry for Unit Test Expert and use the path listed there.
@@ -37,7 +37,7 @@ handoffs:
 
       Save your test plan and defect log to disk (per your Output section) and return only the paths. The executor will parse your findings and merge them into the ledger.
     send: true
-    model: Claude Opus 4.6 (copilot)
+    model: Claude Opus 4.7 (anthropic)
 
   - label: Test Quality Review — GPT-5.4
     agent: Unit Test Expert
@@ -50,7 +50,7 @@ handoffs:
     send: true
     model: GPT-5.4 (copilot)
 
-  - label: Type Annotation Review — Claude Opus 4.6
+  - label: Type Annotation Review — Claude Opus 4.7
     agent: Type Annotation Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory). Find the specialist trigger entry for Type Annotation Expert and use the path listed there.
@@ -59,7 +59,7 @@ handoffs:
 
       Save your inventory, findings, and session summary to disk (per your Output section) and return only the paths. The executor will parse your findings and merge them into the ledger.
     send: true
-    model: Claude Opus 4.6 (copilot)
+    model: Claude Opus 4.7 (anthropic)
 
   - label: Type Annotation Review — GPT-5.4
     agent: Type Annotation Expert
@@ -72,7 +72,7 @@ handoffs:
     send: true
     model: GPT-5.4 (copilot)
 
-  - label: README Review — Claude Opus 4.6
+  - label: README Review — Claude Opus 4.7
     agent: README Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory). Find the specialist trigger entry for README Expert and use the path listed there.
@@ -81,7 +81,7 @@ handoffs:
 
       Return the README path and a summary of sections written or updated. Mark completed DOC findings `done` in the ledger.
     send: true
-    model: Claude Opus 4.6 (copilot)
+    model: Claude Opus 4.7 (anthropic)
 
   - label: README Review — GPT-5.4
     agent: README Expert
@@ -94,7 +94,7 @@ handoffs:
     send: true
     model: GPT-5.4 (copilot)
 
-  - label: Pandas Author — Claude Opus 4.6
+  - label: Pandas Author — Claude Opus 4.7
     agent: Pandas Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -111,7 +111,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, vectorized replacement applied, performance improvement (if measured), and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.6 (copilot)
+    model: Claude Opus 4.7 (anthropic)
 
   - label: Pandas Author — GPT-5.4
     agent: Pandas Expert
@@ -132,7 +132,7 @@ handoffs:
     send: true
     model: GPT-5.4 (copilot)
 
-  - label: DuckDB Author — Claude Opus 4.6
+  - label: DuckDB Author — Claude Opus 4.7
     agent: DuckDB Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -150,7 +150,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, DuckDB replacement applied, EXPLAIN verification result, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.6 (copilot)
+    model: Claude Opus 4.7 (anthropic)
 
   - label: DuckDB Author — GPT-5.4
     agent: DuckDB Expert
@@ -172,7 +172,7 @@ handoffs:
     send: true
     model: GPT-5.4 (copilot)
 
-  - label: LangGraph Author — Claude Opus 4.6
+  - label: LangGraph Author — Claude Opus 4.7
     agent: LangGraph Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -188,7 +188,7 @@ handoffs:
 
       Return a structured summary: finding ID, LangGraph defect fixed, files touched, test result, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.6 (copilot)
+    model: Claude Opus 4.7 (anthropic)
 
   - label: LangGraph Author — GPT-5.4
     agent: LangGraph Expert
@@ -208,7 +208,7 @@ handoffs:
     send: true
     model: GPT-5.4 (copilot)
 
-  - label: Python Author — Claude Opus 4.6
+  - label: Python Author — Claude Opus 4.7
     agent: Python Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -224,7 +224,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, idiomatic replacement applied, test result, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.6 (copilot)
+    model: Claude Opus 4.7 (anthropic)
 
   - label: Python Author — GPT-5.4
     agent: Python Expert
@@ -244,7 +244,7 @@ handoffs:
     send: true
     model: GPT-5.4 (copilot)
 
-  - label: BigQuery Author — Claude Opus 4.6
+  - label: BigQuery Author — Claude Opus 4.7
     agent: BigQuery Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -261,7 +261,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, BigQuery replacement applied, dry_run verification result, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.6 (copilot)
+    model: Claude Opus 4.7 (anthropic)
 
   - label: BigQuery Author — GPT-5.4
     agent: BigQuery Expert
@@ -309,15 +309,15 @@ Adding a new specialist? Add one row here and two entries in YAML `handoffs:`. N
 
 | ID prefix | Specialist | Auto-dispatch handoff label | Manual second-opinion handoff label |
 |---|---|---|---|
-| `F-`, `I-`, `A-`, `C-`, `S-`, `L-`, `U-`, `PY-` | Python Expert | Python Author — Claude Opus 4.6 | Python Author — GPT-5.4 |
-| `PA-` | Pandas Expert | Pandas Author — Claude Opus 4.6 | Pandas Author — GPT-5.4 |
-| `DB-` | DuckDB Expert | DuckDB Author — Claude Opus 4.6 | DuckDB Author — GPT-5.4 |
-| `BQ-` | BigQuery Expert | BigQuery Author — Claude Opus 4.6 | BigQuery Author — GPT-5.4 |
-| `G-` | LangGraph Expert | LangGraph Author — Claude Opus 4.6 | LangGraph Author — GPT-5.4 |
-| `D-` | Docstring Expert | Docstring Review — Claude Opus 4.6 | Docstring Review — GPT-5.4 |
-| `TY-` | Type Annotation Expert | Type Annotation Review — Claude Opus 4.6 | Type Annotation Review — GPT-5.4 |
-| `T-` | Unit Test Expert | Test Quality Review — Claude Opus 4.6 | Test Quality Review — GPT-5.4 |
-| `DOC-` | README Expert | README Review — Claude Opus 4.6 | README Review — GPT-5.4 |
+| `F-`, `I-`, `A-`, `C-`, `S-`, `L-`, `U-`, `PY-` | Python Expert | Python Author — Claude Opus 4.7 | Python Author — GPT-5.4 |
+| `PA-` | Pandas Expert | Pandas Author — Claude Opus 4.7 | Pandas Author — GPT-5.4 |
+| `DB-` | DuckDB Expert | DuckDB Author — Claude Opus 4.7 | DuckDB Author — GPT-5.4 |
+| `BQ-` | BigQuery Expert | BigQuery Author — Claude Opus 4.7 | BigQuery Author — GPT-5.4 |
+| `G-` | LangGraph Expert | LangGraph Author — Claude Opus 4.7 | LangGraph Author — GPT-5.4 |
+| `D-` | Docstring Expert | Docstring Review — Claude Opus 4.7 | Docstring Review — GPT-5.4 |
+| `TY-` | Type Annotation Expert | Type Annotation Review — Claude Opus 4.7 | Type Annotation Review — GPT-5.4 |
+| `T-` | Unit Test Expert | Test Quality Review — Claude Opus 4.7 | Test Quality Review — GPT-5.4 |
+| `DOC-` | README Expert | README Review — Claude Opus 4.7 | README Review — GPT-5.4 |
 
 Spawned findings (`Fx-`, `Sx-`, etc.) route by their base prefix (e.g., `Fx-3` → Python Expert).
 
@@ -375,7 +375,7 @@ Append-only. One entry per completed (or blocked / superseded) finding:
 
 ### <ID> — <one-line summary> — <state> — <ISO timestamp>
 - **Specialist**: <name>
-- **Model**: <Claude Opus 4.6 | GPT-5.4>
+- **Model**: <Claude Opus 4.7 | GPT-5.4>
 - **Files touched**: <list as reported by specialist>
 - **Commit**: <sha as reported by specialist>
 - **Specialist summary**: <one-line>

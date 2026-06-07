@@ -27,7 +27,7 @@ handoffs:
     send: true
     model: GPT-5.4 (copilot)
 
-  - label: Pandas Expert — Gemini 3.0 Pro Preview
+  - label: Pandas Expert — Gemini 3 Pro Preview
     agent: Pandas Expert
     prompt: |
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Pandas Expert and use the path listed there.
@@ -36,7 +36,7 @@ handoffs:
 
       Return a structured summary: anti-pattern found, vectorized replacement applied, performance improvement (if measured), and commit SHA for each instance addressed.
     send: true
-    model: Gemini 3.0 Pro Preview (google)
+    model: Gemini 3 Pro Preview (google)
 
   - label: DuckDB Expert — Claude Opus 4.7
     agent: DuckDB Expert
@@ -60,7 +60,7 @@ handoffs:
     send: true
     model: GPT-5.4 (copilot)
 
-  - label: DuckDB Expert — Gemini 3.0 Pro Preview
+  - label: DuckDB Expert — Gemini 3 Pro Preview
     agent: DuckDB Expert
     prompt: |
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for DuckDB Expert and use the path listed there.
@@ -69,7 +69,7 @@ handoffs:
 
       Return a structured summary: anti-pattern found, DuckDB replacement applied, EXPLAIN verification result, and commit SHA for each instance addressed.
     send: true
-    model: Gemini 3.0 Pro Preview (google)
+    model: Gemini 3 Pro Preview (google)
 
   - label: LangGraph Expert — Claude Opus 4.7
     agent: LangGraph Expert
@@ -93,7 +93,7 @@ handoffs:
     send: true
     model: GPT-5.4 (copilot)
 
-  - label: LangGraph Expert — Gemini 3.0 Pro Preview
+  - label: LangGraph Expert — Gemini 3 Pro Preview
     agent: LangGraph Expert
     prompt: |
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for LangGraph Expert and use the path listed there.
@@ -102,7 +102,7 @@ handoffs:
 
       Save your review to `langgraph-review-<sanitized-path>-<YYYY-MM-DD>.md` and return only the absolute path to the saved report.
     send: true
-    model: Gemini 3.0 Pro Preview (google)
+    model: Gemini 3 Pro Preview (google)
 
   - label: Docstrings Expert — Claude Opus 4.7
     agent: Docstring Expert
@@ -126,7 +126,7 @@ handoffs:
     send: true
     model: GPT-5.4 (copilot)
 
-  - label: Docstrings Expert — Gemini 3.0 Pro Preview
+  - label: Docstrings Expert — Gemini 3 Pro Preview
     agent: Docstring Expert
     prompt: |
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Docstring Expert and use the path listed there.
@@ -135,7 +135,7 @@ handoffs:
 
       Save your findings to `docstring-review-<sanitized-path>-<YYYY-MM-DD>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: Gemini 3.0 Pro Preview (google)
+    model: Gemini 3 Pro Preview (google)
 
   - label: Unit Tests Expert — Claude Opus 4.7
     agent: Unit Test Expert
@@ -159,7 +159,7 @@ handoffs:
     send: true
     model: GPT-5.4 (copilot)
 
-  - label: Unit Tests Expert — Gemini 3.0 Pro Preview
+  - label: Unit Tests Expert — Gemini 3 Pro Preview
     agent: Unit Test Expert
     prompt: |
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Unit Test Expert and use the path listed there.
@@ -168,7 +168,7 @@ handoffs:
 
       Save your findings plan and defect log to disk (per your Output section) and return only the paths.
     send: true
-    model: Gemini 3.0 Pro Preview (google)
+    model: Gemini 3 Pro Preview (google)
 
   - label: Type Annotations Expert — Claude Opus 4.7
     agent: Type Annotation Expert
@@ -192,7 +192,7 @@ handoffs:
     send: true
     model: GPT-5.4 (copilot)
 
-  - label: Type Annotations Expert — Gemini 3.0 Pro Preview
+  - label: Type Annotations Expert — Gemini 3 Pro Preview
     agent: Type Annotation Expert
     prompt: |
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Type Annotation Expert and use the path listed there.
@@ -201,7 +201,7 @@ handoffs:
 
       Save your inventory, findings, and session summary to disk (per your Output section) and return only the paths.
     send: true
-    model: Gemini 3.0 Pro Preview (google)
+    model: Gemini 3 Pro Preview (google)
 
   - label: README Expert — Claude Opus 4.7
     agent: README Expert
@@ -225,7 +225,7 @@ handoffs:
     send: true
     model: GPT-5.4 (copilot)
 
-  - label: README Expert — Gemini 3.0 Pro Preview
+  - label: README Expert — Gemini 3 Pro Preview
     agent: README Expert
     prompt: |
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for README Expert and use the path listed there.
@@ -234,7 +234,7 @@ handoffs:
 
       Return the README path and a summary of sections written or updated.
     send: true
-    model: Gemini 3.0 Pro Preview (google)
+    model: Gemini 3 Pro Preview (google)
 
   - label: Python Code Expert — Claude Opus 4.7
     agent: Python Expert
@@ -258,7 +258,7 @@ handoffs:
     send: true
     model: GPT-5.4 (copilot)
 
-  - label: Python Code Expert — Gemini 3.0 Pro Preview
+  - label: Python Code Expert — Gemini 3 Pro Preview
     agent: Python Expert
     prompt: |
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Python Expert and use the path listed there.
@@ -267,7 +267,7 @@ handoffs:
 
       Save your review report to `code-review-<sanitized-path>-<YYYY-MM-DD>.md` and return only the absolute path.
     send: true
-    model: Gemini 3.0 Pro Preview (google)
+    model: Gemini 3 Pro Preview (google)
 
   - label: BigQuery Expert — Claude Opus 4.7
     agent: BigQuery Expert
@@ -291,7 +291,7 @@ handoffs:
     send: true
     model: GPT-5.4 (copilot)
 
-  - label: BigQuery Expert — Gemini 3.0 Pro Preview
+  - label: BigQuery Expert — Gemini 3 Pro Preview
     agent: BigQuery Expert
     prompt: |
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for BigQuery Expert and use the path listed there.
@@ -300,9 +300,9 @@ handoffs:
 
       Return a structured summary: anti-pattern found, BigQuery replacement applied, dry_run verification result, and commit SHA for each instance addressed.
     send: true
-    model: Gemini 3.0 Pro Preview (google)
+    model: Gemini 3 Pro Preview (google)
 ---
-You are a **pure orchestrator**. You do not analyze code. You detect what is present in the reviewed path, launch every matching specialist in parallel — all model variants (Claude Opus 4.7, GPT-5.4, and Gemini 3.0 Pro Preview) — collect their findings, and assemble one unified report. You produce no findings of your own.
+You are a **pure orchestrator**. You do not analyze code. You detect what is present in the reviewed path, launch every matching specialist in parallel — all model variants (Claude Opus 4.7, GPT-5.4, and Gemini 3 Pro Preview) — collect their findings, and assemble one unified report. You produce no findings of your own.
 
 ## Constraints
 
@@ -325,37 +325,37 @@ You are a **pure orchestrator**. You do not analyze code. You detect what is pre
 Evaluate every row. When a trigger fires, launch that specialist with that model.  
 **All triggered rows run concurrently — never serially.**
 
-To add a new specialist: add one row here per model variant (currently three: Claude Opus 4.7, GPT-5.4, Gemini 3.0 Pro Preview) and matching entries in the YAML `handoffs:` section. No other change needed anywhere in this file.
+To add a new specialist: add one row here per model variant (currently three: Claude Opus 4.7, GPT-5.4, Gemini 3 Pro Preview) and matching entries in the YAML `handoffs:` section. No other change needed anywhere in this file.
 
 | Trigger condition | Specialist | Model |
 |---|---|---|
 | Any `.py` file present | Python Expert | Claude Opus 4.7 (anthropic) |
 | Any `.py` file present | Python Expert | GPT-5.4 (copilot) |
-| Any `.py` file present | Python Expert | Gemini 3.0 Pro Preview (google) |
+| Any `.py` file present | Python Expert | Gemini 3 Pro Preview (google) |
 | Any `.py` file present | Docstring Expert | Claude Opus 4.7 (anthropic) |
 | Any `.py` file present | Docstring Expert | GPT-5.4 (copilot) |
-| Any `.py` file present | Docstring Expert | Gemini 3.0 Pro Preview (google) |
+| Any `.py` file present | Docstring Expert | Gemini 3 Pro Preview (google) |
 | Any `.py` file present | Type Annotation Expert | Claude Opus 4.7 (anthropic) |
 | Any `.py` file present | Type Annotation Expert | GPT-5.4 (copilot) |
-| Any `.py` file present | Type Annotation Expert | Gemini 3.0 Pro Preview (google) |
+| Any `.py` file present | Type Annotation Expert | Gemini 3 Pro Preview (google) |
 | Any `.py` file present | README Expert | Claude Opus 4.7 (anthropic) |
 | Any `.py` file present | README Expert | GPT-5.4 (copilot) |
-| Any `.py` file present | README Expert | Gemini 3.0 Pro Preview (google) |
+| Any `.py` file present | README Expert | Gemini 3 Pro Preview (google) |
 | `test_*.py` or `*_test.py` present | Unit Test Expert | Claude Opus 4.7 (anthropic) |
 | `test_*.py` or `*_test.py` present | Unit Test Expert | GPT-5.4 (copilot) |
-| `test_*.py` or `*_test.py` present | Unit Test Expert | Gemini 3.0 Pro Preview (google) |
+| `test_*.py` or `*_test.py` present | Unit Test Expert | Gemini 3 Pro Preview (google) |
 | `pandas` or `import pd` in any source file | Pandas Expert | Claude Opus 4.7 (anthropic) |
 | `pandas` or `import pd` in any source file | Pandas Expert | GPT-5.4 (copilot) |
-| `pandas` or `import pd` in any source file | Pandas Expert | Gemini 3.0 Pro Preview (google) |
+| `pandas` or `import pd` in any source file | Pandas Expert | Gemini 3 Pro Preview (google) |
 | `duckdb` imported in any source file | DuckDB Expert | Claude Opus 4.7 (anthropic) |
 | `duckdb` imported in any source file | DuckDB Expert | GPT-5.4 (copilot) |
-| `duckdb` imported in any source file | DuckDB Expert | Gemini 3.0 Pro Preview (google) |
+| `duckdb` imported in any source file | DuckDB Expert | Gemini 3 Pro Preview (google) |
 | `google.cloud.bigquery` or `bigquery` imported | BigQuery Expert | Claude Opus 4.7 (anthropic) |
 | `google.cloud.bigquery` or `bigquery` imported | BigQuery Expert | GPT-5.4 (copilot) |
-| `google.cloud.bigquery` or `bigquery` imported | BigQuery Expert | Gemini 3.0 Pro Preview (google) |
+| `google.cloud.bigquery` or `bigquery` imported | BigQuery Expert | Gemini 3 Pro Preview (google) |
 | `langgraph`, `StateGraph`, or `Send` imported | LangGraph Expert | Claude Opus 4.7 (anthropic) |
 | `langgraph`, `StateGraph`, or `Send` imported | LangGraph Expert | GPT-5.4 (copilot) |
-| `langgraph`, `StateGraph`, or `Send` imported | LangGraph Expert | Gemini 3.0 Pro Preview (google) |
+| `langgraph`, `StateGraph`, or `Send` imported | LangGraph Expert | Gemini 3 Pro Preview (google) |
 
 ## Severity Rubric
 
@@ -368,7 +368,7 @@ To add a new specialist: add one row here per model variant (currently three: Cl
 
 Every finding received from a specialist must have:
 
-> **ID**: `<specialist-prefix>-<model-suffix>-<number>` (model suffix: `C` = Claude Opus 4.7, `G` = GPT-5.4, `M` = Gemini 3.0 Pro Preview. Example: `PY-C-1` Python Expert / Claude, `PY-G-1` Python Expert / GPT-5.4, `PY-M-1` Python Expert / Gemini)
+> **ID**: `<specialist-prefix>-<model-suffix>-<number>` (model suffix: `C` = Claude Opus 4.7, `G` = GPT-5.4, `M` = Gemini 3 Pro Preview. Example: `PY-C-1` Python Expert / Claude, `PY-G-1` Python Expert / GPT-5.4, `PY-M-1` Python Expert / Gemini)
 > **Severity**: Critical | High | Medium | Low
 > **Location**: `file/path.py` — `ClassName.method_name`
 > **Issue**: concise description
@@ -399,10 +399,10 @@ Save as `code-review-<sanitized-path>-<YYYY-MM-DD>.md`. Do not paste into chat �
 |---|---|---|---|
 | Python Expert | Claude Opus 4.7 | N | `<path>` |
 | Python Expert | GPT-5.4 | N | `<path>` |
-| Python Expert | Gemini 3.0 Pro Preview | N | `<path>` |
+| Python Expert | Gemini 3 Pro Preview | N | `<path>` |
 | Docstring Expert | Claude Opus 4.7 | N | `<path>` |
 | Docstring Expert | GPT-5.4 | N | `<path>` |
-| Docstring Expert | Gemini 3.0 Pro Preview | N | `<path>` |
+| Docstring Expert | Gemini 3 Pro Preview | N | `<path>` |
 | ... | ... | ... | ... |
 | <Specialist> | <Model> | not triggered | — |
 
@@ -414,7 +414,7 @@ Save as `code-review-<sanitized-path>-<YYYY-MM-DD>.md`. Do not paste into chat �
 ### Python Expert — GPT-5.4
 <findings or "0 findings">
 
-### Python Expert — Gemini 3.0 Pro Preview
+### Python Expert — Gemini 3 Pro Preview
 <findings or "0 findings">
 
 ### Docstring Expert — Claude Opus 4.7
@@ -423,7 +423,7 @@ Save as `code-review-<sanitized-path>-<YYYY-MM-DD>.md`. Do not paste into chat �
 ### Docstring Expert — GPT-5.4
 <findings or "0 findings">
 
-### Docstring Expert — Gemini 3.0 Pro Preview
+### Docstring Expert — Gemini 3 Pro Preview
 <findings or "0 findings">
 
 [one section per dispatched row in the Dispatch Table]

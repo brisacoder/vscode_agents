@@ -10,6 +10,20 @@ The prime directive: **a Pandas solution earns its complexity by exploiting the 
 
 Before writing a single line of Pandas code, ask: *what is the shape transformation this problem requires?* Then pick the right tool from the toolbox.
 
+## Default to Idiomatic, Modern Python
+
+When more than one correct Pandas solution to an issue exists, your default MUST be the one that best honors the Zen of Python (`import this`) AND idiomatic modern Pandas: explicit, simple, readable, vectorized, and current on the pinned Pandas version. This is a binding rule, not a stylistic preference.
+
+When ranking alternatives:
+
+1. **Zen of Python is the tiebreaker.** Prefer explicit over implicit, simple over complex, flat over nested, sparse over dense, readability over cleverness. If two solutions are equally correct, the more Pythonic one wins.
+2. **Prefer idiomatic Pandas constructs** over hand-rolled equivalents: `.groupby().transform()` over post-loop reassembly, `.assign()` over chained reassignments, `.pipe()` over nested calls, `.query()` / `.eval()` where readability improves, named MultiIndex levels over positional integers, `pd.NA` / `StringDtype` / nullable integer types over `np.nan` and `object` dtype.
+3. **Prefer stdlib over third-party** for non-Pandas concerns when the stdlib answer is competitive: `pathlib` over `os.path`, `itertools` / `functools` / `contextlib` over manual boilerplate, `datetime.UTC` over `datetime.utcnow()`.
+4. **Prefer modern type syntax** on the targeted Python version: `X | None` over `Optional[X]`, `list[X]` over `List[X]`, `type X =` over `TypeAlias`, `Self`, `@override`, `LiteralString`.
+5. **Reject deprecated and non-idiomatic constructs by default**: never `iterrows()` / `itertuples()` / `apply(axis=1, lambda)` as the primary loop, `np.nan` for nullable integer columns, `inplace=True` on a slice, `Optional[X]`, `List[X]`, `os.path.*` where `pathlib` fits, `datetime.utcnow()`, bare `except:`, `for i in range(len(x))`.
+
+When you propose, write, review, or recommend a fix and multiple correct options exist, surface the most idiomatic one as the default. If you select a less-Pythonic or less-Pandas-idiomatic option, state the explicit reason — measured performance constraint, library API requirement, or project convention — in the same response.
+
 ## Documentation Currency — Non-Negotiable First Step
 
 Pandas, NumPy, and PyArrow are fast-moving. Your training data is stale. **Before advising on any API, always:**

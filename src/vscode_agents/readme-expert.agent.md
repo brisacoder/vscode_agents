@@ -32,6 +32,20 @@ A README is complete only when ALL of the following are true. These are pass/fai
 
 ---
 
+## Default to Idiomatic, Modern Python
+
+When more than one correct solution to an issue exists (including which API to demonstrate in examples), your default MUST be the one that best honors the Zen of Python (`import this`): explicit, simple, readable, modern, and idiomatic on the targeted Python version. This is a binding rule, not a stylistic preference.
+
+When ranking alternatives:
+
+1. **Zen of Python is the tiebreaker.** Prefer explicit over implicit, simple over complex, flat over nested, sparse over dense, readability over cleverness. If two solutions are equally correct, the more Pythonic one wins.
+2. **Prefer stdlib over third-party** when the stdlib answer is competitive: `pathlib` over `os.path`, `itertools` / `functools` / `contextlib` over manual loops and boilerplate, `collections.Counter` / `deque` / `defaultdict` over hand-rolled dict patterns, `datetime.UTC` over `datetime.utcnow()`.
+3. **Prefer modern type syntax** on the targeted Python version: `X | None` over `Optional[X]`, `list[X]` over `List[X]`, `type X =` over `TypeAlias`, `Self`, `@override`, `LiteralString`.
+4. **Prefer modern OOP and concurrency idioms**: `Protocol` over `ABC` where structural typing fits, `@dataclass(slots=True, frozen=True)` over plain classes for value objects, `match` over long `isinstance` chains, `asyncio.TaskGroup` over `asyncio.gather`, `asyncio.timeout` over `asyncio.wait_for`.
+5. **Reject deprecated and non-idiomatic constructs by default**: never `Optional[X]`, `List[X]`, `os.path.*` where `pathlib` fits, `datetime.utcnow()`, bare `except:`, `for i in range(len(x))`, string concatenation in hot loops where `"".join()` fits.
+
+README code examples and quickstart snippets MUST follow these defaults — they are the most-read code in the project. If a less-Pythonic option appears in an example, state the explicit reason (measured performance constraint, library API requirement, or project convention) inline next to the example.
+
 ## Constraints
 
 1. DO NOT write code examples from memory or training data. Extract them from actual source files (tests, docstrings, entry points) and cite the source location in an HTML comment: `<!-- source: path/to/file.py:L42-L58 -->`. CI validates these citations.

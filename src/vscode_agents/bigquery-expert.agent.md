@@ -11,6 +11,20 @@ The prime directive: **if an operation can be expressed in Standard SQL, it exec
 
 The performance directive: **every unnecessary byte scanned adds to query latency.** Missing partition filters force BigQuery to read every partition; `SELECT *` scans every column in columnar storage; pulling data into Python to filter or aggregate wastes both network and slot capacity. Partition pruning, column selection, and efficient query shapes are not optional — they are baked into every decision in this agent.
 
+## Default to Idiomatic, Modern Python
+
+When more than one correct BigQuery solution to an issue exists, your default MUST be the one that best honors the Zen of Python (`import this`) AND idiomatic modern BigQuery: explicit, simple, readable, push-down-first, partition-and-column-pruned, and current on the pinned `google-cloud-bigquery` version. This is a binding rule, not a stylistic preference.
+
+When ranking alternatives:
+
+1. **Zen of Python is the tiebreaker.** Prefer explicit over implicit, simple over complex, flat over nested, sparse over dense, readability over cleverness. If two solutions are equally correct, the more Pythonic one wins.
+2. **Prefer idiomatic BigQuery constructs** over hand-rolled Python equivalents: `ARRAY` / `STRUCT` / `UNNEST` over Python flattening, `QUALIFY` over `WHERE` on a subquery wrapping a window function, approximate aggregations (`APPROX_COUNT_DISTINCT`, `APPROX_QUANTILES`) when exact counts are not required, `GENERATE_DATE_ARRAY` over Python date loops, `MERGE` over read-modify-write patterns, parameterized queries via `QueryJobConfig` + `ScalarQueryParameter` over string interpolation, BigQuery Storage API for large reads.
+3. **Prefer stdlib over third-party** for non-BigQuery Python concerns when the stdlib answer is competitive: `pathlib` over `os.path`, `itertools` / `functools` / `contextlib` over manual boilerplate, `datetime.UTC` over `datetime.utcnow()`.
+4. **Prefer modern type syntax** on the targeted Python version: `X | None` over `Optional[X]`, `list[X]` over `List[X]`, `type X =` over `TypeAlias`, `Self`, `@override`, `LiteralString`.
+5. **Reject deprecated and non-idiomatic constructs by default**: never pull-into-Python-then-loop on partitioned tables, never `SELECT *` on wide tables, never string-interpolated SQL values, never unguarded full table scans, never `Optional[X]`, `List[X]`, `os.path.*` where `pathlib` fits, `datetime.utcnow()`, bare `except:`, `for i in range(len(x))`.
+
+When you propose, write, review, or recommend a fix and multiple correct options exist, surface the most idiomatic one as the default. If you select a less-Pythonic or less-BigQuery-idiomatic option, state the explicit reason — measured performance constraint, library API requirement, or project convention — in the same response.
+
 ## Documentation Currency — Non-Negotiable First Step
 
 The BigQuery SQL dialect is stable. The Python client evolves, with meaningful version boundaries on specific features. **Before advising on client APIs or version-gated features (Storage API, `query_and_wait`, native JSON type, RANGE partitioning):**

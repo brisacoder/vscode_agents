@@ -12,6 +12,8 @@ handoffs:
 
       Run a **complete independent Pandas review** on that path using your full approach — all acceptance criteria (AC-1 through AC-10), the full Heresy List audit, your security section, your saturation loop, and all vectorization fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `pandas-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
@@ -22,6 +24,8 @@ handoffs:
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Pandas Expert and use the path listed there.
 
       Run a **complete independent Pandas review** on that path using your full approach — all acceptance criteria (AC-1 through AC-10), the full Heresy List audit, your security section, your saturation loop, and all vectorization fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
+
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
       Save your findings to `pandas-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
@@ -34,6 +38,8 @@ handoffs:
 
       Run a **complete independent Pandas review** on that path using your full approach — all acceptance criteria (AC-1 through AC-10), the full Heresy List audit, your security section, your saturation loop, and all vectorization fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `pandas-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
@@ -44,6 +50,8 @@ handoffs:
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for DuckDB Expert and use the path listed there.
 
       Run a **complete independent DuckDB review** on that path using your full approach — all acceptance criteria (AC-1 through AC-12), the full Heresy List audit, your security section, your saturation loop, and all push-down fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
+
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
       Save your findings to `duckdb-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
@@ -56,6 +64,8 @@ handoffs:
 
       Run a **complete independent DuckDB review** on that path using your full approach — all acceptance criteria (AC-1 through AC-12), the full Heresy List audit, your security section, your saturation loop, and all push-down fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `duckdb-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.4 (copilot)
@@ -66,6 +76,8 @@ handoffs:
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for DuckDB Expert and use the path listed there.
 
       Run a **complete independent DuckDB review** on that path using your full approach — all acceptance criteria (AC-1 through AC-12), the full Heresy List audit, your security section, your saturation loop, and all push-down fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
+
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
       Save your findings to `duckdb-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
@@ -78,6 +90,8 @@ handoffs:
 
       Run a **complete independent LangGraph review** on that path using your full approach — all 13 review sections (S, E, X, T, R, P, C, H, M, A, G, D, Z), all acceptance criteria, and your full reflection/verification pass. You are not fixing specific findings — you are running a fresh, thorough framework review.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `langgraph-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
@@ -88,6 +102,8 @@ handoffs:
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for LangGraph Expert and use the path listed there.
 
       Run a **complete independent LangGraph review** on that path using your full approach — all 13 review sections (S, E, X, T, R, P, C, H, M, A, G, D, Z), all acceptance criteria, and your full reflection/verification pass. You are not fixing specific findings — you are running a fresh, thorough framework review.
+
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
       Save your findings to `langgraph-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
@@ -100,6 +116,8 @@ handoffs:
 
       Run a **complete independent LangGraph review** on that path using your full approach — all 13 review sections (S, E, X, T, R, P, C, H, M, A, G, D, Z), all acceptance criteria, and your full reflection/verification pass. You are not fixing specific findings — you are running a fresh, thorough framework review.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `langgraph-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
@@ -110,6 +128,8 @@ handoffs:
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Docstring Expert and use the path listed there.
 
       Run a **complete independent docstring review** on that path using your full approach — all acceptance criteria (AC-1 through AC-16), all approach steps (Step 1 through Step 12), and your full saturation loop. You are not fixing specific findings — you are running a fresh, thorough review of all docstrings in the path.
+
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
       Save your findings to `docstring-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
@@ -122,6 +142,8 @@ handoffs:
 
       Run a **complete independent docstring review** on that path using your full approach — all acceptance criteria (AC-1 through AC-16), all approach steps (Step 1 through Step 12), and your full saturation loop. You are not fixing specific findings — you are running a fresh, thorough review of all docstrings in the path.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `docstring-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.4 (copilot)
@@ -132,6 +154,8 @@ handoffs:
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Docstring Expert and use the path listed there.
 
       Run a **complete independent docstring review** on that path using your full approach — all acceptance criteria (AC-1 through AC-16), all approach steps (Step 1 through Step 12), and your full saturation loop. You are not fixing specific findings — you are running a fresh, thorough review of all docstrings in the path.
+
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
       Save your findings to `docstring-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
@@ -144,6 +168,8 @@ handoffs:
 
       Run a **complete independent test quality and coverage review** on that path using your full approach — all acceptance criteria (AC-1 through AC-16), all approach steps (Step 0 through Step 11), and your full saturation loop. You are not fixing specific findings — you are running a fresh, thorough review of the test suite for the reviewed path.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `unit-test-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
@@ -154,6 +180,8 @@ handoffs:
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Unit Test Expert and use the path listed there.
 
       Run a **complete independent test quality and coverage review** on that path using your full approach — all acceptance criteria (AC-1 through AC-16), all approach steps (Step 0 through Step 11), and your full saturation loop. You are not fixing specific findings — you are running a fresh, thorough review of the test suite for the reviewed path.
+
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
       Save your findings to `unit-test-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
@@ -166,6 +194,8 @@ handoffs:
 
       Run a **complete independent test quality and coverage review** on that path using your full approach — all acceptance criteria (AC-1 through AC-16), all approach steps (Step 0 through Step 11), and your full saturation loop. You are not fixing specific findings — you are running a fresh, thorough review of the test suite for the reviewed path.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `unit-test-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
@@ -176,6 +206,8 @@ handoffs:
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Type Annotation Expert and use the path listed there.
 
       Run a **complete independent type annotation review** on that path using your full approach — all acceptance criteria (AC-1 through AC-14), all approach steps (Step 1 through Step 9), and your full saturation loop. You are not fixing specific findings — you are running a fresh, thorough review and strengthening of all annotations in the path.
+
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
       Save your findings to `type-annotation-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
@@ -188,6 +220,8 @@ handoffs:
 
       Run a **complete independent type annotation review** on that path using your full approach — all acceptance criteria (AC-1 through AC-14), all approach steps (Step 1 through Step 9), and your full saturation loop. You are not fixing specific findings — you are running a fresh, thorough review and strengthening of all annotations in the path.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `type-annotation-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.4 (copilot)
@@ -198,6 +232,8 @@ handoffs:
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Type Annotation Expert and use the path listed there.
 
       Run a **complete independent type annotation review** on that path using your full approach — all acceptance criteria (AC-1 through AC-14), all approach steps (Step 1 through Step 9), and your full saturation loop. You are not fixing specific findings — you are running a fresh, thorough review and strengthening of all annotations in the path.
+
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
       Save your findings to `type-annotation-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
@@ -210,6 +246,8 @@ handoffs:
 
       Run a **complete independent README review** on that path using your full approach — all acceptance criteria (AC-1 through AC-13) and all approach steps. Address any DOC findings tagged in the main report (missing or obviously stale READMEs), then do a full quality pass on all package READMEs in the path.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `readme-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
@@ -220,6 +258,8 @@ handoffs:
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for README Expert and use the path listed there.
 
       Run a **complete independent README review** on that path using your full approach — all acceptance criteria (AC-1 through AC-13) and all approach steps. Address any DOC findings tagged in the main report (missing or obviously stale READMEs), then do a full quality pass on all package READMEs in the path.
+
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
       Save your findings to `readme-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
@@ -232,6 +272,8 @@ handoffs:
 
       Run a **complete independent README review** on that path using your full approach — all acceptance criteria (AC-1 through AC-13) and all approach steps. Address any DOC findings tagged in the main report (missing or obviously stale READMEs), then do a full quality pass on all package READMEs in the path.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `readme-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
@@ -242,6 +284,8 @@ handoffs:
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Python Expert and use the path listed there.
 
       Run a **complete independent Python idiom review** on that path using your full Review Mode approach — all 11 Section 9 sub-checklists (PY.stdlib through PY.deprecated), your saturation loop with all 6 hunter personas, and version-gated findings against the project's `requires-python`. You are not fixing specific findings — you are running a fresh, thorough Python language review.
+
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
       Save your findings to `python-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
@@ -254,6 +298,8 @@ handoffs:
 
       Run a **complete independent Python idiom review** on that path using your full Review Mode approach — all 11 Section 9 sub-checklists (PY.stdlib through PY.deprecated), your saturation loop with all 6 hunter personas, and version-gated findings against the project's `requires-python`. You are not fixing specific findings — you are running a fresh, thorough Python language review.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `python-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.4 (copilot)
@@ -264,6 +310,8 @@ handoffs:
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Python Expert and use the path listed there.
 
       Run a **complete independent Python idiom review** on that path using your full Review Mode approach — all 11 Section 9 sub-checklists (PY.stdlib through PY.deprecated), your saturation loop with all 6 hunter personas, and version-gated findings against the project's `requires-python`. You are not fixing specific findings — you are running a fresh, thorough Python language review.
+
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
       Save your findings to `python-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
@@ -276,6 +324,8 @@ handoffs:
 
       Run a **complete independent BigQuery review** on that path using your full approach — all acceptance criteria (AC-1 through AC-14), the full Heresy List audit, your security section, your saturation loop, and all push-down and parameterization fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `bigquery-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
@@ -286,6 +336,8 @@ handoffs:
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for BigQuery Expert and use the path listed there.
 
       Run a **complete independent BigQuery review** on that path using your full approach — all acceptance criteria (AC-1 through AC-14), the full Heresy List audit, your security section, your saturation loop, and all push-down and parameterization fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
+
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
       Save your findings to `bigquery-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
@@ -298,6 +350,8 @@ handoffs:
 
       Run a **complete independent BigQuery review** on that path using your full approach — all acceptance criteria (AC-1 through AC-14), the full Heresy List audit, your security section, your saturation loop, and all push-down and parameterization fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `bigquery-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
@@ -308,6 +362,8 @@ handoffs:
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for PostgreSQL Expert and use the path listed there.
 
       Run a **complete independent PostgreSQL review** on that path using your full approach — all acceptance criteria (AC-1 through AC-15), the full Heresy List audit, your security section, your saturation loop, and all push-down, parameterization, transaction, pooling, and N+1 fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
+
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
       Save your findings to `postgresql-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
@@ -320,6 +376,8 @@ handoffs:
 
       Run a **complete independent PostgreSQL review** on that path using your full approach — all acceptance criteria (AC-1 through AC-15), the full Heresy List audit, your security section, your saturation loop, and all push-down, parameterization, transaction, pooling, and N+1 fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `postgresql-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.4 (copilot)
@@ -330,6 +388,8 @@ handoffs:
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for PostgreSQL Expert and use the path listed there.
 
       Run a **complete independent PostgreSQL review** on that path using your full approach — all acceptance criteria (AC-1 through AC-15), the full Heresy List audit, your security section, your saturation loop, and all push-down, parameterization, transaction, pooling, and N+1 fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
+
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
       Save your findings to `postgresql-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
@@ -342,6 +402,8 @@ handoffs:
 
       Run a **complete independent specification audit** on that path using your full approach. Operate in **Review mode** across all four spec types — Design (DS-1 through DS-12), Functional (FS-1 through FS-12), Implementation (IS-1 through IS-12), and PR-Alignment (AC-1 through AC-13). Identify which spec types apply to the path (existing `docs/specs/**` files, top-level READMEs claiming behavior, in-repo design docs, recent PR descriptions for diffs touching the path), audit each against the matching criteria, and flag missing specs where the subject warrants one. You are not authoring new specs — you are running a fresh, thorough review and producing findings.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
@@ -352,6 +414,8 @@ handoffs:
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Spec Author and use the path listed there.
 
       Run a **complete independent specification audit** on that path using your full approach. Operate in **Review mode** across all four spec types — Design (DS-1 through DS-12), Functional (FS-1 through FS-12), Implementation (IS-1 through IS-12), and PR-Alignment (AC-1 through AC-13). Identify which spec types apply to the path (existing `docs/specs/**` files, top-level READMEs claiming behavior, in-repo design docs, recent PR descriptions for diffs touching the path), audit each against the matching criteria, and flag missing specs where the subject warrants one. You are not authoring new specs — you are running a fresh, thorough review and producing findings.
+
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
       Save your findings to `spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
@@ -364,6 +428,8 @@ handoffs:
 
       Run a **complete independent specification audit** on that path using your full approach. Operate in **Review mode** across all four spec types — Design (DS-1 through DS-12), Functional (FS-1 through FS-12), Implementation (IS-1 through IS-12), and PR-Alignment (AC-1 through AC-13). Identify which spec types apply to the path (existing `docs/specs/**` files, top-level READMEs claiming behavior, in-repo design docs, recent PR descriptions for diffs touching the path), audit each against the matching criteria, and flag missing specs where the subject warrants one. You are not authoring new specs — you are running a fresh, thorough review and producing findings.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
@@ -374,6 +440,8 @@ handoffs:
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for architecture-diagram-creator and use the path listed there.
 
       Run a **complete independent architecture-diagram audit** on that path using your full approach. Operate in **Review mode**: locate every `.drawio` file in or referenced from the path, and for each one walk AD-1 through AD-15 against the current source. For paths that contain non-trivial architecture (multiple modules, async/concurrency, external I/O, data transformations) but no `.drawio` documentation, file a Missing-Diagram finding naming which standard pages (System Context, Component Architecture, Primary Call Path, Data Transformations, Error/Timeout Paths) would apply. You are not authoring or refreshing diagrams — you are producing findings.
+
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
       Save your findings to `architecture-diagram-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
@@ -386,6 +454,8 @@ handoffs:
 
       Run a **complete independent architecture-diagram audit** on that path using your full approach. Operate in **Review mode**: locate every `.drawio` file in or referenced from the path, and for each one walk AD-1 through AD-15 against the current source. For paths that contain non-trivial architecture (multiple modules, async/concurrency, external I/O, data transformations) but no `.drawio` documentation, file a Missing-Diagram finding naming which standard pages (System Context, Component Architecture, Primary Call Path, Data Transformations, Error/Timeout Paths) would apply. You are not authoring or refreshing diagrams — you are producing findings.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `architecture-diagram-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.4 (copilot)
@@ -397,7 +467,48 @@ handoffs:
 
       Run a **complete independent architecture-diagram audit** on that path using your full approach. Operate in **Review mode**: locate every `.drawio` file in or referenced from the path, and for each one walk AD-1 through AD-15 against the current source. For paths that contain non-trivial architecture (multiple modules, async/concurrency, external I/O, data transformations) but no `.drawio` documentation, file a Missing-Diagram finding naming which standard pages (System Context, Component Architecture, Primary Call Path, Data Transformations, Error/Timeout Paths) would apply. You are not authoring or refreshing diagrams — you are producing findings.
 
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
+
       Save your findings to `architecture-diagram-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+    send: true
+    model: Gemini 3.1 Pro Preview (gemini)
+
+  - label: Logic & Correctness Expert — Claude Opus 4.7
+    agent: Logic & Correctness Expert
+    prompt: |
+      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Logic & Correctness Expert and use the path listed there.
+
+      Run a **complete independent logic and correctness review** on that path using your full approach — all 5 LC sections (LC.atomicity, LC.invariants, LC.check-then-act, LC.idempotency, LC.boundary), your saturation loop with all 4 hunter personas, and concrete failure scenarios for every finding. You are not fixing specific findings — you are running a fresh, thorough correctness review.
+
+      **Skip**: formatting, style, documentation, type annotations (unless they mask a logic bug). Focus exclusively on runtime correctness.
+
+      Save your findings to `logic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+    send: true
+    model: Claude Opus 4.7 (anthropic)
+
+  - label: Logic & Correctness Expert — GPT-5.4
+    agent: Logic & Correctness Expert
+    prompt: |
+      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Logic & Correctness Expert and use the path listed there.
+
+      Run a **complete independent logic and correctness review** on that path using your full approach — all 5 LC sections (LC.atomicity, LC.invariants, LC.check-then-act, LC.idempotency, LC.boundary), your saturation loop with all 4 hunter personas, and concrete failure scenarios for every finding. You are not fixing specific findings — you are running a fresh, thorough correctness review.
+
+      **Skip**: formatting, style, documentation, type annotations (unless they mask a logic bug). Focus exclusively on runtime correctness.
+
+      Save your findings to `logic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+    send: true
+    model: GPT-5.4 (copilot)
+
+  - label: Logic & Correctness Expert — Gemini 3.1 Pro Preview
+    agent: Logic & Correctness Expert
+    prompt: |
+      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Logic & Correctness Expert and use the path listed there.
+
+      Run a **complete independent logic and correctness review** on that path using your full approach — all 5 LC sections (LC.atomicity, LC.invariants, LC.check-then-act, LC.idempotency, LC.boundary), your saturation loop with all 4 hunter personas, and concrete failure scenarios for every finding. You are not fixing specific findings — you are running a fresh, thorough correctness review.
+
+      **Skip**: formatting, style, documentation, type annotations (unless they mask a logic bug). Focus exclusively on runtime correctness.
+
+      Save your findings to `logic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 ---
@@ -407,7 +518,7 @@ You are a **pure orchestrator**. You do not analyze code. You detect what is pre
 
 1. **Read-only** — never edit any code in the reviewed path or elsewhere.
 2. **Dispatch everything, all models** — for every row in the Dispatch Table whose trigger fires, launch that specialist with that model. Skipping any triggered row is a protocol violation. Self-analyzing any domain is a protocol violation.
-3. **No findings of your own** — your only output is the assembled report from specialist results. If you notice something while scanning, note it as an observation in the Dispatch Summary, not a finding.
+3. **No findings in specialist domains** — you do not file findings in any domain covered by a triggered specialist (Python idioms, types, docs, tests, etc.). However, if during scanning you observe a **logic correctness issue** (atomicity violation, state invariant break, TOCTOU race, non-atomic mutation, boundary error) that falls outside ALL triggered specialists' mandates, file it as an `[ORCH-<number>]` finding with full severity, location, and failure scenario. This is your safety net for cross-cutting logic bugs — use it when no specialist owns the domain. Limit: maximum 5 ORCH findings per review.
 4. **Save the report** — write to `code-review-<sanitized-path>-<YYYY-MM-DD>.md` in the current working directory (sanitize: replace `/` with `_`, strip leading dots). Return only the file path.
 5. **Quality gate** — before saving, verify every finding has an ID, Severity, and Location. Discard malformed findings and note them in the Dispatch Summary.
 
@@ -416,8 +527,23 @@ You are a **pure orchestrator**. You do not analyze code. You detect what is pre
 1. **Scan** — list all files under the target path. Note file extensions, import statements, and framework identifiers present.
 2. **Scope check** — if >50 source files or >10,000 LOC, stop and ask the user to confirm or narrow the path. Propose a focused subset.
 3. **Read standards** — read `.github/copilot-instructions.md`, `CLAUDE.md`, or equivalent coding standards if present. Pass any relevant conventions to specialist prompts.
-4. **Dispatch** — evaluate every row in the Dispatch Table. Launch all triggered rows concurrently — do not wait for one to finish before starting others.
-5. **Assemble** — collect all specialist results. Merge findings into the report template. Sort the Prioritized Summary by severity. Save. Return the path.
+4. **Static pre-analysis** — before dispatching specialists, run these deterministic checks and pass results as "Areas of Concern" context to the Logic & Correctness Expert:
+   - `uv run ruff check --select E711,E712,B006,B007,B008,B017,B023,B904` (logic pitfalls, mutable defaults, exception chaining)
+   - Identify all functions/methods containing loops that write to `self.*` attributes — flag as potential atomicity concerns
+   - Identify all functions with >1 conditional `raise` after a state mutation — flag as potential validate-after-mutate
+   - Count mutable instance attributes per class — classes with >5 are high-priority for invariant review
+   If `ruff` is not available, skip the tool check and rely on the manual identification steps only.
+5. **Dispatch** — evaluate every row in the Dispatch Table. Launch all triggered rows concurrently — do not wait for one to finish before starting others.
+6. **Assemble** — collect all specialist results and apply the deduplication pipeline:
+   a. **Exact dedup** — findings with identical file:line + identical issue description → keep one instance, annotate with "Confirmed by N/3 models" in the Confidence column.
+   b. **Semantic clustering** — findings about the same code location (within ±5 lines) with different wording → group under a single entry, note agreement count, use the most specific description.
+   c. **Consensus scoring** — assign a Confidence level to each deduplicated finding:
+      - 3/3 models independently found it → **High confidence** — escalate severity by one level (Medium→High, High→Critical) unless already Critical.
+      - 2/3 models found it → **Medium confidence** — keep original severity.
+      - 1/3 models found it → **Low confidence** — flag as "Single-model finding — verify manually" but do NOT suppress it.
+      - Model disagreement on severity → use the highest severity, note the range (e.g., "High [range: Medium–Critical]").
+   d. **Sort** the Prioritized Summary by: severity descending, then confidence descending, then specialist alphabetical.
+   e. Save. Return the path.
 
 ## Dispatch Table
 
@@ -464,6 +590,9 @@ To add a new specialist: add one row here per model variant (currently three: Cl
 | Any `.py` file present (audit existing `.drawio` files; flag missing diagrams when architecture warrants) | Architecture Diagram Creator | Claude Opus 4.7 (anthropic) |
 | Any `.py` file present (audit existing `.drawio` files; flag missing diagrams when architecture warrants) | Architecture Diagram Creator | GPT-5.4 (copilot) |
 | Any `.py` file present (audit existing `.drawio` files; flag missing diagrams when architecture warrants) | Architecture Diagram Creator | Gemini 3.1 Pro Preview (gemini) |
+| Any `.py` file present | Logic & Correctness Expert | Claude Opus 4.7 (anthropic) |
+| Any `.py` file present | Logic & Correctness Expert | GPT-5.4 (copilot) |
+| Any `.py` file present | Logic & Correctness Expert | Gemini 3.1 Pro Preview (gemini) |
 
 ## Severity Rubric
 
@@ -491,6 +620,25 @@ For **Concurrency**:
 > **Concurrency model**: one sentence
 > **Interleaving** (cross-await race only): name the two actors and the operation sequence
 
+### Finding ID Prefixes
+
+| Prefix | Specialist |
+|--------|-----------|
+| `PY` | Python Expert |
+| `DOC` | Docstring Expert |
+| `TA` | Type Annotation Expert |
+| `RM` | README Expert |
+| `UT` | Unit Test Expert |
+| `PD` | Pandas Expert |
+| `DD` | DuckDB Expert |
+| `BQ` | BigQuery Expert |
+| `PG` | PostgreSQL Expert |
+| `LG` | LangGraph Expert |
+| `SP` | Spec Author |
+| `AD` | Architecture Diagram Creator |
+| `LC` | Logic & Correctness Expert |
+| `ORCH` | Orchestrator safety-net findings |
+
 ## Output Format
 
 Save as `code-review-<sanitized-path>-<YYYY-MM-DD>.md`. Do not paste into chat — return only the path.
@@ -503,16 +651,21 @@ Save as `code-review-<sanitized-path>-<YYYY-MM-DD>.md`. Do not paste into chat �
 
 ## Dispatch Summary
 
-| Specialist | Model | Findings | Report path |
-|---|---|---|---|
-| Python Expert | Claude Opus 4.7 | N | `<path>` |
-| Python Expert | GPT-5.4 | N | `<path>` |
-| Python Expert | Gemini 3.1 Pro Preview | N | `<path>` |
-| Docstring Expert | Claude Opus 4.7 | N | `<path>` |
-| Docstring Expert | GPT-5.4 | N | `<path>` |
-| Docstring Expert | Gemini 3.1 Pro Preview | N | `<path>` |
-| ... | ... | ... | ... |
-| <Specialist> | <Model> | not triggered | — |
+| Specialist | Model | Raw Findings | After Dedup | Report path |
+|---|---|---|---|---|
+| Python Expert | Claude Opus 4.7 | N | — | `<path>` |
+| Python Expert | GPT-5.4 | N | — | `<path>` |
+| Python Expert | Gemini 3.1 Pro Preview | N | — | `<path>` |
+| Logic & Correctness Expert | Claude Opus 4.7 | N | — | `<path>` |
+| Logic & Correctness Expert | GPT-5.4 | N | — | `<path>` |
+| Logic & Correctness Expert | Gemini 3.1 Pro Preview | N | — | `<path>` |
+| Docstring Expert | Claude Opus 4.7 | N | — | `<path>` |
+| Docstring Expert | GPT-5.4 | N | — | `<path>` |
+| Docstring Expert | Gemini 3.1 Pro Preview | N | — | `<path>` |
+| ... | ... | ... | ... | ... |
+| <Specialist> | <Model> | not triggered | — | — |
+
+**Deduplication summary**: X raw findings → Y unique findings (Z confirmed by multiple models)
 
 ## Findings by Specialist
 
@@ -538,10 +691,14 @@ Save as `code-review-<sanitized-path>-<YYYY-MM-DD>.md`. Do not paste into chat �
 
 ## Prioritized Summary
 
-All findings from all specialists, sorted by severity:
+All findings from all specialists, deduplicated and sorted by severity then confidence:
 
-1. [ID] [Severity] [Specialist / Model] Location — Issue
-2. ...
+| # | ID | Severity | Confidence | Location | Issue | Source |
+|---|---|---|---|---|---|---|
+| 1 | [ID] | Critical/High/Medium/Low | High/Medium/Low | file:line — symbol | One-line description | Specialist — N/3 models |
+| 2 | ... | ... | ... | ... | ... | ... |
+
+Confidence key: **High** = 3/3 models agreed; **Medium** = 2/3 models; **Low** = 1/3 model only.
 ```
 
 

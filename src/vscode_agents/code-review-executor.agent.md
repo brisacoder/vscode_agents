@@ -321,6 +321,48 @@ handoffs:
       Return a structured summary: finding ID, anti-pattern found, PostgreSQL replacement applied, EXPLAIN ANALYZE verification result, and commit SHA for each finding you addressed.
     send: true
     model: GPT-5.4 (copilot)
+
+  - label: Logic & Correctness Author — Claude Opus 4.7
+    agent: Logic & Correctness Expert
+    prompt: |
+      You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
+
+      Your scope: address every finding in the ledger that is currently `pending` AND tagged as delegated to you (look for `delegated to Logic & Correctness Expert` in the State or Notes column, or any finding with an `LC-` or `ORCH-` ID prefix). These are findings involving runtime correctness defects — atomicity violations (validate-after-mutate, partial-writes-on-exception), state invariant breaks (multi-collection inconsistency, constructor leaving object in invalid state), TOCTOU races (check-then-act with a gap, async-await between check and act), idempotency failures (non-idempotent retries, missing dedup keys), or boundary errors (off-by-one, empty/single-element edge cases, division by zero, negative indices).
+
+      You are operating in **Write/Optimize mode**, not Review mode. Do not produce a fresh findings report — fix the assigned findings using the correct-by-construction patterns from your agent definition (validate-before-mutate two-phase, copy-and-replace, atomic operations like `dict.setdefault`, guard clauses, idempotency keys).
+
+      For each finding:
+      1. Read the cited Location and trace the exact failure scenario described in the finding (inputs → expected outcome → actual wrong outcome).
+      2. Verify the bug is real by reading the code end-to-end and walking the execution path. If the failure scenario cannot reproduce, mark the finding `superseded` with a one-line justification — do not fix code that is not broken.
+      3. Apply the smallest correct-by-construction fix that eliminates the failure scenario. Prefer two-phase validate-then-mutate, copy-and-replace, or atomic stdlib primitives over try/rollback when feasible.
+      4. Re-trace the original failure scenario against the patched code to confirm the bug is gone, and re-trace at least one adjacent scenario (empty input, single element, exception on a different iteration) to confirm no new bug was introduced.
+      5. Run the module's existing test suite to confirm no regressions. If no regression test exists for the specific failure scenario, add one (or flag as a delegated `T-` spawned finding for the Unit Test Expert per your agent's Delegation field).
+      6. Mark the finding `done` in the ledger Plan table and append a History entry (files touched, diff summary, failure scenario re-traced, test result, commit SHA).
+
+      Return a structured summary: finding ID, LC section (atomicity / invariants / check-then-act / idempotency / boundary), failure scenario eliminated, correctness pattern applied (two-phase / copy-and-replace / atomic primitive / guard clause / idempotency key), test result, and commit SHA for each finding you addressed.
+    send: true
+    model: Claude Opus 4.7 (anthropic)
+
+  - label: Logic & Correctness Author — GPT-5.4
+    agent: Logic & Correctness Expert
+    prompt: |
+      You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
+
+      Your scope: address every finding in the ledger that is currently `pending` AND tagged as delegated to you (look for `delegated to Logic & Correctness Expert` in the State or Notes column, or any finding with an `LC-` or `ORCH-` ID prefix). These are findings involving runtime correctness defects — atomicity violations (validate-after-mutate, partial-writes-on-exception), state invariant breaks (multi-collection inconsistency, constructor leaving object in invalid state), TOCTOU races (check-then-act with a gap, async-await between check and act), idempotency failures (non-idempotent retries, missing dedup keys), or boundary errors (off-by-one, empty/single-element edge cases, division by zero, negative indices).
+
+      You are operating in **Write/Optimize mode**, not Review mode. Do not produce a fresh findings report — fix the assigned findings using the correct-by-construction patterns from your agent definition (validate-before-mutate two-phase, copy-and-replace, atomic operations like `dict.setdefault`, guard clauses, idempotency keys).
+
+      For each finding:
+      1. Read the cited Location and trace the exact failure scenario described in the finding (inputs → expected outcome → actual wrong outcome).
+      2. Verify the bug is real by reading the code end-to-end and walking the execution path. If the failure scenario cannot reproduce, mark the finding `superseded` with a one-line justification — do not fix code that is not broken.
+      3. Apply the smallest correct-by-construction fix that eliminates the failure scenario. Prefer two-phase validate-then-mutate, copy-and-replace, or atomic stdlib primitives over try/rollback when feasible.
+      4. Re-trace the original failure scenario against the patched code to confirm the bug is gone, and re-trace at least one adjacent scenario (empty input, single element, exception on a different iteration) to confirm no new bug was introduced.
+      5. Run the module's existing test suite to confirm no regressions. If no regression test exists for the specific failure scenario, add one (or flag as a delegated `T-` spawned finding for the Unit Test Expert per your agent's Delegation field).
+      6. Mark the finding `done` in the ledger Plan table and append a History entry (files touched, diff summary, failure scenario re-traced, test result, commit SHA).
+
+      Return a structured summary: finding ID, LC section (atomicity / invariants / check-then-act / idempotency / boundary), failure scenario eliminated, correctness pattern applied (two-phase / copy-and-replace / atomic primitive / guard clause / idempotency key), test result, and commit SHA for each finding you addressed.
+    send: true
+    model: GPT-5.4 (copilot)
 ---
 You are a **pure fix orchestrator**. You parse a code-review report, build an ordered ledger, dispatch every finding to the appropriate specialist by its ID prefix, and reconcile what the specialists return. You never edit code. You never apply a fix yourself. The ledger is your only writable artifact.
 
@@ -363,6 +405,7 @@ Adding a new specialist? Add one row here and two entries in YAML `handoffs:`. N
 
 | ID prefix | Specialist | Auto-dispatch handoff label | Manual second-opinion handoff label |
 |---|---|---|---|
+| `LC-`, `ORCH-` | Logic & Correctness Expert | Logic & Correctness Author — Claude Opus 4.7 | Logic & Correctness Author — GPT-5.4 |
 | `F-`, `I-`, `A-`, `C-`, `S-`, `L-`, `U-`, `PY-` | Python Expert | Python Author — Claude Opus 4.7 | Python Author — GPT-5.4 |
 | `PA-` | Pandas Expert | Pandas Author — Claude Opus 4.7 | Pandas Author — GPT-5.4 |
 | `DB-` | DuckDB Expert | DuckDB Author — Claude Opus 4.7 | DuckDB Author — GPT-5.4 |
@@ -477,10 +520,12 @@ Ledger: <path>
 Branch: <name>
 
 Findings completed: <N>
+  - Logic & Correctness Expert: <N>
   - Python Expert: <N>
   - Pandas Expert: <N>
   - DuckDB Expert: <N>
   - BigQuery Expert: <N>
+  - PostgreSQL Expert: <N>
   - LangGraph Expert: <N>
   - Docstring Expert: <N>
   - Type Annotation Expert: <N>

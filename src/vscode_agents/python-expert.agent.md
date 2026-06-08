@@ -137,7 +137,7 @@ Section partition:
 
 Launch **six** hunter subagents in parallel. Each hunter has the full source and coverage matrix but does not see prior findings until its own draft is complete.
 
-- **The Pessimist** — failure paths, partial failures, retries, timeouts, error swallowing, resource cleanup, cancellation. Owns slice of F, C, L.
+- **The Pessimist** — failure paths, partial failures, retries, timeouts, error swallowing, resource cleanup, cancellation, validate-before-mutate violations, and non-atomic state transitions. For every loop that writes to shared/instance state, trace what happens if a later iteration raises — are earlier iterations' writes visible to the caller? For every multi-step mutation, trace the exception path — is the object left in a consistent state? Owns slice of F, C, L.
 - **The Adversary** — injection, prompt injection, auth bypass, IDOR, deserialization, secret leakage, SSRF, mass assignment, unbounded LLM tool exec. Owns S.
 - **The Scaler** — N+1 patterns, unbounded concurrency, blocking-in-async, GIL traps, memory growth, cache misses, hot loops. Owns P, slice of C.
 - **The Maintainer** — cross-file coupling, import-time side effects, contract drift between modules, config defaults that contradict usage, state mutation across requests. Owns L, slice of F, I.
@@ -166,7 +166,18 @@ After Phase C, count new findings. If zero, finalize. Otherwise begin next round
 - Tight coupling to a specific concrete dependency where an interface would do
 - Implicit ordering assumptions (dict iteration, set ordering, file glob order)
 - Unbounded growth (lists, caches, queues without eviction)
-- Time-of-check / time-of-use gaps
+- Time-of-check / time-of-use (TOCTOU) gaps:
+  - Dictionary `if key in d` followed by `d[key] = ...` without atomic operation (`setdefault`, lock, or single expression)
+  - File `if path.exists()` followed by `path.write_text()` without locking or atomic rename
+  - Any check → gap → act where the gap allows concurrent mutation or external state change
+- Validate-before-mutate violations:
+  - State modified in a loop before all items in the batch are validated — mid-loop exception leaves partial writes
+  - Exception raised after mutation — state already corrupted when caller catches the error
+  - Input parsed and stored before schema or constraint validation completes
+- Non-atomic multi-step mutations:
+  - Multiple dict/list/set updates that must all succeed together but have no rollback or copy-and-replace
+  - Related data structures (e.g., a store and its index) updated sequentially with no atomicity guarantee
+  - Loop that writes to `self.*` on each iteration — if iteration N raises, iterations 1 through N-1 are already committed
 - External boundary calls without timeouts
 - Retry logic without backoff or jitter
 - Sentinel values (`-1`, `None`, `""`) where a sum type would be safer

@@ -444,6 +444,7 @@ Scope: modernizing *syntax* of existing type annotations. Adding missing annotat
 - Manual `if a > b: result = a else: result = b` where `result = max(a, b)` or `max(a, b, key=...)` would do
 - Manual boolean fold `ok = True; for x in items: if not pred(x): ok = False` where `all(pred(x) for x in items)` would do
 - Manual `any()` / `all()` emulation with an early-return loop
+- `repr(callable_obj)` used as a stable identifier or display name for a callable — `repr()` includes the memory address for most callables (`<function foo at 0x7f...>`), making the result non-deterministic across runs, unsuitable for audit logs, traces, task names, or any identifier that must be reproducible. **Stable priority chain:** (1) `getattr(obj, "__name__", None)` for named functions and methods; (2) `getattr(getattr(obj, "func", None), "__name__", None)` for `functools.partial`-like wrappers; (3) `f"{obj.__class__.__module__}.{obj.__class__.__qualname__}"` as a fully-qualified class name for callable instances with no `__name__`. Flag any `repr(x)` where `x` is typed or inferred as a callable and the result is stored, logged, or used as a key [3.12+]
 
 #### Available in Python 3.14 (`[3.14+]`)
 - `NotImplemented` used in a boolean context (e.g., `if obj.__eq__(other) is NotImplemented:`) — raises `TypeError` from 3.14; use `is NotImplemented` in the return position, never evaluate it as a bool [3.14+]

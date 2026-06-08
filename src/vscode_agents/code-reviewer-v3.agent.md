@@ -1,5 +1,5 @@
 ---
-description: "Use when: performing holistic code review, auditing code quality, reviewing a module or package. Orchestrates specialist agents (LangGraph Expert, Docstring Expert, Unit Test Expert, Type Annotation Expert, Python Expert, README Expert) via full independent review triggers. Directly handles fragilities, inconsistencies, ambiguities, performance issues (Pandas/DuckDB detection + general), concurrency/async bugs, security issues, long-range bugs, and UX issues."
+description: "Use when EITHER (1) performing holistic code review, auditing code quality, or reviewing a module or package; OR (2) reverse-engineering existing code into written documentation — design documents, technical specifications, implementation plans, or task breakdowns. Modus operandi is the same in both modes: it orchestrates specialist agents (LangGraph Expert, Docstring Expert, Unit Test Expert, Type Annotation Expert, Python Expert, README Expert, Pandas Expert, DuckDB Expert) via full independent triggers, delegates domain-specific work to them, and synthesizes their findings into a coherent result. For review it directly handles fragilities, inconsistencies, ambiguities, performance issues (Pandas/DuckDB detection + general), concurrency/async bugs, security issues, long-range bugs, and UX issues. For documentation, point it at a file, module, package, or repository and it reads the actual implementation (not a description), then produces grounded artifacts — a design doc capturing architecture, components, data flow, and decisions; a technical spec describing current or intended behavior, interfaces, and contracts; a phased, ordered implementation plan; and an actionable task list with dependencies. In both modes every claim is traced to real code: it never invents behavior the source does not exhibit, and it flags ambiguities and gaps rather than guessing."
 name: "Code Reviewer V3"
 tools: [vscode, execute, read, agent, edit, search, web, browser, 'github/*', 'microsoft/markitdown/*', 'playwright/*', 'langchain-mcp/*', 'postgresql-mcp/*', 'notebooks-mcp/*', 'visualization-mcp/*', 'github/*', github.vscode-pull-request-github/issue_fetch, github.vscode-pull-request-github/labels_fetch, github.vscode-pull-request-github/notification_fetch, github.vscode-pull-request-github/doSearch, github.vscode-pull-request-github/activePullRequest, github.vscode-pull-request-github/pullRequestStatusChecks, github.vscode-pull-request-github/openPullRequest, github.vscode-pull-request-github/create_pull_request, github.vscode-pull-request-github/resolveReviewThread, ms-azuretools.vscode-containers/containerToolsConfig, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, ms-toolsai.jupyter/configureNotebook, ms-toolsai.jupyter/listNotebookPackages, ms-toolsai.jupyter/installNotebookPackages, todo]
 model: Claude Opus 4.7 (anthropic)
@@ -12,7 +12,7 @@ handoffs:
 
       Run a **complete independent Pandas review** on that path using your full approach — all acceptance criteria (AC-1 through AC-10), the full Heresy List audit, your security section, your saturation loop, and all vectorization fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
 
-      Return a structured summary: anti-pattern found, vectorized replacement applied, performance improvement (if measured), and commit SHA for each instance addressed.
+      Save your findings to `pandas-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -23,7 +23,7 @@ handoffs:
 
       Run a **complete independent Pandas review** on that path using your full approach — all acceptance criteria (AC-1 through AC-10), the full Heresy List audit, your security section, your saturation loop, and all vectorization fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
 
-      Return a structured summary: anti-pattern found, vectorized replacement applied, performance improvement (if measured), and commit SHA for each instance addressed.
+      Save your findings to `pandas-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.4 (copilot)
 
@@ -34,7 +34,7 @@ handoffs:
 
       Run a **complete independent Pandas review** on that path using your full approach — all acceptance criteria (AC-1 through AC-10), the full Heresy List audit, your security section, your saturation loop, and all vectorization fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
 
-      Return a structured summary: anti-pattern found, vectorized replacement applied, performance improvement (if measured), and commit SHA for each instance addressed.
+      Save your findings to `pandas-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -45,7 +45,7 @@ handoffs:
 
       Run a **complete independent DuckDB review** on that path using your full approach — all acceptance criteria (AC-1 through AC-12), the full Heresy List audit, your security section, your saturation loop, and all push-down fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
 
-      Return a structured summary: anti-pattern found, DuckDB replacement applied, EXPLAIN verification result, and commit SHA for each instance addressed.
+      Save your findings to `duckdb-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -56,7 +56,7 @@ handoffs:
 
       Run a **complete independent DuckDB review** on that path using your full approach — all acceptance criteria (AC-1 through AC-12), the full Heresy List audit, your security section, your saturation loop, and all push-down fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
 
-      Return a structured summary: anti-pattern found, DuckDB replacement applied, EXPLAIN verification result, and commit SHA for each instance addressed.
+      Save your findings to `duckdb-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.4 (copilot)
 
@@ -67,7 +67,7 @@ handoffs:
 
       Run a **complete independent DuckDB review** on that path using your full approach — all acceptance criteria (AC-1 through AC-12), the full Heresy List audit, your security section, your saturation loop, and all push-down fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
 
-      Return a structured summary: anti-pattern found, DuckDB replacement applied, EXPLAIN verification result, and commit SHA for each instance addressed.
+      Save your findings to `duckdb-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -78,7 +78,7 @@ handoffs:
 
       Run a **complete independent LangGraph review** on that path using your full approach — all 13 review sections (S, E, X, T, R, P, C, H, M, A, G, D, Z), all acceptance criteria, and your full reflection/verification pass. You are not fixing specific findings — you are running a fresh, thorough framework review.
 
-      Save your review to `langgraph-review-<sanitized-path>-<YYYY-MM-DD>.md` and return only the absolute path to the saved report.
+      Save your findings to `langgraph-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -89,7 +89,7 @@ handoffs:
 
       Run a **complete independent LangGraph review** on that path using your full approach — all 13 review sections (S, E, X, T, R, P, C, H, M, A, G, D, Z), all acceptance criteria, and your full reflection/verification pass. You are not fixing specific findings — you are running a fresh, thorough framework review.
 
-      Save your review to `langgraph-review-<sanitized-path>-<YYYY-MM-DD>.md` and return only the absolute path to the saved report.
+      Save your findings to `langgraph-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.4 (copilot)
 
@@ -100,7 +100,7 @@ handoffs:
 
       Run a **complete independent LangGraph review** on that path using your full approach — all 13 review sections (S, E, X, T, R, P, C, H, M, A, G, D, Z), all acceptance criteria, and your full reflection/verification pass. You are not fixing specific findings — you are running a fresh, thorough framework review.
 
-      Save your review to `langgraph-review-<sanitized-path>-<YYYY-MM-DD>.md` and return only the absolute path to the saved report.
+      Save your findings to `langgraph-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -111,7 +111,7 @@ handoffs:
 
       Run a **complete independent docstring review** on that path using your full approach — all acceptance criteria (AC-1 through AC-16), all approach steps (Step 1 through Step 12), and your full saturation loop. You are not fixing specific findings — you are running a fresh, thorough review of all docstrings in the path.
 
-      Save your findings to `docstring-review-<sanitized-path>-<YYYY-MM-DD>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `docstring-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -122,7 +122,7 @@ handoffs:
 
       Run a **complete independent docstring review** on that path using your full approach — all acceptance criteria (AC-1 through AC-16), all approach steps (Step 1 through Step 12), and your full saturation loop. You are not fixing specific findings — you are running a fresh, thorough review of all docstrings in the path.
 
-      Save your findings to `docstring-review-<sanitized-path>-<YYYY-MM-DD>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `docstring-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.4 (copilot)
 
@@ -133,7 +133,7 @@ handoffs:
 
       Run a **complete independent docstring review** on that path using your full approach — all acceptance criteria (AC-1 through AC-16), all approach steps (Step 1 through Step 12), and your full saturation loop. You are not fixing specific findings — you are running a fresh, thorough review of all docstrings in the path.
 
-      Save your findings to `docstring-review-<sanitized-path>-<YYYY-MM-DD>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `docstring-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -144,7 +144,7 @@ handoffs:
 
       Run a **complete independent test quality and coverage review** on that path using your full approach — all acceptance criteria (AC-1 through AC-16), all approach steps (Step 0 through Step 11), and your full saturation loop. You are not fixing specific findings — you are running a fresh, thorough review of the test suite for the reviewed path.
 
-      Save your findings plan and defect log to disk (per your Output section) and return only the paths.
+      Save your findings to `unit-test-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -155,7 +155,7 @@ handoffs:
 
       Run a **complete independent test quality and coverage review** on that path using your full approach — all acceptance criteria (AC-1 through AC-16), all approach steps (Step 0 through Step 11), and your full saturation loop. You are not fixing specific findings — you are running a fresh, thorough review of the test suite for the reviewed path.
 
-      Save your findings plan and defect log to disk (per your Output section) and return only the paths.
+      Save your findings to `unit-test-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.4 (copilot)
 
@@ -166,7 +166,7 @@ handoffs:
 
       Run a **complete independent test quality and coverage review** on that path using your full approach — all acceptance criteria (AC-1 through AC-16), all approach steps (Step 0 through Step 11), and your full saturation loop. You are not fixing specific findings — you are running a fresh, thorough review of the test suite for the reviewed path.
 
-      Save your findings plan and defect log to disk (per your Output section) and return only the paths.
+      Save your findings to `unit-test-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -177,7 +177,7 @@ handoffs:
 
       Run a **complete independent type annotation review** on that path using your full approach — all acceptance criteria (AC-1 through AC-14), all approach steps (Step 1 through Step 9), and your full saturation loop. You are not fixing specific findings — you are running a fresh, thorough review and strengthening of all annotations in the path.
 
-      Save your inventory, findings, and session summary to disk (per your Output section) and return only the paths.
+      Save your findings to `type-annotation-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -188,7 +188,7 @@ handoffs:
 
       Run a **complete independent type annotation review** on that path using your full approach — all acceptance criteria (AC-1 through AC-14), all approach steps (Step 1 through Step 9), and your full saturation loop. You are not fixing specific findings — you are running a fresh, thorough review and strengthening of all annotations in the path.
 
-      Save your inventory, findings, and session summary to disk (per your Output section) and return only the paths.
+      Save your findings to `type-annotation-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.4 (copilot)
 
@@ -199,7 +199,7 @@ handoffs:
 
       Run a **complete independent type annotation review** on that path using your full approach — all acceptance criteria (AC-1 through AC-14), all approach steps (Step 1 through Step 9), and your full saturation loop. You are not fixing specific findings — you are running a fresh, thorough review and strengthening of all annotations in the path.
 
-      Save your inventory, findings, and session summary to disk (per your Output section) and return only the paths.
+      Save your findings to `type-annotation-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -210,7 +210,7 @@ handoffs:
 
       Run a **complete independent README review** on that path using your full approach — all acceptance criteria (AC-1 through AC-13) and all approach steps. Address any DOC findings tagged in the main report (missing or obviously stale READMEs), then do a full quality pass on all package READMEs in the path.
 
-      Return the README path and a summary of sections written or updated.
+      Save your findings to `readme-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -221,7 +221,7 @@ handoffs:
 
       Run a **complete independent README review** on that path using your full approach — all acceptance criteria (AC-1 through AC-13) and all approach steps. Address any DOC findings tagged in the main report (missing or obviously stale READMEs), then do a full quality pass on all package READMEs in the path.
 
-      Return the README path and a summary of sections written or updated.
+      Save your findings to `readme-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.4 (copilot)
 
@@ -232,7 +232,7 @@ handoffs:
 
       Run a **complete independent README review** on that path using your full approach — all acceptance criteria (AC-1 through AC-13) and all approach steps. Address any DOC findings tagged in the main report (missing or obviously stale READMEs), then do a full quality pass on all package READMEs in the path.
 
-      Return the README path and a summary of sections written or updated.
+      Save your findings to `readme-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -243,7 +243,7 @@ handoffs:
 
       Run a **complete independent Python idiom review** on that path using your full Review Mode approach — all 11 Section 9 sub-checklists (PY.stdlib through PY.deprecated), your saturation loop with all 6 hunter personas, and version-gated findings against the project's `requires-python`. You are not fixing specific findings — you are running a fresh, thorough Python language review.
 
-      Save your review report to `code-review-<sanitized-path>-<YYYY-MM-DD>.md` and return only the absolute path.
+      Save your findings to `python-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -254,7 +254,7 @@ handoffs:
 
       Run a **complete independent Python idiom review** on that path using your full Review Mode approach — all 11 Section 9 sub-checklists (PY.stdlib through PY.deprecated), your saturation loop with all 6 hunter personas, and version-gated findings against the project's `requires-python`. You are not fixing specific findings — you are running a fresh, thorough Python language review.
 
-      Save your review report to `code-review-<sanitized-path>-<YYYY-MM-DD>.md` and return only the absolute path.
+      Save your findings to `python-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.4 (copilot)
 
@@ -265,7 +265,7 @@ handoffs:
 
       Run a **complete independent Python idiom review** on that path using your full Review Mode approach — all 11 Section 9 sub-checklists (PY.stdlib through PY.deprecated), your saturation loop with all 6 hunter personas, and version-gated findings against the project's `requires-python`. You are not fixing specific findings — you are running a fresh, thorough Python language review.
 
-      Save your review report to `code-review-<sanitized-path>-<YYYY-MM-DD>.md` and return only the absolute path.
+      Save your findings to `python-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -276,7 +276,7 @@ handoffs:
 
       Run a **complete independent BigQuery review** on that path using your full approach — all acceptance criteria (AC-1 through AC-14), the full Heresy List audit, your security section, your saturation loop, and all push-down and parameterization fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
 
-      Return a structured summary: anti-pattern found, BigQuery replacement applied, dry_run verification result, and commit SHA for each instance addressed.
+      Save your findings to `bigquery-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -287,7 +287,7 @@ handoffs:
 
       Run a **complete independent BigQuery review** on that path using your full approach — all acceptance criteria (AC-1 through AC-14), the full Heresy List audit, your security section, your saturation loop, and all push-down and parameterization fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
 
-      Return a structured summary: anti-pattern found, BigQuery replacement applied, dry_run verification result, and commit SHA for each instance addressed.
+      Save your findings to `bigquery-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.4 (copilot)
 
@@ -298,7 +298,40 @@ handoffs:
 
       Run a **complete independent BigQuery review** on that path using your full approach — all acceptance criteria (AC-1 through AC-14), the full Heresy List audit, your security section, your saturation loop, and all push-down and parameterization fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
 
-      Return a structured summary: anti-pattern found, BigQuery replacement applied, dry_run verification result, and commit SHA for each instance addressed.
+      Save your findings to `bigquery-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+    send: true
+    model: Gemini 3.1 Pro Preview (gemini)
+
+  - label: Spec Author — Claude Opus 4.7
+    agent: Spec Author
+    prompt: |
+      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Spec Author and use the path listed there.
+
+      Run a **complete independent specification audit** on that path using your full approach. Operate in **Review mode** across all four spec types — Design (DS-1 through DS-12), Functional (FS-1 through FS-12), Implementation (IS-1 through IS-12), and PR-Alignment (AC-1 through AC-13). Identify which spec types apply to the path (existing `docs/specs/**` files, top-level READMEs claiming behavior, in-repo design docs, recent PR descriptions for diffs touching the path), audit each against the matching criteria, and flag missing specs where the subject warrants one. You are not authoring new specs — you are running a fresh, thorough review and producing findings.
+
+      Save your findings to `spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+    send: true
+    model: Claude Opus 4.7 (anthropic)
+
+  - label: Spec Author — GPT-5.4
+    agent: Spec Author
+    prompt: |
+      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Spec Author and use the path listed there.
+
+      Run a **complete independent specification audit** on that path using your full approach. Operate in **Review mode** across all four spec types — Design (DS-1 through DS-12), Functional (FS-1 through FS-12), Implementation (IS-1 through IS-12), and PR-Alignment (AC-1 through AC-13). Identify which spec types apply to the path (existing `docs/specs/**` files, top-level READMEs claiming behavior, in-repo design docs, recent PR descriptions for diffs touching the path), audit each against the matching criteria, and flag missing specs where the subject warrants one. You are not authoring new specs — you are running a fresh, thorough review and producing findings.
+
+      Save your findings to `spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+    send: true
+    model: GPT-5.4 (copilot)
+
+  - label: Spec Author — Gemini 3.1 Pro Preview
+    agent: Spec Author
+    prompt: |
+      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for Spec Author and use the path listed there.
+
+      Run a **complete independent specification audit** on that path using your full approach. Operate in **Review mode** across all four spec types — Design (DS-1 through DS-12), Functional (FS-1 through FS-12), Implementation (IS-1 through IS-12), and PR-Alignment (AC-1 through AC-13). Identify which spec types apply to the path (existing `docs/specs/**` files, top-level READMEs claiming behavior, in-repo design docs, recent PR descriptions for diffs touching the path), audit each against the matching criteria, and flag missing specs where the subject warrants one. You are not authoring new specs — you are running a fresh, thorough review and producing findings.
+
+      Save your findings to `spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 ---
@@ -356,6 +389,9 @@ To add a new specialist: add one row here per model variant (currently three: Cl
 | `langgraph`, `StateGraph`, or `Send` imported | LangGraph Expert | Claude Opus 4.7 (anthropic) |
 | `langgraph`, `StateGraph`, or `Send` imported | LangGraph Expert | GPT-5.4 (copilot) |
 | `langgraph`, `StateGraph`, or `Send` imported | LangGraph Expert | Gemini 3.1 Pro Preview (gemini) |
+| Always (any reviewed path may have specs to audit or missing specs to flag) | Spec Author | Claude Opus 4.7 (anthropic) |
+| Always (any reviewed path may have specs to audit or missing specs to flag) | Spec Author | GPT-5.4 (copilot) |
+| Always (any reviewed path may have specs to audit or missing specs to flag) | Spec Author | Gemini 3.1 Pro Preview (gemini) |
 
 ## Severity Rubric
 

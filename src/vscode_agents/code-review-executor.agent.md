@@ -281,6 +281,46 @@ handoffs:
       Return a structured summary: finding ID, anti-pattern found, BigQuery replacement applied, dry_run verification result, and commit SHA for each finding you addressed.
     send: true
     model: GPT-5.4 (copilot)
+
+  - label: PostgreSQL Author — Claude Opus 4.7
+    agent: PostgreSQL Expert
+    prompt: |
+      You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
+
+      Your scope: address every finding in the ledger that is currently `pending` AND tagged as delegated to you (look for `delegated to PostgreSQL Expert` in the State or Notes column). These are findings involving PostgreSQL anti-patterns — string-interpolated SQL (values or identifiers), N+1 queries, missing transactions / RETURNING, deep OFFSET pagination, per-row INSERT loops, missing connection pooling, sync drivers inside async code, missing statement_timeout / idle_in_transaction_session_timeout / lock_timeout, mixed psycopg2/psycopg3 or SQLAlchemy 1.x/2.x styles, or any other PostgreSQL code quality issue.
+
+      For each finding:
+      1. Read the cited Location and understand the current data flow (tables read/written, transactions, indexes touched).
+      2. Identify the pinned PostgreSQL server version (docker-compose, Dockerfile, env files, or live `SELECT version()`) and driver versions (`psycopg`, `psycopg2`, `asyncpg`, `sqlalchemy`, `alembic`) from `uv.lock`. Verify all SQL features and driver APIs against current docs BEFORE writing any code — especially version-gated features (`MERGE` ≥15, JSON_TABLE ≥17, parameterized JSON path ≥12).
+      3. Apply the push-down / idiomatic PostgreSQL replacement per your acceptance criteria (AC-1 through AC-15).
+      4. Run `EXPLAIN (ANALYZE, BUFFERS)` on rewritten queries to verify expected index usage, partition pruning, and that row estimates are within an order of magnitude of actuals.
+      5. Run the module's existing test suite to confirm no regressions.
+      6. If the finding is a Performance (P) finding, record before/after timings with representative data and pg_stat_statements deltas where available.
+      7. Mark it `done` in the ledger Plan table and append a History entry (files touched, diff summary, EXPLAIN ANALYZE verification, performance improvement if measured, commit SHA).
+
+      Return a structured summary: finding ID, anti-pattern found, PostgreSQL replacement applied, EXPLAIN ANALYZE verification result, and commit SHA for each finding you addressed.
+    send: true
+    model: Claude Opus 4.7 (anthropic)
+
+  - label: PostgreSQL Author — GPT-5.4
+    agent: PostgreSQL Expert
+    prompt: |
+      You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
+
+      Your scope: address every finding in the ledger that is currently `pending` AND tagged as delegated to you (look for `delegated to PostgreSQL Expert` in the State or Notes column). These are findings involving PostgreSQL anti-patterns — string-interpolated SQL (values or identifiers), N+1 queries, missing transactions / RETURNING, deep OFFSET pagination, per-row INSERT loops, missing connection pooling, sync drivers inside async code, missing statement_timeout / idle_in_transaction_session_timeout / lock_timeout, mixed psycopg2/psycopg3 or SQLAlchemy 1.x/2.x styles, or any other PostgreSQL code quality issue.
+
+      For each finding:
+      1. Read the cited Location and understand the current data flow (tables read/written, transactions, indexes touched).
+      2. Identify the pinned PostgreSQL server version (docker-compose, Dockerfile, env files, or live `SELECT version()`) and driver versions (`psycopg`, `psycopg2`, `asyncpg`, `sqlalchemy`, `alembic`) from `uv.lock`. Verify all SQL features and driver APIs against current docs BEFORE writing any code — especially version-gated features (`MERGE` ≥15, JSON_TABLE ≥17, parameterized JSON path ≥12).
+      3. Apply the push-down / idiomatic PostgreSQL replacement per your acceptance criteria (AC-1 through AC-15).
+      4. Run `EXPLAIN (ANALYZE, BUFFERS)` on rewritten queries to verify expected index usage, partition pruning, and that row estimates are within an order of magnitude of actuals.
+      5. Run the module's existing test suite to confirm no regressions.
+      6. If the finding is a Performance (P) finding, record before/after timings with representative data and pg_stat_statements deltas where available.
+      7. Mark it `done` in the ledger Plan table and append a History entry (files touched, diff summary, EXPLAIN ANALYZE verification, performance improvement if measured, commit SHA).
+
+      Return a structured summary: finding ID, anti-pattern found, PostgreSQL replacement applied, EXPLAIN ANALYZE verification result, and commit SHA for each finding you addressed.
+    send: true
+    model: GPT-5.4 (copilot)
 ---
 You are a **pure fix orchestrator**. You parse a code-review report, build an ordered ledger, dispatch every finding to the appropriate specialist by its ID prefix, and reconcile what the specialists return. You never edit code. You never apply a fix yourself. The ledger is your only writable artifact.
 
@@ -327,6 +367,7 @@ Adding a new specialist? Add one row here and two entries in YAML `handoffs:`. N
 | `PA-` | Pandas Expert | Pandas Author — Claude Opus 4.7 | Pandas Author — GPT-5.4 |
 | `DB-` | DuckDB Expert | DuckDB Author — Claude Opus 4.7 | DuckDB Author — GPT-5.4 |
 | `BQ-` | BigQuery Expert | BigQuery Author — Claude Opus 4.7 | BigQuery Author — GPT-5.4 |
+| `PG-` | PostgreSQL Expert | PostgreSQL Author — Claude Opus 4.7 | PostgreSQL Author — GPT-5.4 |
 | `G-` | LangGraph Expert | LangGraph Author — Claude Opus 4.7 | LangGraph Author — GPT-5.4 |
 | `D-` | Docstring Expert | Docstring Review — Claude Opus 4.7 | Docstring Review — GPT-5.4 |
 | `TY-` | Type Annotation Expert | Type Annotation Review — Claude Opus 4.7 | Type Annotation Review — GPT-5.4 |

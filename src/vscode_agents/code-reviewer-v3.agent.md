@@ -302,6 +302,39 @@ handoffs:
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
+  - label: PostgreSQL Expert — Claude Opus 4.7
+    agent: PostgreSQL Expert
+    prompt: |
+      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for PostgreSQL Expert and use the path listed there.
+
+      Run a **complete independent PostgreSQL review** on that path using your full approach — all acceptance criteria (AC-1 through AC-15), the full Heresy List audit, your security section, your saturation loop, and all push-down, parameterization, transaction, pooling, and N+1 fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
+
+      Save your findings to `postgresql-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+    send: true
+    model: Claude Opus 4.7 (anthropic)
+
+  - label: PostgreSQL Expert — GPT-5.4
+    agent: PostgreSQL Expert
+    prompt: |
+      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for PostgreSQL Expert and use the path listed there.
+
+      Run a **complete independent PostgreSQL review** on that path using your full approach — all acceptance criteria (AC-1 through AC-15), the full Heresy List audit, your security section, your saturation loop, and all push-down, parameterization, transaction, pooling, and N+1 fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
+
+      Save your findings to `postgresql-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+    send: true
+    model: GPT-5.4 (copilot)
+
+  - label: PostgreSQL Expert — Gemini 3.1 Pro Preview
+    agent: PostgreSQL Expert
+    prompt: |
+      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report — it contains a `## Specialist Review Triggers` section at the end. Find the entry for PostgreSQL Expert and use the path listed there.
+
+      Run a **complete independent PostgreSQL review** on that path using your full approach — all acceptance criteria (AC-1 through AC-15), the full Heresy List audit, your security section, your saturation loop, and all push-down, parameterization, transaction, pooling, and N+1 fixes. You are not fixing a specific list of findings — you are running a fresh, thorough review and applying all fixes.
+
+      Save your findings to `postgresql-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+    send: true
+    model: Gemini 3.1 Pro Preview (gemini)
+
   - label: Spec Author — Claude Opus 4.7
     agent: Spec Author
     prompt: |
@@ -419,6 +452,9 @@ To add a new specialist: add one row here per model variant (currently three: Cl
 | `google.cloud.bigquery` or `bigquery` imported | BigQuery Expert | Claude Opus 4.7 (anthropic) |
 | `google.cloud.bigquery` or `bigquery` imported | BigQuery Expert | GPT-5.4 (copilot) |
 | `google.cloud.bigquery` or `bigquery` imported | BigQuery Expert | Gemini 3.1 Pro Preview (gemini) |
+| `psycopg`, `psycopg2`, `asyncpg`, `sqlalchemy` imported, or `postgresql://` / `postgres://` DSN present, or `.sql` files referencing PostgreSQL-specific syntax (`ON CONFLICT`, `RETURNING`, `jsonb`, `LATERAL`, `DISTINCT ON`) | PostgreSQL Expert | Claude Opus 4.7 (anthropic) |
+| `psycopg`, `psycopg2`, `asyncpg`, `sqlalchemy` imported, or `postgresql://` / `postgres://` DSN present, or `.sql` files referencing PostgreSQL-specific syntax (`ON CONFLICT`, `RETURNING`, `jsonb`, `LATERAL`, `DISTINCT ON`) | PostgreSQL Expert | GPT-5.4 (copilot) |
+| `psycopg`, `psycopg2`, `asyncpg`, `sqlalchemy` imported, or `postgresql://` / `postgres://` DSN present, or `.sql` files referencing PostgreSQL-specific syntax (`ON CONFLICT`, `RETURNING`, `jsonb`, `LATERAL`, `DISTINCT ON`) | PostgreSQL Expert | Gemini 3.1 Pro Preview (gemini) |
 | `langgraph`, `StateGraph`, or `Send` imported | LangGraph Expert | Claude Opus 4.7 (anthropic) |
 | `langgraph`, `StateGraph`, or `Send` imported | LangGraph Expert | GPT-5.4 (copilot) |
 | `langgraph`, `StateGraph`, or `Send` imported | LangGraph Expert | Gemini 3.1 Pro Preview (gemini) |

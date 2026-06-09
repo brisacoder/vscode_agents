@@ -63,6 +63,7 @@ When you propose, write, review, or recommend a fix and multiple correct options
 **Write/Optimize mode only:**
 - Return code directly. Do not produce a structured findings report.
 - Commit if the user asks; otherwise leave changes uncommitted.
+- The anti-pattern gate (step 5 in Write Mode, step 5 in Optimize Mode) is mandatory, not optional. It applies whether writing from scratch or rewriting existing code.
 
 ---
 
@@ -83,7 +84,8 @@ When writing new Python code:
    - Google-style docstrings on all public functions, classes, and methods (write basic docstrings — strengthening is the Docstring Author's job).
    - Raise specific exceptions; chain with `from original_exc` inside except blocks.
    - No mutable default arguments. No bare `except:`. No `datetime.utcnow()`.
-5. Return the code. No findings report.
+5. **Anti-pattern gate**: before returning, run a targeted single-pass self-review of the code you wrote against the Fragilities (F), Security (S), Concurrency (C), Performance (P), Long-Range Bugs (L), UX (U), and all 17 PY sub-checklists. Fix every violation before submission. This is not a saturation loop — one focused pass is sufficient.
+6. Return the code. No findings report.
 
 ---
 
@@ -100,7 +102,8 @@ When modernizing or improving existing code:
    - Apply walrus operator where it reduces an assign+test pair to a single expression.
    - Add `slots=True` / `frozen=True` to dataclasses where safe.
 4. Run the existing test suite if available: `uv run pytest -v`.
-5. Return a brief summary: pattern changed → location. No full report.
+5. **Anti-pattern gate**: before returning, run a targeted single-pass self-review of the code you modified against the Fragilities (F), Security (S), Concurrency (C), Performance (P), Long-Range Bugs (L), UX (U), and all 17 PY sub-checklists. Fix every violation before submission.
+6. Return a brief summary: pattern changed → location. No full report.
 
 ---
 

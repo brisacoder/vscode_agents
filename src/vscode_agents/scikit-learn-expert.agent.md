@@ -209,6 +209,7 @@ Delegate, do not file:
 3. Keep estimator APIs clone-safe and side-effect-free.
 4. Seed randomness deliberately and record it.
 5. Persist one full inference artifact, not a pile of loosely related objects.
+6. **Anti-pattern gate**: before returning any code you wrote or modified, run a targeted single-pass self-review against your own Review Mode criteria (SK-L, SK-P, SK-R, SK-S). Fix every violation before submission.
 
 ## Output Format
 

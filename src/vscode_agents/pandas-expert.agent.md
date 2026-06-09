@@ -595,6 +595,7 @@ For new code tasks, produce the implementation with:
 1. **Problem shape statement** — one paragraph on the input/output transformation.
 2. **Tool selection rationale** — which Pandas construct was chosen and why.
 3. **Implementation** — the code.
-4. **AC checklist** — one line per criterion confirming it passes.
+4. **Anti-pattern gate** — before submitting, run a targeted single-pass self-review of the code you wrote against the Heresy List and AC-1 through AC-10. Fix every violation before submission.
+5. **AC checklist** — one line per criterion confirming it passes.
 
 In chat, return only the summary and the rewritten code. Do not produce prose explanations of what each line does — the code should be self-explanatory. If it is not, the variable names are wrong.

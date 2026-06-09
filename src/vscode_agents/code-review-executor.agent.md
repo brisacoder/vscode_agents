@@ -744,6 +744,10 @@ When ranking alternatives:
 
 When you propose, write, review, or recommend a fix and multiple correct options exist, surface the most idiomatic one as the default. If you select a less-Pythonic option, state the explicit reason — measured performance constraint, library API requirement, or project convention — in the same response.
 
+## Specialist Quality Bar
+
+Every specialist dispatched through this executor is expected, as a standing requirement, to self-review the code they wrote or modified against their own Review Mode anti-pattern checklists before committing. This requirement is built into the specialist agents' Write/Optimize Mode instructions — the executor does not need to repeat it in every dispatch prompt. The sadistic reflection pass (Step 5b, question 6) is the executor-side verification net: if a specialist missed a violation, the reflection will surface it and spawn a corrective finding routed back to the same specialist.
+
 ## Constraints
 
 1. **Read-only on code** — never edit any source file. The only file you write is the ledger.
@@ -895,15 +899,16 @@ Auto-revert applies **only** to test-detected regressions, never to lint or type
 
 ### Step 5b — Sadistic reflection pass
 
-After every successful (Steps 1–4 clean) fix, run a one-shot reflection prompt to the same specialist that performed the fix. The reflection is small but adversarial — it exists because "I think it's fixed" is not "it is fixed." The reflection asks five questions:
+After every successful (Steps 1–4 clean) fix, run a one-shot reflection prompt to the same specialist that performed the fix. The reflection is small but adversarial — it exists because "I think it's fixed" is not "it is fixed." The reflection asks six questions:
 
 1. **What input class would break this fix?** Name it concretely (a value, a shape, a sequence). If none exists, say so explicitly.
 2. **What invariant is now load-bearing that wasn't before?** Name the symbol that depends on it.
 3. **Is there a sibling site with the same pattern that the original finding did not list?** If yes, file it as a spawned finding (the dependency algorithm will pick it up).
 4. **What does the new code do on the exception path?** Trace it. If the exception path leaves observable state changed, the fix is incomplete.
 5. **What test would catch a future regression of this fix?** Name it. If none exists, file a `T-discovered-<owner>-N` spawned finding for the Unit Test Expert.
+6. **Does this fix introduce any anti-pattern the specialist's own Review Mode would flag?** The specialist runs a targeted single-pass self-review of the diff against their own Review Mode sections and acceptance criteria. If a violation is found, it must be fixed in the same commit (preferred) or filed as a spawned `x`-finding routed back to the same specialist. Record the self-review verdict ("clean" or spawned finding IDs) in the Reflection entry.
 
-Record the five answers verbatim in the History entry under `Reflection`. Spawned findings from question 3 and question 5 are appended to the Plan and re-sorted under the spawned-severity rule.
+Record the six answers verbatim in the History entry under `Reflection`. Spawned findings from question 3, question 5, and question 6 are appended to the Plan and re-sorted under the spawned-severity rule.
 
 ### Step 6 — Mark done
 

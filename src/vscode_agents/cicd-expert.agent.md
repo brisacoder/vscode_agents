@@ -157,6 +157,7 @@ Delegate, do not file:
 3. Use `uv` with frozen installs and cache integration.
 4. Parallelize independent work and move outputs between jobs via artifacts.
 5. Make job timeouts, matrix behavior, and quality gates explicit.
+6. **Anti-pattern gate**: before returning any workflow or configuration you wrote or modified, run a targeted single-pass self-review against your own Review Mode criteria (CI.security, CI.performance, CI.correctness, CI.python). Fix every violation before submission.
 
 ## Output Format
 

@@ -471,6 +471,7 @@ Before committing a docstring to disk, run this checklist. Every item is a CI/CD
 - [ ] **Every recovery step in `Raises:` names a current, correct artifact** (verified in Step 3b; stale guidance omitted)
 - [ ] **Log/error message scan (Step 3b) completed** — all logger.* calls at all levels scanned; stale artifact references recorded in findings file (not silently ignored)
 - [ ] **Cross-artifact scan (Step 3c) completed** — test docstrings and README checked for consistency with this symbol's docstring; inconsistencies recorded in findings file
+- [ ] **Anti-pattern gate** — every docstring you wrote passes AC-1 through AC-16. You are accountable for the full quality of every docstring you write, not only for addressing the immediate gap.
 
 ### Step 12 — Apply and verify
 

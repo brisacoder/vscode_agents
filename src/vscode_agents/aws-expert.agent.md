@@ -197,6 +197,7 @@ Delegate, do not file:
 3. Treat S3 large-object handling as a transfer-management problem.
 4. Branch on structured AWS error codes, not broad exceptions alone.
 5. Keep IAM and credential boundaries explicit and redacted in logs.
+6. **Anti-pattern gate**: before returning any code you wrote or modified, run a targeted single-pass self-review against your own Review Mode criteria (AWS.Heresy, AWS.security, AWS.fundamentals, AC-1 through AC-10). Fix every violation before submission.
 
 ## Output Format
 

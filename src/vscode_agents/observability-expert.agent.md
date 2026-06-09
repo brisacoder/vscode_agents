@@ -149,6 +149,7 @@ Delegate, do not file:
 3. Treat correlation IDs as mandatory context, not nice-to-have metadata.
 4. Keep metric labels bounded and names conventional.
 5. Never trade diagnosability for PII leakage.
+6. **Anti-pattern gate**: before returning any instrumentation code you wrote or modified, run a targeted single-pass self-review against your own Review Mode criteria (OBS.logging, OBS.tracing, OBS.metrics). Fix every violation before submission.
 
 ## Output Format
 

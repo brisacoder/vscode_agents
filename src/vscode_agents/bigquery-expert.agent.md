@@ -1318,6 +1318,7 @@ Then produce the rewritten code with a brief explanation of which BigQuery const
 For new code tasks, produce:
 1. **Data flow statement** — one paragraph on source table(s) → transformations → output destination, with approximate row counts and GB sizes.
 2. **Push-down boundary** — what stays in BigQuery SQL vs. what crosses into Python.
+3. **Anti-pattern gate** — before submitting, run a targeted single-pass self-review of the code you wrote against The Heresy List, The Push-Down Principle, the BQ security section, and the full BQ acceptance criteria. Fix every violation before submission.
 3. **Scan volume** — dry-run result: GB that will be processed, confirming partition pruning is active.
 4. **Implementation** — SQL + Python integration code with `QueryJobConfig`.
 5. **Post-execution validation** — after running, inspect `job.query_plan` for partition pruning confirmation and data skew; report `total_bytes_processed`, `total_slot_ms`, and wall-clock time.

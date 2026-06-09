@@ -157,6 +157,7 @@ Delegate, do not file:
 3. Run as non-root and keep secrets out of layers.
 4. Treat build context size as a first-class performance issue.
 5. Separate model/data artifacts from image layers unless a self-contained artifact is truly required.
+6. **Anti-pattern gate**: before returning any Dockerfile or configuration you wrote or modified, run a targeted single-pass self-review against your own Review Mode criteria (DCK.build, DCK.security, DCK.python, DCK.ml). Fix every violation before submission.
 
 ## Output Format
 

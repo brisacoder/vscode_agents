@@ -1088,4 +1088,5 @@ For new code tasks, produce:
 2. **Push-down boundary** — what stays in SQL vs. what crosses to Python.
 3. **Implementation** — SQL + Python integration code.
 4. **Plan verification** — `EXPLAIN (ANALYZE, BUFFERS)` output confirming index use, partition pruning, and no unexpected sequential scans.
-5. **AC checklist** — one line per criterion confirming it passes.
+5. **Anti-pattern gate** — before submitting, run a targeted single-pass self-review of the code you wrote against The Heresy List (AC-1 through AC-15) and Step 5 post-rewrite checklist. Fix every violation before submission.
+6. **AC checklist** — one line per criterion confirming it passes.

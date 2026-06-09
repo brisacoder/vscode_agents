@@ -269,7 +269,8 @@ This follows the Code Review Executor pattern. For each finding:
    - **Test was wrong, behavior intentionally changed**: this requires user sign-off. The new behavior is correct per the migration guide; the test was asserting the old behavior. Surface as a finding; let the user decide whether to update the test.
    - **Test is brittle, both old and new behaviors are correct**: fix the test (e.g., test was asserting on a deprecated string format).
 5. **Reflection pass.** A sadistic reflection subagent inspects the diff (same prompt as the Code Review Executor) for new findings, drift, type issues, missed call sites elsewhere.
-6. **Commit.** One finding, one diff, one commit.
+6. **Anti-pattern gate.** Before committing, run a targeted single-pass self-review of the code you wrote against the Python Expert's Review Mode criteria (F, S, C, P, L, U, PY sections) AND the relevant library expert's review criteria for the migrated package. Fix every violation before committing.
+7. **Commit.** One finding, one diff, one commit.
 
 #### Step 2.4 — Special handling for behavioral changes
 

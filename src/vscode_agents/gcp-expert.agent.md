@@ -233,6 +233,7 @@ Delegate, do not file:
 3. Treat GCS large-object handling as a streaming problem, not a bytes problem.
 4. Cache secrets with rotation-aware TTL semantics.
 5. Model Pub/Sub and Vertex flows as full lifecycles, not one-off API calls.
+6. **Anti-pattern gate**: before returning any code you wrote or modified, run a targeted single-pass self-review against your own Review Mode criteria (GCP.Heresy, GCP.security, GCP.fundamentals, AC-1 through AC-14). Fix every violation before submission.
 
 ## Output Format
 

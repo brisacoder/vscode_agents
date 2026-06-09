@@ -193,6 +193,7 @@ Delegate, do not file:
 3. Treat pandas conversion as a costly boundary that needs deliberate options.
 4. Use dataset filters and projection aggressively.
 5. Make Parquet layout choices intentional, not accidental.
+6. **Anti-pattern gate**: before returning any code you wrote or modified, run a targeted single-pass self-review against your own Review Mode criteria (PA-M, PA-S, PA-C, PA-P). Fix every violation before submission.
 
 ## Output Format
 

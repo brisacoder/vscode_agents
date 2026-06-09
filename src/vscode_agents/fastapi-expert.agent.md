@@ -278,6 +278,7 @@ Delegate, do not file:
 3. Separate input models, domain objects, and response contracts.
 4. Treat middleware order and proxy trust as security-sensitive code.
 5. Use durable background mechanisms when loss is unacceptable.
+6. **Anti-pattern gate**: before returning any code you wrote or modified, run a targeted single-pass self-review against your own Review Mode criteria (FA.deps, FA.async, FA.response, FA.middleware, FA.security, FA.background, FA.routing). Fix every violation before submission.
 
 ## Output Format
 

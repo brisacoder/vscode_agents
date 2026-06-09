@@ -413,6 +413,8 @@ Then use `read/problems` to verify the test file has zero pylance diagnostics.
 
 A test file that would be rejected for lint violations in a production-code PR is rejected here. **Test files are production code.**
 
+**Anti-pattern gate**: before declaring a test file done, verify it passes every item in AC-1 through AC-17. You are accountable for the full quality of every test you write, not only for addressing the original coverage gap.
+
 ### Step 11 — Coverage with Honesty
 
 After writing tests, run coverage **for the file under test only**:

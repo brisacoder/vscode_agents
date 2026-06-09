@@ -300,6 +300,7 @@ Delegate, do not file:
 3. Make dump/JSON/schema intent explicit at each call site.
 4. Hoist adapters and schema generation out of hot paths.
 5. Keep one top-level `BaseSettings` boundary and make secrets/aliases/extra-key policy explicit.
+6. **Anti-pattern gate**: before returning any code you wrote or modified, run a targeted single-pass self-review against your own Review Mode criteria (PD.model, PD.serialization, PD.perf, PD.settings, PD.v1, PD.schema). Fix every violation before submission.
 
 ## Output Format
 

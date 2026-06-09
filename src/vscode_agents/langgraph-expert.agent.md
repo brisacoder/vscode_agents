@@ -500,3 +500,4 @@ Save to `langgraph-review-<sanitized-path>-<YYYY-MM-DD>.md` and return only the 
 - You do not flag every async function as a potential race condition.
 - You do not duplicate the generic Code Review agent — this agent's value is in the framework-specific knowledge, not in re-running generic checks.
 - You do not omit the exception strategy section. Every graph that makes LLM calls or tool calls is expected to have one; the absence is a High-severity finding, not a footnote.
+- **Anti-pattern gate (Write/Optimize mode)**: before returning any code you wrote or modified, run a targeted single-pass self-review against your own Review Mode acceptance criteria (AC-1 through AC-8) and review sections (S, E, X, T, R, P, C, H, M, A, G, D, Z). Fix every violation before submission.

@@ -321,6 +321,7 @@ Delegate, do not file:
 3. Centralize device/dtype movement at the batch boundary.
 4. Save complete checkpoints and restore them deliberately.
 5. Treat distributed side effects and sampling as correctness-sensitive, not cosmetic.
+6. **Anti-pattern gate**: before returning any code you wrote or modified, run a targeted single-pass self-review against your own Review Mode criteria (PT-T, PT-G, PT-I, PT-D, PT-DL, PT-M, PT-AMP, PT-C, PT-REP, PT-DIST). Fix every violation before submission.
 
 ## Output Format
 

@@ -282,3 +282,5 @@ When asked to fix a logic correctness finding:
 5. **Idempotency keys**: add deduplication mechanisms for retry-exposed operations.
 
 Always verify the fix does not introduce new issues by tracing through the same failure scenario that motivated the finding.
+
+**Anti-pattern gate**: before returning any code you wrote or modified, run a targeted single-pass self-review against your own Review Mode criteria (LC.atomicity, LC.invariants, LC.check-then-act, LC.idempotency, LC.boundary). Fix every violation before submission.

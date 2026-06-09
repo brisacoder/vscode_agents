@@ -30,8 +30,7 @@ Every item below is a hard gate. The agent does not declare work complete until 
 | AC-10 | **Tests pass**: `uv run pytest -v` on the affected package shows no regressions from docstring changes | Run the test suite |
 | AC-11 | **Return-value guarantee accuracy**: any guarantee stated in `Returns:` (sorted, ordered, deduplicated, never empty, normalized) is verified against the implementation — the code must actually perform that operation | Read the return path for each guarantee claimed |
 | AC-12 | **Raises recovery-step accuracy**: any recovery guidance in a `Raises:` entry (e.g., "run `build_index()` to rebuild", "see `scripts/dataprep.py`") names a current, correct artifact — the referenced function, script, or command exists in the codebase and is the right mechanism | Search codebase for each cited artifact |
-| AC-13 | **Stale error-message defects reported**: when reading a function body, if a `raise` statement's message includes recovery instructions referencing a removed or renamed artifact, this is captured in the findings file even if the docstring does not quote the message text | See Step 3b |
-| AC-14 | **Log messages scanned at all levels**: every `logger.*` call in the function body (info, debug, warning, error, critical) is scanned for references to function names, parameter names, module names, or process steps. Stale references are captured in the findings file | See Step 3b |
+| AC-13 | **Stale error-message defects reported (audit-only)**: when reading a function body, if a `raise` statement's message includes recovery instructions referencing a removed or renamed artifact, this is captured as a finding pointer in the findings file. **Authoritative owner for error-recovery message accuracy is README Expert** (AC-13 in that agent), which cross-checks error messages against the documented recovery procedures. This agent reports observations and does not run the cross-artifact scan as a primary audit; it surfaces stale references it incidentally notices while reading docstrings. The same applies to type-name references in `raise` messages, which are authoritatively owned by Type Annotation Expert (AC-13). | See Step 3b |\n| AC-14 | **Log messages scanned at all levels (audit-only)**: this agent may surface stale `logger.*` references it notices, but **authoritative ownership of the log/error-message stale-reference scan is Type Annotation Expert** (AC-13 Step 2b Scans 1\u20133), which scans every `logger.*` call, `raise` text, and `rich` output for stale type / parameter / function-name references whenever a hint changes. To avoid double-filing, this agent files a finding only when it sees a stale reference that is **not** a type reference (e.g., a stale function-name mention in a log message inside a function whose docstring describes that function). When in doubt, defer to Type Annotation Expert; the executor's dedup pass will collapse overlaps. | See Step 3b |
 | AC-15 | **Test docstring consistency enforced**: for every symbol documented, the corresponding test methods are read. Test docstrings that reference the production function with wrong parameter names, wrong return descriptions, wrong behaviors, or stale function names are flagged as findings | See Step 3c |
 | AC-16 | **README consistency enforced**: if the package README mentions the symbol being documented, its description is cross-checked against the docstring. Inconsistencies (README says sorted, docstring says unordered; README names wrong parameter) are flagged as findings | See Step 3c |
 
@@ -209,6 +208,18 @@ Imported by:
 ```
 
 Module docstrings appear at the top of the file, before imports. They state the module's purpose and (when useful) who imports it.
+
+### Module docstrings must declare import-time side effects
+
+If the module body executes any of the following at import time, the module docstring must say so in a dedicated **Side effects** paragraph (or note), naming the effect and the rationale:
+
+- Registers a handler, plugin, route, or message subscription on a global registry (covered by Python Expert `PY.module.decorator-side-effect`).
+- Reads an environment variable, file, or remote resource whose absence or failure would prevent import (covered by `PY.module.io`).
+- Mutates a module-level container that other modules read (covered by `PY.module.mutable-state`).
+- Configures the `logging` system at import (rare but happens).
+- Spawns a background thread, process, or asyncio task.
+
+Modules without side effects do not need this section; modules with side effects must have it. Callers reading the docstring should not be surprised when `import x` triggers behaviour. Workspace coding standard #25\u201327. Cross-reference: Python Expert files the side-effect itself as a `PY.module.*` finding; the Docstring Expert files the missing documentation as a separate `D-` finding so both the code and the docs converge.
 
 ## Approach
 

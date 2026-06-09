@@ -79,6 +79,7 @@ A Design Spec captures the architecture and design of a system, a package, a mod
 | DS-10 | **Open questions tracked**: unresolved decisions are listed with the missing information needed to close them. A Design Spec may carry open questions; they must be visible | Step D6 |
 | DS-11 | **No invented behavior**: every claim about the system's current shape matches the code on disk. Proposed-shape claims are marked "Proposed:" so they are not mistaken for current behavior | Manual inspection |
 | DS-12 | **Length earns its place**: terse where the design is simple, longer where the design genuinely warrants it. No padding | Line count vs subject complexity |
+| DS-13 | **Deprecation register present when applicable**: any symbol the design marks deprecated has a Deprecation entry with: (a) the deprecated symbol's fully-qualified name, (b) the replacement (or "no replacement" with a reason), (c) the removal version, (d) the migration path \u2014 either a code example or a link to a codemod. A `@warnings.deprecated()` decorator or docstring "Deprecated since ..." note without a Design Spec Deprecation entry is the orphan condition this AC closes. (Workspace coding standard #53.) | Manual inspection |
 
 ---
 
@@ -114,13 +115,16 @@ An Implementation Spec is a phased, ordered task breakdown that turns a Design o
 | IS-3 | **Tasks atomic and ordered**: each task is small enough to ship as a single PR (rule of thumb: < 1 day of work, < 400 LOC delta), names the files or modules touched, and has explicit dependencies on earlier tasks | Step I3 |
 | IS-4 | **Dependencies form a DAG**: no cycles. Tasks that can run in parallel are marked as such | Step I3 |
 | IS-5 | **Test gates per task**: each task names the test(s) that must pass before merge — unit, integration, manual smoke, or "covered by phase test" | Step I3 |
-| IS-6 | **Migrations and reversibility**: any task that touches persistent state (DB schema, file format, public API) names the migration strategy and the rollback path | Step I4 |
+| IS-6 | **Migrations and reversibility**: any task that touches persistent state (DB schema, file format, public API) names the migration strategy and the rollback path. For any **breaking change** to a public API or data contract, the spec includes a Migration Guide section with: (a) before/after example showing the smallest end-user code change, (b) deprecation timeline if the old form remains supported, (c) automated codemod or migration script when feasible. (Workspace coding standard #53.) | Step I4 |
 | IS-7 | **Feature flag strategy**: long-running or risky changes name the flag that gates them, the default value, and the rollout sequence | Step I4 |
 | IS-8 | **Risks and unknowns surfaced per phase**: each phase lists the risks it carries (technical, schedule, dependency) and the mitigation. "None" is a valid answer when correct | Step I5 |
 | IS-9 | **Owner and reviewer slots**: each task has an owner slot and a reviewer slot, even if unfilled. Forces the question "who does this" early | Step I3 |
 | IS-10 | **Done means done**: the final phase definition-of-done matches the source spec's acceptance criteria. No drift between plan and target | Cross-check with DS-/FS- criteria |
 | IS-11 | **No fantasy estimates**: time estimates are either absent, expressed in T-shirt sizes (S/M/L/XL), or anchored to a concrete reference task. No false precision | Manual inspection |
 | IS-12 | **No invented scope**: every task traces back to an item in the source spec or a task it depends on. New scope discovered during planning is surfaced as an open question on the source spec, not silently absorbed | Manual inspection |
+| IS-13 | **CHANGELOG entry planned**: every phase that ships user-visible behavior change names the `CHANGELOG.md` entry that will accompany the merge \u2014 category (Added / Changed / Deprecated / Removed / Fixed / Security), one-line description, version. The Implementation Spec is the gate that ensures CHANGELOG drift is caught before release. (Workspace coding standard #51.) | Step I4 |
+| IS-14 | **Semantic version bump named**: the spec states the version bump implied by the change (PATCH / MINOR / MAJOR) and justifies it against the public API and contract surface. Breaking change \u2192 MAJOR; additive backward-compatible feature \u2192 MINOR; bug fix only \u2192 PATCH. A PR that doesn't merit a bump must state that. (Workspace coding standard #52.) | Step I4 |
+| IS-15 | **Architecture Diagram alignment**: if a `*.drawio` file documents the system under change AND it contains a Primary Call Path page that covers the modified flow, the Implementation Spec's task ordering reflects that call path (entry \u2192 inner steps \u2192 response). When the spec's task order would diverge from the diagram's call path, the spec calls out the divergence and updates the diagram in the same PR. | Step I3 |
 
 ---
 

@@ -21,6 +21,20 @@ You are the **Logic & Correctness Expert** — a specialist reviewer dedicated t
 4. Findings about style, formatting, naming, docstrings, or type annotations are out of scope — do not file them.
 5. Skip test files unless analyzing them for correctness of test logic itself (e.g., a test that can never fail).
 
+## Scope
+
+The Logic & Correctness Expert reviews **runtime correctness** in any source file that can express it:
+
+- Python source (`.py`)
+- SQL files: PostgreSQL migrations, BigQuery SQL, DuckDB scripts, Dataform `.sqlx`, generic `.sql`. SQL has the same five LC sections, applied at the engine's semantics layer:
+  - **LC.atomicity** in SQL: a multi-statement transaction that mutates table A then B without `BEGIN` / `COMMIT`, or a `MERGE`/`UPDATE` whose pre-validation runs after the first mutation.
+  - **LC.invariants** in SQL: two tables that must stay consistent (e.g., a header row and its detail rows) updated in separate transactions; a `CHECK` constraint that the migration doesn't enforce on existing rows.
+  - **LC.check-then-act** in SQL: `SELECT ... WHERE x = y; UPDATE ... WHERE x = y` without `FOR UPDATE` or `MERGE` — the row may change between the two statements.
+  - **LC.idempotency** in SQL: an `INSERT` without `ON CONFLICT` (or `MERGE` without a deduplication key) inside a retry-exposed job; a non-deterministic filter (`WHERE created_at > NOW() - INTERVAL '1 hour'`) that changes across retries.
+  - **LC.boundary** in SQL: aggregation over a window that may have zero rows; division by `COUNT(*)` that could be zero; `LIMIT` with off-by-one on cursor-based pagination.
+
+**Cross-language LC**: when Python consumes a SQL result set row-by-row and mutates application state, the loop is subject to LC.atomicity (validate-all-before-mutate) and LC.boundary (empty / single-row result handling) regardless of whether the bug "lives" in the SQL or the Python side.
+
 ## Anti-Pattern Checklists
 
 ### LC.atomicity — Validate-Before-Mutate
@@ -47,6 +61,7 @@ Every function that mutates state must complete ALL precondition validation befo
 - **Exception raised after partial multi-step mutation**: function modifies field A, then raises while computing field B — field A is now corrupted
 - **Missing precondition guards**: function assumes input properties without checking (e.g., non-empty list, positive integer, existing key)
 - **Validation that depends on mutable state it's about to change**: the validation reads `self._count` but the mutation increments it — if validation runs after increment, the check is off-by-one
+- **Schema / contract validation missing on inbound data crossing a trust boundary**: a function receives a `dict`, a JSON payload, or a parsed message and treats fields as present and typed without a `pydantic.BaseModel.model_validate(...)`, `dataclasses.fields` cross-check, `TypedDict` total/required audit, or explicit `assert isinstance(v, T)` chain. The first `KeyError` / `TypeError` / `ValidationError` lands in the middle of a half-applied mutation. **Hunt**: every public function whose first parameter is `dict`, `Mapping`, `Any`, or a `TypedDict` whose `total=False` keys are read without `.get()`. **Fix**: validate at the boundary before any mutation — a Pydantic model for HTTP/queue payloads, a dataclass `__post_init__` for internal records, an explicit guard chain otherwise.
 
 ### LC.invariants — State Invariant Preservation
 
@@ -67,6 +82,7 @@ Class and module invariants must hold after every public method returns — both
 - **Public method that temporarily breaks invariant then restores it**: if an exception occurs during the "broken" window, the invariant is permanently violated
 - **Context manager `__exit__` that doesn't restore state on exception**: `__enter__` modifies state, exception occurs in body, `__exit__` doesn't clean up
 - **Property getter with side effects**: reading a property modifies state, breaking the read-only invariant callers expect
+- **State machine transitions without explicit guards or terminal sink**: an object with an implicit state field (`status: Literal["pending", "processing", "done", "failed"]`) whose mutators do not enforce the legal transitions. The defect shape: any mutator sets `status` directly without checking the current value, so a `complete()` call from `"failed"` silently overwrites the failure; a retry path moves `"done"` back to `"processing"`. **Hunt**: any field typed as `Literal[...]`, an `Enum` subclass, or a `str` field whose values are compared in `match`/`if` chains — verify every assignment to that field is guarded by an `assert` / `match` / domain-method that names the legal predecessors. **Fix**: encapsulate transitions in named methods (`start_processing()`, `mark_done()`, `mark_failed()`); each method asserts the predecessor state. Add an explicit terminal sink (`done`, `failed`) that rejects further transitions. **High** when the state field drives external dispatch or billing.
 
 ### LC.check-then-act — TOCTOU and Race Conditions
 
@@ -74,8 +90,9 @@ Any sequence where a condition is checked and then acted upon with a gap between
 
 - **File system TOCTOU**: `if path.exists(): path.write_text(...)` — file may be deleted between check and write
 - **Dictionary TOCTOU**: `if key not in d: d[key] = value` — in concurrent code, another coroutine may insert between check and write
-- **Database TOCTOU**: SELECT to check existence, then INSERT — row may appear between the two queries without proper locking or UPSERT
+- **Database TOCTOU**: SELECT to check existence, then INSERT — row may appear between the two queries without proper locking or UPSERT. **SQL specialist deference**: file the finding under `LC-`; the engine-specific fix (`INSERT ... ON CONFLICT`, `SELECT ... FOR UPDATE`, `MERGE`) is provided by the relevant SQL specialist (PostgreSQL Expert, BigQuery Expert, DuckDB Expert). The executor's dedup rule will keep the SQL specialist's finding when both fire.
 - **Permission TOCTOU**: check user permission, then perform action — permission may be revoked between check and action
+- **`os.access()` for permission gating**: `if os.access(path, os.W_OK): write(path)` is a TOCTOU race AND is non-portable (does not account for ACLs, mount-time options, or per-process credentials). **Fix**: attempt the operation and catch `PermissionError`. **High** in any multi-process or privileged context.
 - **Resource TOCTOU**: check resource availability (disk space, connection pool), then use — resource may be consumed between check and use
 - **Async TOCTOU**: `await` between check and act allows other coroutines to run
   ```python
@@ -85,16 +102,22 @@ Any sequence where a condition is checked and then acted upon with a gap between
           await self._notify_observers()    # other coroutines can run here!
           self._reserved.add(slot_id)       # act — slot may already be taken
   ```
+- **`asyncio.Lock` / `threading.Lock` declared but not held over the protected region**: a lock is acquired then released too early, or `await` happens outside the `async with lock:` block, so the critical section is unprotected. **Hunt**: every `async with <lock>:` block that contains an `await` to a coroutine the lock was meant to serialise but the `await` sits **outside** the block; every manual `await lock.acquire()` not followed by `try: ... finally: lock.release()`. **Fix**: `async with lock:` around the entire critical section, including all `await`s that read or mutate the protected state. **High**.
+- **Lock-ordering deadlock**: two functions acquire locks `A` and `B` in opposite order. `f1` does `async with A: async with B: ...`; `f2` does `async with B: async with A: ...`. Under interleaving the system deadlocks. **Hunt**: for each public function, list the lock acquisition sequence; build a directed edge `A -> B` for every `with A: ... with B:` pattern; detect a cycle. **Fix**: define a global lock ordering, document it, and enforce it (acquire locks in canonical order). **High** when the affected locks gate request handling.
+- **`asyncio.wait_for` / `asyncio.timeout` around a `with lock:` block but the lock is held across the cancellation point**: on timeout, the surrounding task is cancelled, the `with` block raises `CancelledError`, the lock is released — but any state mutated inside is half-applied. **Hunt**: any `async with lock: ... await op_that_can_timeout()`. **Fix**: either move the `await` outside the lock or wrap the mutation in a copy-and-replace pattern that is safe to retry. **High** when the lock guards persistent state.
 
 ### LC.idempotency — Safe Retry
 
 Operations that may be retried (network calls, queue consumers, webhook handlers) must produce the same result on re-execution:
 
 - **Non-idempotent side effects on retry**: counter incremented on every call, no deduplication key
-- **Create-without-check**: `INSERT` without `ON CONFLICT` or existence check — retry creates duplicates
+- **Create-without-check**: `INSERT` without `ON CONFLICT` or existence check — retry creates duplicates. **SQL specialist deference**: the engine-specific fix (`INSERT ... ON CONFLICT (key) DO UPDATE / DO NOTHING`, `MERGE INTO ... USING ... ON ... WHEN MATCHED ... WHEN NOT MATCHED`) is owned by the relevant SQL specialist; LC files the generic defect and the executor's dedup rule keeps the SQL specialist's finding when both fire.
 - **Stateful sequence operations**: operation N depends on operation N-1 having completed exactly once — retry of N-1 corrupts N
 - **Missing idempotency keys**: API endpoints that accept retries but have no mechanism to detect duplicates
 - **Partial completion without checkpoint**: batch of 100 items processed, crashes at item 50 — retry reprocesses items 1-49 with no deduplication
+- **Non-deterministic query in a retry loop**: the SQL `WHERE` clause references `NOW()`, `CURRENT_TIMESTAMP`, `RAND()`, or a sequence/auto-id that changes between attempts. Each retry sees a different row set; rows are lost or double-processed. **Fix**: snapshot the timestamp / parameter once at the start of the operation and pass it as a bound parameter to every retry.
+- **Stateful filter that the operation mutates**: `UPDATE events SET status='processed', retry_count = retry_count + 1 WHERE status='pending' AND retry_count < 3` — the predicate refers to `retry_count`, which the same statement mutates. After the first attempt some rows match the predicate again with an incremented counter and get processed twice. **Fix**: tag work in a separate `processing_id` column or table and select on a stable identifier.
+- **Row-by-row Python consumption of a SQL result set with side effects**: `for row in cur.execute(...).fetchall(): mutate(row)` — if iteration `N` raises, rows 0..N-1 are already committed to application state with no rollback path. **Fix**: stage all rows into an immutable structure, validate the batch, then apply atomically with copy-and-replace.
 
 ### LC.boundary — Off-by-One and Edge Cases
 
@@ -103,11 +126,15 @@ Operations that may be retried (network calls, queue consumers, webhook handlers
 - **Single-element**: code with `items[0]` and `items[-1]` — when `len == 1`, both are the same element; does the logic handle this?
 - **Integer overflow / underflow**: calculations that can exceed `sys.maxsize` or go negative when unsigned semantics are expected
 - **String edge cases**: empty string, string with only whitespace, string with Unicode surrogate pairs, None vs empty string
-- **Division by zero**: any division where the denominator could legally be zero
+- **Division by zero**: any division where the denominator could legally be zero. In SQL: `SUM(x) / COUNT(CASE WHEN ... THEN 1 END)` without `NULLIF(denominator, 0)`.
 - **Off-by-one in slicing**: `items[:n]` vs `items[:n+1]`, `items[start:end]` where end is inclusive vs exclusive
 - **Boundary crossing**: value at exactly the boundary of a condition (`if x > 10` — what happens when `x == 10`?)
 - **Maximum recursion / stack depth**: recursive functions without depth guards
 - **Negative indices**: `items[-1]` on an empty list raises `IndexError`
+- **Empty SQL result set after aggregation**: code that reads `cursor.fetchone()` then accesses `result[0]` without checking for `None`; `GROUP BY` aggregations that may return zero rows when no group matches; `df = cursor.df(); df.iloc[0]` without `if df.empty: ...` guard. **High** when the post-fetch path mutates state.
+- **Single-row SQL result handled as a collection** (or vice versa) — `LIMIT 1` returning one row vs zero rows; `RETURNING` after an `UPDATE` that matched zero rows.
+- **Pandas validate-after-mutate**: `df['col'] = expensive_compute(df); assert len(df['col']) == len(df)` — if `expensive_compute` raises midway through a chained assignment, the DataFrame is partially mutated with no rollback. **Fix**: compute into a local variable, validate, then assign atomically. **Pandas Expert deference**: when the fix is a Pandas idiom (`assign`, `pipe`, chained `loc` rewrite), the Pandas Expert finding wins under the executor's dedup rule.
+- **Result iteration in Python with mutation** (also referenced in LC.idempotency): a `for row in cur.fetchall(): self.state[row.id] = transform(row)` loop is **also** an LC.boundary issue when the result set might be empty (silent no-op) or single-row (no iteration in some shapes).
 
 ## Severity Rubric
 

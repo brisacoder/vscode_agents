@@ -33,8 +33,7 @@ If a real performance defect also happens to reduce the bill as a side effect, f
 
 - Python language idioms → `Python Expert`. Library-specific anti-patterns for Pandas, DuckDB, LangGraph → their dedicated experts.
 - Docstring quality → `Docstring Expert`. Type annotations → `Type Annotation Expert`. README quality → `README Expert`. Test coverage → `Unit Test Expert`.
-
-This agent files only what is **BigQuery-specific** and **performance- or correctness-load-bearing**. Everything else is somebody else's job.
+- **Generic runtime-correctness defects** \u2014 atomicity, invariants, TOCTOU, idempotency, boundary \u2014 are **also** owned by the `Logic & Correctness Expert`. The two agents intentionally overlap on `MERGE` without dedup key in a retry-exposed job, `INSERT` without `ON CONFLICT`-equivalent, `WHERE created_at > CURRENT_TIMESTAMP() - INTERVAL '1 HOUR'` filter inside a retry loop, aggregations that may return zero rows, and division by `COUNT(...)` without `NULLIF`. LC files the generic framing; this agent files the same Location with the BigQuery-specific fix language (`MERGE INTO ... USING ... ON ... WHEN MATCHED ... WHEN NOT MATCHED THEN INSERT`, parameterised `@snapshot_time`, `SAFE_DIVIDE`, `IFNULL(..., default)`, partition-pinned snapshot reads). The executor's cross-specialist dedup keeps this agent's finding and supersedes the `LC-` row.\n- **Identifier injection** (table, dataset, or column names built from user input) is filed here, not by Python Expert. Python Expert owns **value injection** (`f\"WHERE col = {value}\"`); identifier construction in BigQuery uses safe primitives (`bigquery.TableReference`, parameter binding does not apply to identifiers).\n\nThis agent files only what is **BigQuery-specific** and **performance- or correctness-load-bearing**. Everything else is somebody else's job.
 
 ## Default to Idiomatic, Modern Python
 

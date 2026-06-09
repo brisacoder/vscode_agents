@@ -56,6 +56,17 @@ When you propose, write, review, or recommend a fix and multiple correct options
 - DO NOT skip the framework-semantics grounding line. Every finding states the relevant framework concept that makes the finding apply.
 - DO NOT review LangGraph code as if it were threading code. State the concurrency model first.
 
+## Overlap with Logic & Correctness Expert
+
+This agent fires whenever LangGraph is imported. Logic & Correctness Expert fires on every Python file. Both will be present on graph code. The boundary:
+
+- **Reducer correctness is owned by this agent, not LC.** The reducer IS the framework's atomicity primitive. LC.atomicity (validate-before-mutate) does not apply to a reducer that returns a new accumulator value — the reducer is the validation-and-mutation step in one. Do not file LC-style atomicity findings against reducer code; file under section S (state) with the reducer-correctness framing.
+- **`asyncio.run()` inside a graph node.** Python Expert and LC will flag this as a generic anti-pattern. The real defect is framework-specific: it stalls the single event loop running every superstep of the graph. File the finding under section A (Async correctness) with the framework grounding. The executor's cross-specialist dedup pass will keep this agent's finding and supersede the `LC-` / `PY-` / `C-` row.
+- **Interrupt replay and idempotency.** When `interrupt()` is followed by side-effecting code that is replayed on resume, the defect is **both** a LangGraph H (interrupt) finding and an LC.idempotency finding. File the LangGraph finding; the executor keeps it and supersedes the LC row because the fix (move side effects after the interrupt, gate on resume token) is framework-specific.
+- **Mutable shared payload in `Send()`.** LC will frame it as invariant break; Python Expert will frame it as shared mutable state. File the LangGraph finding under section P (parallel dispatch) with the Send-semantics grounding. The executor will keep the LangGraph finding.
+
+When the executor dedup pass keeps this agent's finding, the LC/PY/C row is marked `superseded: framework-specific fix`. Do not skip filing a LangGraph finding under the mistaken belief that LC already owns it — without the framework grounding, the LC finding's fix language will be wrong.
+
 ## Security
 
 LangGraph's security surface is dominated by prompt injection and uncontrolled tool execution, but state-based persistence introduces additional concerns.
@@ -121,9 +132,12 @@ Check:
   - Bare `list` (no reducer) means *overwrite on each return*. Often unintentional.
   - Custom reducers are powerful but easy to get wrong: must be associative for parallel dispatch (`Send`) to produce deterministic results.
 - **Channel types match what nodes return.** A node returning `{"messages": new_msg}` (single, not list) when the channel is `list` will fail or behave unexpectedly depending on the reducer.
+- **Node return-shape matches channel reducer input.** A reducer with signature `(list[Msg], list[Msg]) -> list[Msg]` requires the node to return `{"messages": [msg, ...]}`. A node that returns `{"messages": msg}` (single object) reaches the reducer as a non-iterable and triggers a `TypeError` at runtime — or, with a permissive custom reducer, silently produces wrong-shape state. Verify every node's return literal against the channel's reducer arity. **Severity**: High.
+- **Custom reducers are tested for associativity AND commutativity when used with `Send()`.** Send dispatches in parallel; the framework folds N updates in nondeterministic order. A reducer that is associative but **not** commutative — e.g., string concatenation, list `+` where order matters — produces nondeterministic state across runs. The grounded check: write a doctest or property test that asserts `reduce(a, reduce(b, c)) == reduce(reduce(a, b), c)` AND `reduce(a, b) == reduce(b, a)` for a representative input. **Severity**: High when the channel is on a `Send()` target; **Medium** otherwise.
 - **Exception channel present.** If the graph uses an exception strategy, verify the state schema includes a channel for exceptions (e.g., `exceptions: list[ExceptionInfo]` with a list-accumulating reducer). A missing exception channel means exception data cannot flow to the exception node.
 - **Optional channels are honest about being optional.** `Annotated[X | None, ...]` and the reducer handles `None`.
 - **Schema migrations are flagged.** If the state schema changes in a graph that uses a checkpointer, prior checkpoints may not deserialize. Severity: High when a checkpointer is configured.
+- **State values are checkpointer-serializable.** Workspace standard #6 forbids pickle; LangGraph's default `MemorySaver` and many database checkpointers serialise state. Any state field whose type is not natively JSON-serializable (custom class without `__dict__` round-trip, generator, file handle, lambda, frozenset of complex types) will fail to checkpoint or will be silently lost on restore. **Severity**: High when a checkpointer is configured.
 - **Pydantic state schemas vs TypedDict.** Pydantic gives validation at node boundaries; TypedDict doesn't. Choice should be deliberate. Pydantic v2 is required for current LangGraph.
 
 ### 2. Edge and routing correctness (E)
@@ -140,6 +154,7 @@ Check:
 - **Conditional edges that should be static.** A router that always returns the same label is a static edge in disguise; remove the router.
 - **`Command` returns.** In modern LangGraph, nodes can return `Command(goto=..., update=...)` to combine state update with explicit routing. This bypasses conditional edges. If a graph mixes `Command`-based routing with conditional edges, it's not a bug per se, but check consistency. Confusion arises when a node returns `Command(goto="X")` but there's also a conditional edge from that node — the `Command` wins, but the conditional edge is dead code.
 - **`Command[Literal[...]]` return annotations are topology declarations, not just type hints.** The `Literal["node_name", ...]` parameter of `Command` tells LangGraph which destination nodes this node can route to — the framework uses it to validate and construct the graph topology. Widening `Command[Literal["exception_node", "agent_node"]]` to bare `Command` (with or without a `# noqa` comment to silence the linter) removes that topology contract and can silently break graph validation or routing. **Never widen a `Command[Literal[...]]` return annotation.** If a type checker complains about the annotation, fix the checker configuration or the code — do not widen the `Literal` parameter.
+- **`Command[Literal[...]]` annotation drift.** The annotation must enumerate **every** node that the body can `Command(goto=...)`-to. If the body has `Command(goto="exception_node")` but the annotation is `Command[Literal["agent_node"]]`, routing succeeds at runtime but the topology declared at compile time is wrong; downstream consumers (graph visualisers, static validators) misread the graph. Audit: for each node with a `Command[Literal[...]]` return type, grep the body for every `Command(goto=...)` literal and confirm membership. **Severity**: High when a static graph validator runs in CI; **Medium** otherwise.
 - **Exception node reachability.** The exception node must be reachable from every node that has a `try/except` routing to it. If a node's type annotation says `Command[Literal["exception_node", ...]]` but the graph has no edge to "exception_node", the graph will fail at runtime.
 - **Recursion limits.** Cyclic graphs (e.g., agent loops) need either a termination condition that's reliably reached or an explicit `recursion_limit` set on the config. Default is 25; agent loops often hit this in production.
 
@@ -234,6 +249,7 @@ Check:
 
 - **If a checkpointer is configured, nodes should be effectively idempotent.** Resumption replays from the last checkpoint. A node that calls an external API has at-least-once semantics on resume; if exactly-once matters, the node needs an idempotency key or a deduplication mechanism.
 - **`thread_id` is provided in config when a checkpointer is configured.** Without `thread_id`, the checkpointer can't identify the conversation/session.
+- **Tenant isolation in `thread_id`.** In multi-tenant deployments the `thread_id` must include a tenant identifier (`f"{tenant_id}:{session_id}"`) or the checkpointer storage must enforce per-tenant scoping. A bare `session_id` shared across tenants leaks one tenant's conversation history to another on the next request that happens to collide. **Severity**: Critical when state contains PII or cross-tenant information; **High** otherwise.
 - **State schema is checkpointer-compatible.** Custom types in state need to be serializable by the checkpointer's serializer. Non-serializable objects in state break checkpointing silently or loudly.
 - **Schema changes are flagged for migration risk.** A schema change deployed to production with existing checkpoints in storage may fail to deserialize. This is a real outage shape.
 - **`MemorySaver` in production is a finding.** High severity. `MemorySaver` stores state in-process; process restart loses all sessions.
@@ -256,6 +272,7 @@ Streaming has multiple modes; consumers must match.
 Check:
 
 - **Stream mode matches consumer expectations.** `stream_mode="values"` emits full state snapshots; `"updates"` emits per-node deltas; `"messages"` emits LLM tokens; `"custom"` emits user-emitted events. A consumer iterating `astream()` must handle the actual emission shape.
+- **Consumer can reconstruct the state it claims to track from the chosen mode.** `stream_mode="updates"` emits per-node deltas only; a consumer that drops the first event and tries to render full state from later deltas alone is missing initial state. A consumer that uses `"values"` and assumes deltas wastes bandwidth and may double-apply if it merges into a prior snapshot. Verify the consumer's accumulation logic against the emission shape — the mismatched-reconstruction defect is silent on most messages and only surfaces when the rendered state diverges from the actual graph state. **Severity**: High in user-facing streams; **Medium** in background workers.
 - **`stream_mode` list emits tagged tuples.** When multiple modes are passed, each event is a tuple `(mode, data)`. Code that ignores the tag is buggy.
 - **`stream_writer` is used correctly for custom events** if the graph emits them.
 

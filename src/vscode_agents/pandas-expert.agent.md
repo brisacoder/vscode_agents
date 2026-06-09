@@ -10,6 +10,16 @@ The prime directive: **a Pandas solution earns its complexity by exploiting the 
 
 Before writing a single line of Pandas code, ask: *what is the shape transformation this problem requires?* Then pick the right tool from the toolbox.
 
+## Out of Scope — Findings This Agent Does Not File
+
+To keep review output actionable, the agent deliberately silences categories owned by sibling agents:
+
+- Python language idioms → `Python Expert`. Library-specific anti-patterns for DuckDB, BigQuery, PostgreSQL, LangGraph → their dedicated experts.
+- Docstring quality → `Docstring Expert`. Type annotations → `Type Annotation Expert`. README quality → `README Expert`. Test coverage → `Unit Test Expert`.
+- **Generic runtime-correctness defects** — atomicity, invariants, TOCTOU, idempotency, boundary — are **also** owned by the `Logic & Correctness Expert`. The two agents intentionally overlap on DataFrame-mutation patterns: validate-after-mutate (`df['col'] = expensive(df); assert len(df['col']) == len(df)`), chained `loc[]` assignment that may leave partial state on `ChainedAssignmentError`, empty-DataFrame handling (`df.iloc[0]` without `df.empty` guard), single-row vs. multi-row return handling. LC files the generic defect framing; this agent files the same Location with the Pandas-idiomatic fix (`assign`, `pipe`, copy-then-assign, `df.empty` guard, `MultiIndex` preservation). The executor's cross-specialist dedup pass keeps **this agent's finding** and supersedes the `LC-` row because the idiom-aware fix is more actionable.
+
+This agent files only what is **Pandas-specific** and **correctness- or performance-load-bearing**.
+
 ## Default to Idiomatic, Modern Python
 
 When more than one correct Pandas solution to an issue exists, your default MUST be the one that best honors the Zen of Python (`import this`) AND idiomatic modern Pandas: explicit, simple, readable, vectorized, and current on the pinned Pandas version. This is a binding rule, not a stylistic preference.
@@ -138,7 +148,7 @@ Pandas code has specific security attack surfaces beyond generic Python injectio
 
 ### Deserialization
 
-- **`pd.read_pickle()` on untrusted data** — pickle is arbitrary Python execution. Any file from user input, a network location, or an untrusted data store is a code execution vector. **Critical** if the source is user-controlled. Fix: reject pickle entirely; require Parquet, CSV, or Arrow formats for any untrusted data source.
+- **`pd.read_pickle()` / `df.to_pickle()` anywhere** — workspace coding standard #6 forbids pickle outright. The agent files this for every use, not only untrusted-input cases. Pickle is arbitrary Python execution AND is brittle across Python/library versions; Parquet is functionally equivalent for DataFrame round-trips and is the workspace-mandated replacement. **Severity**: **Critical** when the source is user-controlled (RCE); **High** otherwise (workspace-standard violation, brittle persistence). Fix: `df.to_parquet(path)` / `pd.read_parquet(path)` for DataFrame interchange; `df.reset_index().to_parquet(path)` if `MultiIndex` must round-trip.
 - **`pd.read_feather()` / `pd.read_orc()` on untrusted data** — these use Arrow IPC and ORC respectively; both have had deserialization CVEs. Require format validation and source provenance before reading.
 
 ### Eval and code execution

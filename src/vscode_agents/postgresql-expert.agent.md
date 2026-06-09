@@ -18,6 +18,7 @@ To keep review output actionable, the agent **deliberately silences** the catego
 
 - Python language idioms → `Python Expert`. Library-specific anti-patterns for Pandas, DuckDB, BigQuery, LangGraph → their dedicated experts.
 - Docstring quality → `Docstring Expert`. Type annotations → `Type Annotation Expert`. README quality → `README Expert`. Test coverage → `Unit Test Expert`.
+- **Generic runtime-correctness defects** — atomicity (multi-step mutation without `BEGIN`/`COMMIT`), invariants (multi-collection inconsistency), TOCTOU (read-modify-write race / lost-update), idempotency (retry creating duplicates, non-deterministic filter in retry loop), boundary (empty result set, division by zero in aggregation) — are **also** owned by the `Logic & Correctness Expert` under `LC.atomicity`, `LC.invariants`, `LC.check-then-act`, `LC.idempotency`, `LC.boundary`. The two agents intentionally overlap on these patterns: LC files the generic defect framing; this agent files the same Location with the **PostgreSQL-specific fix** (`SELECT ... FOR UPDATE`, `INSERT ... ON CONFLICT`, `MERGE`, `SERIALIZABLE` with retry loop, `RETURNING`, advisory locks, `SET LOCAL` isolation, `pg_try_advisory_xact_lock`, MERGE-with-deduplication-key). The executor's cross-specialist dedup pass keeps **this agent's finding** when both fire and supersedes the `LC-` row, because the engine-specific fix is more actionable. Do not omit the finding under the mistaken belief that LC owns it exclusively \u2014 file with the PostgreSQL fix language.
 
 ### Hosting and operations
 

@@ -46,6 +46,7 @@ In **Author** mode: produce a new `.drawio` from source. In **Review** mode: aud
 | AD-13 | **Title block on every page**: page name, single-sentence scope, source path, generation date (and source commit SHA when available) | Per-page header |
 | AD-14 | **mxGraphModel XML correctness**: all `mxCell` elements are direct children of `<root>`; edge labels are sibling `mxCell` elements with `parent` set to the edge id; newlines in `value` use `&#10;`, never `&#xa;`; the file opens in drawio without "Could not add object" or geometry errors | XML validation + open test |
 | AD-15 | **Single artifact**: one `.drawio` file containing all pages inside one `<mxfile>`. No per-page files unless explicitly requested | Output check |
+| AD-16 | **Design Spec alignment**: if a Design Spec exists for the same subject (e.g., `docs/specs/design-*.md`, `<package>/README.md` Architecture section), the title block of each page cites it (path or anchor), and the components, data flows, and decisions shown on the diagram match the Spec's named entities. Drift between Spec and Diagram is recorded as a Refresh trigger \u2014 the Spec is the source of truth, the Diagram visualises it. When both are stale, **the Spec is refreshed first** (by Spec Author) and the Diagram follows; never the reverse, because Spec Author's review reads the code in prose terms while the Diagram derives shapes from that prose. | Title block + cross-check |
 
 ---
 

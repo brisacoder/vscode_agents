@@ -131,13 +131,13 @@ Section partition:
 - Subagent A: Fragilities (F), Inconsistencies (I), Ambiguities (A)
 - Subagent B: Performance (P), Concurrency (C), UX (U)
 - Subagent C: Long-Range Bugs (L), Security (S)
-- **Subagent D: Python Idioms (PY) — all 11 sub-checklists**
+- **Subagent D: Python Idioms (PY) — all 17 sub-checklists**
 
 ### Phase B — Hunt with diverse priors (per round)
 
 Launch **six** hunter subagents in parallel. Each hunter has the full source and coverage matrix but does not see prior findings until its own draft is complete.
 
-- **The Pessimist** — failure paths, partial failures, retries, timeouts, error swallowing, resource cleanup, cancellation, validate-before-mutate violations, and non-atomic state transitions. For every loop that writes to shared/instance state, trace what happens if a later iteration raises — are earlier iterations' writes visible to the caller? For every multi-step mutation, trace the exception path — is the object left in a consistent state? Owns slice of F, C, L.
+- **The Pessimist** — Python-language failure paths only: error swallowing (`except Exception: pass`, broad excepts that drop context), missing exception chaining (`raise X` without `from`), resource cleanup gaps (missing `with` statements, generators that hold resources past `StopIteration`), cancellation handling (`CancelledError` swallowed, shielded sections that hide cancellation), retry mechanism mechanics (backoff, jitter, max attempts — **not** retry idempotency, which is LC.idempotency), timeout configuration on outbound calls, and failure-path propagation across function boundaries. **Out of scope for the Pessimist**: validate-before-mutate, non-atomic multi-step mutations, TOCTOU, idempotency, and boundary errors — all owned by Logic & Correctness Expert. If the Pessimist notices one of those patterns, it adds a single-line note to the Reflection Log and stops; it does not file a finding. Owns slice of F, C, L.
 - **The Adversary** — injection, prompt injection, auth bypass, IDOR, deserialization, secret leakage, SSRF, mass assignment, unbounded LLM tool exec. Owns S.
 - **The Scaler** — N+1 patterns, unbounded concurrency, blocking-in-async, GIL traps, memory growth, cache misses, hot loops. Owns P, slice of C.
 - **The Maintainer** — cross-file coupling, import-time side effects, contract drift between modules, config defaults that contradict usage, state mutation across requests. Owns L, slice of F, I.
@@ -161,26 +161,21 @@ After Phase C, count new findings. If zero, finalize. Otherwise begin next round
 ## Anti-Pattern Checklists (Sections 1–8 — Python-level)
 
 ### Fragilities (F)
+
+Scope: Python-language-level fragilities. **Runtime correctness defects — validate-before-mutate violations, non-atomic multi-step state mutations, TOCTOU check-then-act gaps, idempotency failures on retry, and boundary errors — are out of scope here. They are owned by the Logic & Correctness Expert** under sections LC.atomicity, LC.invariants, LC.check-then-act, LC.idempotency, and LC.boundary. If you spot one of those patterns, note it in the Reflection Log and recommend Logic & Correctness Expert; do not file it as an F finding. The orchestrator already runs Logic & Correctness Expert on every `.py` path, so the finding will be filed correctly by the right owner.
+
 - Bare `except:` or `except Exception:` swallowing context
 - Hidden mutable default arguments
 - Tight coupling to a specific concrete dependency where an interface would do
 - Implicit ordering assumptions (dict iteration, set ordering, file glob order)
 - Unbounded growth (lists, caches, queues without eviction)
-- Time-of-check / time-of-use (TOCTOU) gaps:
-  - Dictionary `if key in d` followed by `d[key] = ...` without atomic operation (`setdefault`, lock, or single expression)
-  - File `if path.exists()` followed by `path.write_text()` without locking or atomic rename
-  - Any check → gap → act where the gap allows concurrent mutation or external state change
-- Validate-before-mutate violations:
-  - State modified in a loop before all items in the batch are validated — mid-loop exception leaves partial writes
-  - Exception raised after mutation — state already corrupted when caller catches the error
-  - Input parsed and stored before schema or constraint validation completes
-- Non-atomic multi-step mutations:
-  - Multiple dict/list/set updates that must all succeed together but have no rollback or copy-and-replace
-  - Related data structures (e.g., a store and its index) updated sequentially with no atomicity guarantee
-  - Loop that writes to `self.*` on each iteration — if iteration N raises, iterations 1 through N-1 are already committed
+- Executable statements at module top level beyond the allowed-list (see PY.module for the full allow-list and hunt pattern). Top-level function calls, conditionals with side effects, loops, `try`/`except` around runtime work, validation calls, registry mutations, file/network/env I/O, and logger calls of severity above `DEBUG` all run at import time. They make the module impossible to import without paying the cost, defeat lazy evaluation, break test collection when validation fails on unrelated test runs, hide errors inside `ImportError`, and resist mocking. The concrete failure mode that motivated this rule: a top-level call like `_check_<invariant>(<constant>)` placed between two constant assignments — it looks like a constant declaration, behaves like a startup hook, and crashes import on bad data with no traceback frame the caller can act on. **Hunt pattern**: grep each source file for lines that start at column 0 and are neither `import`, `from`, `def`, `class`, `async def`, `@decorator`, `if TYPE_CHECKING:`, `if __name__ == "__main__":`, `__all__ =`, a constant assignment (`UPPER_CASE = ...`), a `type X = ...` alias, a `logger = logging.getLogger(__name__)` binding, nor a docstring. Every other top-level statement is a finding — file it as F and tag it with the matching PY.module sub-bullet.
 - External boundary calls without timeouts
-- Retry logic without backoff or jitter
+- Retry logic without backoff or jitter (the retry mechanism itself; whether the retried operation is idempotent is LC.idempotency)
 - Sentinel values (`-1`, `None`, `""`) where a sum type would be safer
+- `os.environ["KEY"]` (bracket indexing) for an environment variable that may legitimately be absent. Raises `KeyError` at the unfortunate time the code is first invoked in a fresh environment. **Hunt**: grep `os\.environ\[`. **Fix**: `os.environ.get("KEY")` with an explicit default, or a `Settings` model that validates required keys at startup with an actionable error message. **High** when the call lives on a request path; **Medium** at import time (covered also by PY.module.io). [3.12+]
+- `json.dumps(obj)` (or `json.dump(obj, fp)`) on a value whose static type or runtime origin includes types `json` does not natively serialise: `datetime`, `Decimal`, `UUID`, `Path`, `Enum`, `set`, `frozenset`, `bytes`, `numpy.int64`, `numpy.ndarray`, Pydantic models, dataclasses. Raises `TypeError: Object of type X is not JSON serializable` at runtime, often inside a request path. **Hunt**: grep `json\.dumps?\(` — check whether the argument's static type is a `dict` of unambiguously-JSON-native types (`str`, `int`, `float`, `bool`, `None`, `list`, nested `dict`). **Fix**: pass a `default=` function that converts the foreign types (`default=str` is the common defect — see PY.builtins), use `pydantic_core.to_json(...)` or `orjson.dumps(..., default=...)` for Pydantic models, or convert before serialising. **High**.
+- Event-listener accumulation without cleanup: registering a callback (`signal.signal`, `atexit.register`, `tkinter` bindings, custom observer registries, `boto3` event handlers, Pydantic `model_validator(mode="before")` chains held by a long-running object) inside a function that may be called more than once. Listeners stack; each call adds a new handler that fires on the next event, producing duplicated side effects and memory growth. **Hunt**: any registration call (`register(`, `connect(`, `subscribe(`, `addEventListener(`, `bind(`, `signal.signal(`) inside a non-`__init__`/non-module-startup function with no paired unregister. **Fix**: register exactly once at startup (a singleton or module init), or pair every register with an unregister in a context manager. **High** in long-running services.
 
 ### Inconsistencies (I)
 
@@ -205,9 +200,13 @@ Scope: contract and naming ambiguities. Weak or missing type annotations are out
 
 ### Performance (P)
 
-Scope: Python-level performance only. Pandas, DuckDB, and other library-specific anti-patterns are out of scope (Pandas Expert, DuckDB Expert).
+Scope: Python-level performance only. Pandas, DuckDB, and other library-specific anti-patterns are out of scope (Pandas Expert, DuckDB Expert, BigQuery Expert, PostgreSQL Expert).
 
-- O(n²) over inputs that grow with usage
+**N+1 scope clarification**: "N+1 patterns" in this checklist means *Python-language* repeated work over growing inputs (nested loops, accumulated state, redundant computations). **Database N+1 query loops** (per-row `cursor.execute(...)` inside a `for parent in parents:` loop) are owned by the relevant SQL specialist (PostgreSQL Expert, BigQuery Expert, DuckDB Expert) because the fix is engine-specific (batch INSERT, MERGE, `unnest(array)`, `RETURNING`). Do not file `P-` findings for SQL N+1; let the SQL specialist handle it.
+
+**Pandas iteration scope clarification**: generic Python iteration patterns (`for i in range(len(x))`, manual loop building a list when a comprehension fits) are in scope. **Pandas-specific row-iteration anti-patterns** (`df.iterrows()`, `df.itertuples()`, `df.apply(lambda, axis=1)`, `pd.concat([df, …] in a loop`) are owned by Pandas Expert; the fix is vectorized DataFrame code, not pure-Python rewriting. Do not file `P-` findings for Pandas iteration.
+
+- O(n²) over inputs that grow with usage (Python-language only — not SQL or DataFrame)
 - Hot-loop allocations
 - Synchronous I/O in a tight loop where batch APIs exist
 - LRU caches with unbounded keyspace
@@ -228,20 +227,28 @@ Scope: Python-level performance only. Pandas, DuckDB, and other library-specific
 - State the concurrency model in one sentence before filing anything
 
 ### Security (S)
-- SQL injection, command injection, path traversal
+
+**SQL injection scope clarification**: this section owns *value injection* — user input interpolated into a query value (`f"WHERE id = {user_id}"`, `.format(value=user_input)`, `%`-formatting with user data). The fix is parameterized queries, and the specific binding API is engine-specific. **Identifier injection** (table, column, or schema names built from user input — `f"SELECT * FROM {table}"`) is owned by the relevant SQL specialist (PostgreSQL Expert, BigQuery Expert, DuckDB Expert) because the safe construction primitive is engine-specific (`psycopg.sql.Identifier`, `google.cloud.bigquery` table refs, DuckDB quoted identifiers). When in doubt, file the Python-level f-string pattern under `S-` and let the SQL specialist add the engine-specific fix.
+
+- SQL injection (value injection — user input interpolated into a query value), command injection, path traversal
 - Unsafe template rendering (Jinja autoescape disabled)
 - Prompt injection — user content concatenated into system or tool prompts
 - Hardcoded secrets, secrets in logs, secrets in URLs
-- pickle / yaml / marshal on untrusted input
+- `pickle` / `cPickle` / `yaml.load` (unsafe loader) / `marshal` anywhere — workspace standard #6 forbids pickle outright; for data interchange use Parquet, for config use TOML/JSON. Untrusted-input use is Critical (RCE); trusted-input use is **High** because the workspace standard forbids it and Parquet/JSON are functionally equivalent.
+- `random` module used for security-sensitive values (tokens, nonces, session IDs, cryptographic keys, password reset codes). Hunt: `random\.(randint|choice|sample|shuffle|random|uniform|getrandbits)` near identifiers containing `token`, `nonce`, `secret`, `key`, `csrf`, `reset`. Fix: `secrets.token_bytes()`, `secrets.token_hex()`, `secrets.token_urlsafe()`, `secrets.choice()`. **Critical** when the value crosses a trust boundary.
+- `assert` statements used for runtime validation in non-test code. `python -O` strips them; the validation silently disappears in production. Hunt: `^\s*assert ` outside `tests/` and `test_*.py`. Fix: raise a domain exception explicitly. **Medium**; **High** if the assert is the only check enforcing a security invariant (auth, ownership, scope).
+- Regex with catastrophic backtracking (ReDoS) when applied to user-supplied strings. Hunt: nested quantifiers (`(a+)+`, `(a*)*`, `(a|a)*`), alternation overlap, lookbehind/lookahead in a loop. Verify with a test that runs the regex against a 50-character pathological input under a 100-ms budget. **High** when the input is user-controlled and the call sits on a request path.
 - `eval`, `exec`, dynamic imports from user input
 - Missing or bypassable auth checks
 - IDOR (object IDs from request without ownership check)
 - Unverified JWTs, role checks that fail open
-- Pydantic mass assignment (extra fields accepted)
+- Pydantic mass assignment: `model_config = ConfigDict(extra="allow")` (v2) or `class Config: extra = "allow"` (v1). Hunt: `extra=["']allow["']`. Fix: `extra="forbid"`. **High** when the model receives data from a request, webhook, or external API; **Medium** when source is trusted.
 - Unbounded LLM tool execution, missing scope checks on tool calls
 - SSRF (outbound URL built from user input without allowlist)
 - PII in logs or telemetry
 - Known-vulnerable pinned versions on security-sensitive packages
+- `tempfile.mktemp()` (the deprecated name-only API): generates a path without atomically creating the file, leaving a TOCTOU window in which an attacker can predict the name and create a symlink at that path. Python deprecated `mktemp()` in 2.3 yet it still ships. **Hunt**: grep `tempfile\.mktemp\(`. **Fix**: `tempfile.NamedTemporaryFile(...)` or `tempfile.mkstemp(...)` (atomic create-and-return). **High** in any multi-user filesystem context.
+- `yaml.load(...)` without an explicit `Loader=yaml.SafeLoader` (or `yaml.safe_load(...)`). Default `Loader=Loader` deserialises arbitrary Python objects, including instantiating classes and calling `__reduce__` \u2014 a remote code execution vector when the YAML source is anything other than a trusted local file. **Hunt**: grep `yaml\.load\(` \u2014 verify a `Loader=` keyword present with `SafeLoader` or `CSafeLoader`. **Fix**: replace with `yaml.safe_load(...)`. **Critical** on user-supplied YAML; **High** otherwise.
 
 ### Long-Range Bugs (L)
 - Cross-boundary reads required. Follow imports, call sites, and return-shape consumers wherever they live. File against the reviewed-path origin, not the external consumer, but show the trace.
@@ -256,6 +263,7 @@ Scope: Python-level performance only. Pandas, DuckDB, and other library-specific
 - API responses include enough context to debug
 - Logs at the right level for the audience
 - Observability gaps that would prolong incident diagnosis
+- Generic exception messages without context: `raise ValueError("Invalid input")`, `raise RuntimeError("Failed")`, `raise Exception("Error")`. The message must name (a) the failing input value or identifier, (b) the constraint that was violated or the expected shape, and (c) the actionable next step where one exists. **Hunt**: every `raise <ExceptionClass>(<string-literal>)` whose string-literal does not contain a `{...}` placeholder, an f-string interpolation, or a runtime value formatter. **Severity**: Medium when the error is logged-only; **High** when it surfaces to a user or downstream service. Workspace standard #43\u201345. [3.12+]
 
 ---
 
@@ -265,6 +273,7 @@ These domains have dedicated expert agents. The Python Expert does NOT produce s
 
 | Domain | Dedicated expert | When you notice an issue |
 |---|---|---|
+| Runtime correctness defects: validate-before-mutate, non-atomic multi-step state mutations, TOCTOU check-then-act gaps, retry idempotency, boundary errors (off-by-one, empty/single-element, division by zero, slicing edges) | Logic & Correctness Expert | Note in Reflection Log; the orchestrator already dispatches Logic & Correctness Expert on every `.py` path, so the finding will be filed under `LC-` by the right owner. Do not file `F-` findings for these patterns. |
 | Pandas anti-patterns (`iterrows`, `apply(axis=1)`, chained indexing, nullable types, CoW) | Pandas Expert | Note in Reflection Log; recommend running Pandas Expert |
 | DuckDB anti-patterns (Python-side filtering, string SQL, missing push-down) | DuckDB Expert | Note in Reflection Log; recommend running DuckDB Expert |
 | LangGraph graph flow (unreachable nodes, reducer correctness, Send semantics, checkpointing) | LangGraph Author | Note in Reflection Log; recommend running LangGraph Author |
@@ -279,9 +288,56 @@ PY.types findings (modern type *syntax* — `Optional[X]` → `X | None`, `List[
 
 ## Section 9: Python Language Idioms (PY)
 
-**This section is mandatory for every file in the reviewed path.** Walk all 11 sub-checklists against every source file. Tag every finding `Delegation: → Python Modernization Expert`. Every finding must carry a `[version+]` tag indicating the minimum Python version that enables the preferred pattern.
+**This section is mandatory for every file in the reviewed path.** Walk all 17 sub-checklists against every source file. Tag every finding `Delegation: → Python Modernization Expert`. Every finding must carry a `[version+]` tag indicating the minimum Python version that enables the preferred pattern.
 
 The Pythonista hunter in Phase B owns this section. "None identified" is only valid if the full checklist trace is provided.
+
+### PY.module — Module Top-Level Hygiene
+
+Scope: what is allowed to live at column 0 outside any `def`/`class`. The single rule is **no logic at module scope** — the module body runs at import time, and import time is not a place to validate input, mutate registries, open files, call the network, configure logging severity above `DEBUG`, or do anything that can raise on data the importer did not supply.
+
+Walk every source file in the reviewed path and classify every top-level statement against the allow-list below. Anything that is not on the allow-list is a finding — file it once here under PY.module and also under F (it is a fragility) with the F entry cross-referencing the PY.module sub-bullet.
+
+#### Allow-list at module top level
+
+The following are the only statements permitted at column 0:
+
+1. `import` and `from ... import ...` statements.
+2. `def`, `async def`, and `class` definitions (their decorators may run, but the decorator must be pure metadata — see sub-bullet below on decorators with side effects).
+3. Module docstring (the first statement).
+4. `__all__ = [...]`, `__version__ = "..."`, and other dunder-name bindings that are pure data.
+5. Module-level constant assignments — names must be `UPPER_CASE` (or a private `_UPPER_CASE`) and the right-hand side must be a literal, a `Final[...]` annotation around a literal, a frozen container construction (`frozenset({...})`, `MappingProxyType({...})`, `tuple(...)`, `types.MappingProxyType(...)` over a literal dict), or an `Enum`/`StrEnum`/`IntEnum` class definition.
+6. `type X = ...` PEP 695 type alias statements [3.12+].
+7. `LegacyAlias: TypeAlias = ...` only when targeting < 3.12; on 3.12+ this becomes a PY.types finding.
+8. `logger = logging.getLogger(__name__)` — the single canonical logger binding.
+9. The `if TYPE_CHECKING:` guard (with imports inside).
+10. The `if __name__ == "__main__":` guard, whose body must do nothing but call a single `main()` entry point.
+
+#### Forbidden at module top level (every bullet is a PY.module finding)
+
+- **PY.module.call** — a bare function call statement at column 0, including validation helpers (`_check_<x>(<const>)`, `_assert_<x>(...)`, `validate_<x>(...)`), registry mutation calls (`register(...)`, `<dict>.update(...)`, `<list>.append(...)`), and I/O calls (`Path(...).read_text()`, `open(...)`, `requests.get(...)`, `os.makedirs(...)`). **Concrete trigger**: any line at column 0 whose AST node is `Expr(Call(...))`. The motivating defect: `_check_source_trust_weights_exhaustive(_SOURCE_TRUST_WEIGHTS_RAW)` placed between two constant declarations — it crashes import on bad data with no recovery path, and a reviewer scanning for constants reads right past it. **Fix**: move the call into a function that the caller invokes explicitly, into a `__post_init__` / validator on a config dataclass, or into a `@cache`-decorated factory that defers the work until first use [3.12+].
+- **PY.module.compound** — `if`, `for`, `while`, `try`, `with`, or `match` statements at column 0 whose body has side effects. The only conditionals allowed at top level are `if TYPE_CHECKING:` and `if __name__ == "__main__":` (whose body calls `main()` and nothing else). Conditional constant assignment belongs inside a factory function returning the constant. **Hunt**: grep for `^if `, `^for `, `^while `, `^try:`, `^with `, `^match ` and exempt only the two allowed `if` forms [3.12+].
+- **PY.module.mutable-state** — a top-level binding to a mutable container that is mutated elsewhere in the module body or by other modules (`_REGISTRY = {}` followed by top-level `_REGISTRY[...] = ...`, or a class-level mutable singleton). Either freeze it (`MappingProxyType`, `frozenset`, `tuple`) or move the construction into a factory. Mutable module-level state is a long-range bug magnet (L) and an import-order trap [3.12+].
+- **PY.module.io** — any I/O call at module top level: file reads/writes, network calls, environment-variable reads that affect control flow (one `os.environ.get("X", default)` bound to a `Final` is fine; chained logic is not), database connections, subprocess spawns. Import must be free of I/O so the module can be imported in test, in `--help`, in static analysis, and in cold-start measurement [3.12+].
+- **PY.module.logging-noise** — `logger.info(...)`, `logger.warning(...)`, `logger.error(...)`, or `logger.critical(...)` at column 0. Only `logger.debug(...)` is acceptable, and only when import-time diagnostics genuinely help. Use `logging.getLogger(__name__)` to bind, then log inside functions [3.12+].
+- **PY.module.decorator-side-effect** — a decorator applied to a top-level `def`/`class` whose decorator implementation registers, mutates global state, or performs I/O at decoration time (`@app.route(...)`, `@register(...)`, `@cache_at_import_time(...)`). The `def`/`class` statement itself is allowed, but the side effect inside the decorator runs at import — flag it. The fix is usually an explicit `register(handler)` call inside an `init()` function the application calls during startup [3.12+].
+- **PY.module.try-import** — `try: import x ... except ImportError: import y` style import guards. Workspace coding standard #1 forbids these outright; if the project standard does not forbid them, still flag the pattern when the fallback silently degrades functionality. The acceptable alternative is `importlib.util.find_spec(...)` inside a function, or a hard dependency declaration [3.12+].
+- **PY.module.print** — any `print(...)` at column 0. Use `logger.debug(...)` if diagnostic output is truly needed at import; otherwise delete it. `print` at module scope writes to stdout on every import — including from inside test runners, language servers, and JSON-line subprocesses [3.12+].
+- **PY.module.star-import** — `from pkg import *` at module scope. Pollutes the namespace with names not declared by the importer, breaks tooling (lint, autocomplete, type checkers), and can re-export removed symbols invisibly. **Hunt**: grep `^from .* import \*$`. **Fix**: import the specific names. Workspace coding standard #16/#17 forbids this. [3.12+]
+- **PY.module.circular-import** — detected when module A imports module B at top level and module B imports module A at top level (or via a longer cycle through C, D...). Symptoms: `ImportError: cannot import name X from partially initialized module Y`. The TYPE_CHECKING guard suppresses the symptom for type-only imports but not for runtime usage. **Hunt**: walk the import graph of the reviewed path; report any cycle. **Fix**: factor the shared dependency into a third module that both A and B import; never break the cycle with a lazy import inside a function (forbidden by workspace standard #2). Workspace coding standard #5. **High** when the cycle is currently reachable; **Medium** when guarded by TYPE_CHECKING. [3.12+]
+- **PY.module.global-statement** — the `global` keyword used anywhere outside `if __name__ == "__main__":` blocks. Module-level mutable state is already covered by PY.module.mutable-state; `global` makes the mutation explicit but does not make it safer. **Hunt**: grep `^\s*global\s+`. **Fix**: refactor into a class attribute (with the same atomicity concerns surfaced by Logic & Correctness Expert) or a function return value. **Medium**. [3.12+]
+
+#### How to file the finding
+
+A top-level violation is **always two findings**: one F (the fragility — import-time side effect) and one PY.module (the idiom violation). The F finding's "Recommended fix" cross-references the PY.module ID. This duplication is intentional: PY findings are delegated to the Python Modernization Expert; F findings are handled by the executor. Both paths must converge on the same fix.
+
+#### Severity defaults for PY.module
+
+- `PY.module.io`, `PY.module.call`, `PY.module.circular-import` where the call can raise on importer-supplied or environment-supplied data: **High**.
+- `PY.module.compound`, `PY.module.mutable-state`, `PY.module.decorator-side-effect`, `PY.module.global-statement`: **Medium** by default, **High** if the side effect crosses a process boundary or mutates shared registry state.
+- `PY.module.logging-noise`, `PY.module.print`, `PY.module.try-import`, `PY.module.star-import`: **Medium**.
+
+---
 
 ### PY.stdlib — Standard Library Underuse
 
@@ -289,7 +345,7 @@ Focus: third-party or manual code where a stdlib module would do the same job. I
 
 #### Available in Python 3.12 (baseline)
 - `itertools.batched()` not used where fixed-size chunking is done with manual slicing `[i:i+n]` [3.12+]
-- `functools.cache` not used when the only reason `@lru_cache(maxsize=None)` is present is unbounded caching [3.12+]
+- `functools.cache` not used when the only reason `@lru_cache(maxsize=None)` is present is unbounded caching. **Caveat**: both `functools.cache` and `functools.lru_cache` on an **instance method** hold a strong reference to `self` and are a memory leak \u2014 see PY.builtins. Recommend `functools.cache` only when the target is a module-level function; recommend `functools.cached_property` or a module-level function-with-explicit-key for per-instance memoisation. [3.12+]
 - `functools.partial` not used where a `lambda` solely pre-fills one or more arguments of an existing function [3.12+]
 - `collections.Counter` not used where a `dict` is manually incremented [3.12+]
 - `collections.deque` not used where a `list` is used as a FIFO queue (`.pop(0)` or repeated `insert(0, ...)`) [3.12+]
@@ -302,6 +358,7 @@ Focus: third-party or manual code where a stdlib module would do the same job. I
 - `pathlib.Path.mkdir(parents=True, exist_ok=True)` not used where `os.makedirs` is present [3.12+]
 - `pathlib.Path.walk()` not used where `os.walk()` is present — `Path.walk()` is the 3.12 semantic equivalent (same topdown/onerror semantics, Path objects instead of strings) [3.12+]
 - `pathlib.Path.rglob()` not used where recursive glob iteration is needed without top-down control [3.12+]
+- `open(path, "r")` / `open(path, "w")` / `open(path, "a")` / `Path.open(...)` / `Path.read_text(...)` / `Path.write_text(...)` called without an explicit `encoding=` argument on a text-mode operation. The default is platform-dependent (`utf-8` on most modern systems, `cp1252` on Windows, locale-driven elsewhere) and corrupts data silently when the file contains non-ASCII bytes. **Hunt**: grep for these call shapes \u2014 verify `encoding=` is present. **Fix**: `encoding="utf-8"` (or whatever the file actually uses), `errors="strict"` to fail loudly on mismatch. Binary mode (`"rb"`, `"wb"`) is exempt. **High** for any text-mode I/O whose content is not guaranteed ASCII. Workspace coding standard #21\u201323. [3.12+]
 - `contextlib.suppress(ExcType)` not used where `try: ... except ExcType: pass` is the pattern [3.12+]
 - `contextlib.contextmanager` not used where a class with only `__enter__`/`__exit__` does a simple setup/teardown [3.12+]
 - `contextlib.asynccontextmanager` not used where an async class context manager does a simple setup/teardown [3.12+]
@@ -356,6 +413,7 @@ Focus: third-party or manual code where a stdlib module would do the same job. I
 
 #### Available in Python 3.12 (baseline)
 - `%`-formatting (`"Hello %s" % name`) or `.format()` (`"Hello {}".format(name)`) where an f-string is cleaner — **exempt: `logger.*("msg: %s", value)` calls, where `%`-style is intentional for deferred evaluation** [3.12+]
+- **f-string passed as the message argument to `logger.*()`**: `logger.info(f"Processed {expensive_compute(record)} records")`. The f-string is evaluated **before** the logger checks whether the level is enabled; the expensive call runs even when the log line is filtered out. Worse, any PII inside the interpolation is constructed and held in memory regardless of whether it is ever written. **Hunt**: regex `logger\.(debug|info|warning|error|critical|exception)\(f["']` across the codebase. **Fix**: use the `%`-style `logger.info("Processed %s records", expensive_compute(record))` so the formatter runs only when the level is enabled; pass `extra={...}` for structured fields. **High** when the interpolation includes an expensive call or PII; **Medium** otherwise. [3.12+]
 - Manual prefix stripping `if s.startswith(p): s = s[len(p):]` where `.removeprefix(p)` would do [3.9+]
 - Manual suffix stripping `if s.endswith(s): s = s[:-len(s)]` where `.removesuffix(s)` would do [3.9+]
 - `s.split(sep, 1)[0]` / `[1]` dance where `s.partition(sep)` gives head, sep, tail cleanly [3.12+]
@@ -407,6 +465,8 @@ Scope: modernizing *syntax* of existing type annotations. Adding missing annotat
 - `super(ClassName, self)` called with explicit arguments where bare `super()` is correct — exempt only when cooperative multiple inheritance requires explicit class specification [3.12+]
 - `@classmethod` used where `@staticmethod` or a module-level function would be clearer [3.12+]
 - Class used in positional match pattern (`case Foo(x, y):`) without `__match_args__` defined — positional pattern matching silently falls back to keyword-only without it [3.10+]
+- **God class**: a single class exceeding 500 LOC or 20 public methods. Flag for splitting into cohesive components; document the responsibility and identify the seams (commonly: state container vs. behaviour, request handling vs. business logic, persistence vs. domain). **Medium**. [3.12+]
+- **Deep inheritance**: MRO depth greater than 3 levels (counting `object`) without a documented reason. Each level can override behaviour; reasoning becomes intractable. Prefer composition or `Protocol`-based design. **Medium**. [3.12+]
 
 #### Available in Python 3.13 (`[3.13+]`)
 - Immutable value-object class missing `__replace__` method, preventing `copy.replace()` usage — implement `__replace__(self, **changes)` on any immutable value object [3.13+]
@@ -431,6 +491,9 @@ Scope: modernizing *syntax* of existing type annotations. Adding missing annotat
 #### Available in Python 3.12 (baseline)
 - `raise SomeError("msg")` without `raise SomeError("msg") from original_exc` in an `except` block — the original exception context is lost
 - `contextlib.suppress(ExcType)` not used where `try: ... except ExcType: pass` is the pattern for intentional single-exception swallowing
+- **Catch-without-re-raise-or-log** (workspace standard #35): every caught exception must be either logged AND re-raised, OR converted to a documented domain exception that wraps the original with `from`. Silent `except X: pass` (without `contextlib.suppress` justification) is a defect. `except X: log; return None` is a defect unless the return-`None` is part of the documented contract. **Hunt**: every `except` block whose body has no `raise`, no `logger.exception(`, and no domain-exception wrap. **High** when the swallowed error would have indicated data corruption, security failure, or contract violation; **Medium** otherwise. [3.12+]
+- Bare-string log inside an `except` block (`logger.error("failed")`) without operation context. The error message must include the operation being attempted, the relevant identifiers (request ID, user ID, file path, key), and the actionable fix. **Medium**. [3.12+]
+- `logger.error("failed: %s", e)` where `logger.exception("failed")` would attach the full traceback. **Medium**. [3.12+]
 
 #### Available in Python 3.11+ (flag if missed)
 - `exception.add_note("context")` not used where additional context (user ID, file path, operation being performed) would help debugging — `add_note()` attaches structured context to the exception without wrapping it [3.11+]
@@ -456,6 +519,8 @@ Scope: modernizing *syntax* of existing type annotations. Adding missing annotat
 - Manual boolean fold `ok = True; for x in items: if not pred(x): ok = False` where `all(pred(x) for x in items)` would do
 - Manual `any()` / `all()` emulation with an early-return loop
 - `repr(callable_obj)` used as a stable identifier or display name for a callable — `repr()` includes the memory address for most callables (`<function foo at 0x7f...>`), making the result non-deterministic across runs, unsuitable for audit logs, traces, task names, or any identifier that must be reproducible. **Stable priority chain:** (1) `getattr(obj, "__name__", None)` for named functions and methods; (2) `getattr(getattr(obj, "func", None), "__name__", None)` for `functools.partial`-like wrappers; (3) `f"{obj.__class__.__module__}.{obj.__class__.__qualname__}"` as a fully-qualified class name for callable instances with no `__name__`. Flag any `repr(x)` where `x` is typed or inferred as a callable and the result is stored, logged, or used as a key [3.12+]
+- `Enum` member compared with `==` to a raw string or int literal: `if mode == "read":` instead of `if mode == Mode.READ:` or `if mode.value == "read":`. The enum member is never `==` to the wrapped value unless the enum mixes in `str`/`int` (e.g., `class Mode(str, Enum)`); the comparison silently returns `False` and the branch never executes. **Hunt**: any `==` where one side is typed as `Enum` (or its subclass like `StrEnum`/`IntEnum`) and the other is a literal. **High**. [3.12+]
+- `functools.lru_cache` or `functools.cache` decorating an instance method (i.e. the first argument is `self`). The cache holds a strong reference to `self`, blocking garbage collection of every instance ever cached. **Hunt**: `@lru_cache` or `@cache` immediately above a `def` whose first parameter is `self`. **Fix**: cache on a module-level function with explicit identity keys, use `functools.cached_property` for per-instance memoisation, or evict explicitly via a `weakref.WeakValueDictionary`. **High** in long-running services. [3.12+]
 
 #### Available in Python 3.14 (`[3.14+]`)
 - `NotImplemented` used in a boolean context (e.g., `if obj.__eq__(other) is NotImplemented:`) — raises `TypeError` from 3.14; use `is NotImplemented` in the return position, never evaluate it as a bool [3.14+]
@@ -470,6 +535,77 @@ Scope: modernizing *syntax* of existing type annotations. Adding missing annotat
 - `asyncio.wait_for(coro, timeout=n)` used where the `asyncio.timeout(n)` context manager is cleaner for scoping the deadline — note: `wait_for` cancels the inner coroutine on timeout; `asyncio.timeout()` does not cancel the outer task, so the migration requires review of cleanup logic [3.11+]
 - `async for` not used on async generators that yield values one at a time
 - `async with` not used on async context managers
+- `asyncio.run()` called from inside an `async def`, from a callback running inside a running event loop, or from any code reachable from a FastAPI handler, a Jupyter notebook cell, an `IPython` shell, a `pytest-asyncio` test, or a worker that already started a loop. Raises `RuntimeError: asyncio.run() cannot be called from a running event loop`. **Hunt**: grep `asyncio\.run\(` in every file; for each match, check whether the enclosing function is `async def` or whether the file imports `fastapi`, `IPython`, `jupyter`, or `pytest_asyncio`. **Fix**: if already inside a loop, `await` the coroutine directly or use `asyncio.create_task(coro)` to schedule it; never start a new loop. **High** because the failure is at runtime and often only on hot paths. [3.12+]
+- **Unbounded fan-out with `asyncio.gather(*coros)` or `TaskGroup` over a user-sized collection**: dispatching one task per input element with no `asyncio.Semaphore` or `asyncio.BoundedSemaphore` produces a thundering herd that exhausts connection pools, downstream rate limits, file descriptors, or memory. **Hunt**: any `asyncio.gather(*[f(x) for x in collection])`, `asyncio.gather(*(f(x) for x in collection))`, or `async with TaskGroup() as tg: for x in collection: tg.create_task(f(x))` where `collection` is not bounded by a `Final[int]` constant at module scope. **Fix**: wrap each task in an `async with semaphore:` block, with `semaphore = asyncio.Semaphore(N)` where `N` is the documented concurrency budget. **High** when the call lives in a request path or batch worker. [3.12+]
+- **`concurrent.futures.ThreadPoolExecutor(max_workers=None)` or `ProcessPoolExecutor(max_workers=None)`** without justification. The default sizing rule changed across Python versions and is wrong for both common cases: too small for I/O-bound work that benefits from high concurrency, too large for memory-constrained workloads. Always declare the worker count explicitly with a comment naming the workload type (`# I/O-bound, N=32`) and the resource budget. **Hunt**: grep `(Thread|Process)PoolExecutor\(` for arguments. **Fix**: explicit `max_workers=N` from configuration. **Medium**, **High** in production services. [3.12+]
+
+---
+
+### PY.datetime — Date and Time Correctness
+
+Time-zone defects are a top-five cause of production wrong-result bugs. The Python `datetime` API silently allows mixing tz-aware and tz-naive values, and the workspace standard expects UTC throughout.
+
+#### Available in Python 3.12 (baseline)
+- `datetime.datetime.now()` called without `tz=` in any code that compares, serialises, persists, or transports the value. Naive datetimes (no `tzinfo`) are acceptable only for purely-local, never-serialised use. **Hunt**: grep `datetime\.now\(\)\s*[^t]` and `datetime\.datetime\.now\(\s*\)`. **Fix**: `datetime.datetime.now(tz=datetime.UTC)`. **High** when the value crosses a boundary (DB, API, log). [3.11+]
+- `datetime.datetime.utcnow()` and `datetime.datetime.utcfromtimestamp()` — already in PY.deprecated, replicated here as a cross-link. [3.12+]
+- Comparison or arithmetic between a tz-aware datetime and a tz-naive datetime. Python raises `TypeError` for ordering comparisons but **silently returns `False` for `==`**, which is the bug. **Hunt**: any `<`, `>`, `<=`, `>=`, `==`, `!=`, `-` between two datetimes where one side comes from `datetime.now()` with no `tz=` and the other from a stored value (DB, API, JSON). **High**. [3.12+]
+- `datetime.datetime(year, month, day, ...)` constructor without `tzinfo=` when the timestamp will be persisted. **Medium**. [3.12+]
+- `time.time()` used for measuring elapsed time. `time.time()` is wall-clock and can jump backward under NTP adjustment. Use `time.monotonic()` for elapsed-time measurement, `time.perf_counter()` for benchmark precision, `time.time_ns()` for wall-clock event timestamps. **Hunt**: `start = time\.time\(\)` paired with `time\.time\(\) - start`. **Medium**. [3.12+]
+- Date arithmetic with `timedelta` across DST boundaries without converting to UTC first. **Medium**. [3.12+]
+- `datetime.fromisoformat(s)` on user input without try/except for malformed input — Python 3.11 widened parser tolerance but it still raises on invalid input. **Low** in trusted contexts, **High** when `s` is user-supplied. [3.11+]
+
+---
+
+### PY.subprocess — Subprocess Hygiene
+
+`subprocess` is a frequent source of resource leaks, silent failure, and injection. These rules cover the cases the workspace has hit before.
+
+#### Available in Python 3.12 (baseline)
+- `subprocess.Popen(...)` not used as a context manager and not paired with explicit `.wait()` / `.terminate()` / `.communicate()` on every exception path. **Hunt**: grep `Popen\(` — verify the next 10 lines have `with`, `.wait(`, `.terminate(`, `.communicate(`, or a `try`/`finally`. **Fix**: `with subprocess.Popen(...) as proc:`. **High** because the leaked process holds file descriptors and may write to a closed pipe. [3.12+]
+- `subprocess.run(...)` called without `check=True`. The non-zero exit silently passes; the application continues with corrupted or missing output. **Hunt**: grep `subprocess\.run\(` — verify `check=True` is in the call. **Fix**: pass `check=True` and catch `CalledProcessError` explicitly when failure is a recoverable case. **High** for any call whose failure should propagate; **Medium** for advisory commands. [3.12+]
+- `subprocess.run(..., shell=True)` or `Popen(..., shell=True)` with any value that is not a literal string. Shell injection is trivial when any component is interpolated. **Hunt**: grep `shell=True` — verify the command is a hardcoded literal. **Fix**: pass a list (`["cmd", "arg1", "arg2"]`) and drop `shell=True`. **Critical** when interpolated value is user-supplied; **High** otherwise. [3.12+]
+- `subprocess.run(...)` / `Popen(...)` without `timeout=` on any call to an external program. A hung subprocess hangs the caller indefinitely. **Hunt**: grep `subprocess\.(run|Popen)\(` — verify a `timeout=` kwarg. **Medium** by default, **High** when the call sits on a request path. [3.12+]
+- `text=True` (or `encoding=` / `errors=`) missing on subprocess calls that consume `stdout` or `stderr`. Mixing bytes and str causes type errors downstream and platform-dependent encoding. **Hunt**: `capture_output=True` or `stdout=PIPE` without `text=True`. **Medium**. [3.12+]
+
+---
+
+### PY.generators — Resource Cleanup Across Yield
+
+Generators that hold a resource open across a `yield` leak the resource if the consumer breaks early — the generator never resumes past the yield, the `finally` never runs.
+
+#### Available in Python 3.12 (baseline)
+- Generator (`def` or `async def` with `yield`) that acquires a resource (file, connection, lock, subprocess, temp dir) before the yield and releases it after the yield, without wrapping the body in `try` / `finally`. **Hunt**: any function whose body contains both `yield` and one of `open(`, `tempfile.`, `.acquire(`, `.connect(`, `Popen(`. **Fix**: wrap the body in `try` / `finally` and release in `finally`, or use `contextlib.contextmanager` / `contextlib.asynccontextmanager` if the function is being used as a context manager. **High** — silent resource leak, hard to reproduce. [3.12+]
+- `tempfile.NamedTemporaryFile(delete=False)` / `tempfile.TemporaryDirectory(...)` used with manual cleanup (`os.unlink(...)`, `shutil.rmtree(...)`) on the happy path only. **Hunt**: grep `NamedTemporaryFile.*delete\s*=\s*False`; verify the cleanup is in `finally` or a context manager. **Fix**: use `with tempfile.NamedTemporaryFile() as f:` (default `delete=True`) or `with tempfile.TemporaryDirectory() as d:`. **Medium**, **High** in long-running services. [3.12+]
+- `open(...)` without `with` (already a flake8/ruff finding, but record here for completeness). [3.12+]
+- Database cursor or connection acquired outside a `with` block. Drivers leak prepared statements and server-side cursors. **High**. [3.12+]
+
+---
+
+### PY.config — Configuration and Environment Reads
+
+Configuration parsing is silently wrong more often than it is silently broken. The string-equality footgun on env vars is the most common production miss.
+
+#### Available in Python 3.12 (baseline)
+- Boolean configuration parsed from an environment variable via raw string equality: `os.environ.get("X", "false") == "true"` accepts only the exact literal `"true"` and silently treats `"True"`, `"TRUE"`, `"1"`, `"yes"`, `"on"` as falsy. **Hunt**: regex `os\.environ(\.get)?\([^)]+\)\s*==\s*["'](?:true|false|yes|no|1|0|on|off)["']`. **Fix**: parse with a single canonical function. Use Pydantic Settings (`bool` field) for typed configuration; for one-off cases write `_truthy = {"1", "true", "yes", "on"}` and compare lowercased. **Medium**, **High** when the flag controls security or data-path behaviour. [3.12+]
+- `os.environ["VAR"]` at module top level (covered by PY.module.io, replicated here so PY.config is self-contained).
+- Default values for environment-driven config that differ between dev and prod without a warning at startup. **Hunt**: `os.environ.get("X", "<production-looking-default>")` where the default would be unsafe in production (`DEBUG=True`, `ALLOWED_HOSTS=*`, etc.). **High** when the misconfiguration is silent and security-relevant. [3.12+]
+- Pydantic `BaseSettings` model without `model_config = SettingsConfigDict(extra="forbid")`. Allows env vars with typos to be silently ignored. **Medium**. [3.12+]
+- Config dataclass without `__post_init__` validation when fields have non-trivial constraints (URL format, port range, timeout > 0). **Medium**. [3.12+]
+- `os.environ.get("URL")` used directly as a URL without `urllib.parse.urlparse` validation. **Low** when source is operator-controlled, **High** when source is user-controlled. [3.12+]
+
+---
+
+### PY.http — HTTP Client Hygiene
+
+HTTP client misuse is a routine source of latency, resource exhaustion, and partial-failure bugs.
+
+#### Available in Python 3.12 (baseline)
+- `requests.get(...)` / `requests.post(...)` / etc. used directly without a `Session`. Each call opens a fresh TCP and TLS connection; pooling, retries, and default headers are lost. **Hunt**: grep `^\s*requests\.(get|post|put|delete|patch|head)\(` (i.e. not `session.get(...)`). **Fix**: create a module-level `requests.Session()` (or `httpx.Client()`) once and reuse it. **Medium**, **High** in hot paths. [3.12+]
+- `requests.*` / `httpx.*` calls without `timeout=`. The default is no timeout — the call hangs forever on a slow peer. **Hunt**: grep `requests\.|httpx\.` — verify each call has a `timeout=` kwarg or that the session has a default. **High** on any request path. [3.12+]
+- HTTP response used without calling `response.raise_for_status()` or checking `response.status_code`. The body is consumed as if successful even on 5xx. **Hunt**: grep `\.get\(|\.post\(` followed by `\.json\(\)` or `\.text` without an intervening status check. **High**. [3.12+]
+- Hardcoded URLs / hostnames in module-level constants without environment override. **Medium**. [3.12+]
+- `Authorization`, API keys, or session tokens passed in the URL query string instead of headers. Tokens land in access logs, browser history, and referrers. **Critical** for tokens that grant access. [3.12+]
+- `verify=False` on `requests` or `httpx` calls without an explicit, documented reason. **High** by default. [3.12+]
 
 ---
 
@@ -620,37 +756,55 @@ The structure below is the literal content of the saved Markdown file.
 <U1, U2, ...>
 
 ## 9. Python Language Idioms
-### 9a. PY.stdlib — Standard Library Underuse
+### 9a. PY.module — Module Top-Level Hygiene
+<PY.module findings or "None identified — checklist trace below">
+
+### 9b. PY.stdlib — Standard Library Underuse
 <PY.stdlib findings or "None identified — checklist trace below">
 
-### 9b. PY.loops — Loop and Iteration
+### 9c. PY.loops — Loop and Iteration
 <PY.loops findings or "None identified — checklist trace below">
 
-### 9c. PY.strings — String Handling
+### 9d. PY.strings — String Handling
 <PY.strings findings or "None identified — checklist trace below">
 
-### 9d. PY.types — Type Syntax Modernization
+### 9e. PY.types — Type Syntax Modernization
 <PY.types findings or "None identified — checklist trace below">
 
-### 9e. PY.classes — Class and OOP Patterns
+### 9f. PY.classes — Class and OOP Patterns
 <PY.classes findings or "None identified — checklist trace below">
 
-### 9f. PY.dataclasses — Dataclass Patterns
+### 9g. PY.dataclasses — Dataclass Patterns
 <PY.dataclasses findings or "None identified — checklist trace below">
 
-### 9g. PY.exceptions — Exception Patterns
+### 9h. PY.exceptions — Exception Patterns
 <PY.exceptions findings or "None identified — checklist trace below">
 
-### 9h. PY.builtins — Builtin and Operator Idioms
+### 9i. PY.builtins — Builtin and Operator Idioms
 <PY.builtins findings or "None identified — checklist trace below">
 
-### 9i. PY.async — Modern Async Patterns
+### 9j. PY.async — Modern Async Patterns
 <PY.async findings or "None identified — checklist trace below">
 
-### 9j. PY.match — Structural Pattern Matching
+### 9k. PY.datetime — Date and Time Correctness
+<PY.datetime findings or "None identified — checklist trace below">
+
+### 9l. PY.subprocess — Subprocess Hygiene
+<PY.subprocess findings or "None identified — checklist trace below">
+
+### 9m. PY.generators — Resource Cleanup Across Yield
+<PY.generators findings or "None identified — checklist trace below">
+
+### 9n. PY.config — Configuration and Environment Reads
+<PY.config findings or "None identified — checklist trace below">
+
+### 9o. PY.http — HTTP Client Hygiene
+<PY.http findings or "None identified — checklist trace below">
+
+### 9p. PY.match — Structural Pattern Matching
 <PY.match findings or "None identified — checklist trace below">
 
-### 9k. PY.deprecated — Active Deprecations
+### 9q. PY.deprecated — Active Deprecations
 <PY.deprecated findings or "None identified — checklist trace below">
 
 ## Prioritized Summary
@@ -679,7 +833,7 @@ The structure below is the literal content of the saved Markdown file.
 
 ## Notes for the agent
 
-- Section 9 (Python Language Idioms) is the reason this agent exists. If The Pythonista persona in Phase B finds nothing and all 11 sub-checklists show "None identified," re-read Section 9 carefully and verify the checklist traces are genuine, not rubber-stamped.
+- Section 9 (Python Language Idioms) is the reason this agent exists. If The Pythonista persona in Phase B finds nothing and all 17 sub-checklists show "None identified," re-read Section 9 carefully and verify the checklist traces are genuine, not rubber-stamped.
 - Version gating is mandatory. A `[3.14+]` finding filed against a project targeting 3.12 is invalid. Read the Python version first; check `pyproject.toml` `requires-python` field.
 - t-strings (`t"..."`) are a 3.14 feature. Do not recommend them for projects targeting 3.12 or 3.13. For projects targeting 3.14+, flag f-strings used to construct SQL, HTML, or shell commands as candidates for t-string replacement where the interpolated values come from external/user input.
 - `from __future__ import annotations` deprecation is 3.14-only. Do not file this finding against 3.12 or 3.13 code — for those, it is still the recommended way to enable deferred annotation evaluation.

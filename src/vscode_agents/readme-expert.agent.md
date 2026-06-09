@@ -28,7 +28,7 @@ A README is complete only when ALL of the following are true. These are pass/fai
 | AC-10 | Cross-references link out instead of inlining | No section >20 lines that belongs in another file |
 | AC-11 | Third-party APIs cited match the pinned version in `uv.lock` | Version cross-check |
 | AC-12 | Update mode: no section rewritten without a code-drift justification | Diff log review |
-| AC-13 | Error messages in source code that include remediation instructions (e.g., `"run build_dtc_4w_index"`, `"run scripts/dataprep.py"`) are consistent with the README's documented commands — the README does not send users to a different procedure than the code's own error messages do | Error-remediation catalog from Step 2 cross-checked against README content |
+| AC-13 | **README Expert is the authoritative owner of error-recovery message accuracy across the codebase.** Error messages in source code that include remediation instructions (e.g., `"run build_dtc_4w_index"`, `"run scripts/dataprep.py"`) are consistent with the README's documented commands \u2014 the README does not send users to a different procedure than the code's own error messages do, and the code's error messages do not point at removed or renamed artifacts. Other agents (Docstring Expert AC-13, Type Annotation Expert AC-13 Step 2b) may surface stale error-message references as a side observation, but **this AC is where the recovery-text-vs-procedure cross-check is owned**: file findings here when the README and a `raise` message diverge on the remediation step, when the `raise` message points to a missing artifact, or when the README documents a procedure no error message ever directs users to. | Error-remediation catalog from Step 2 cross-checked against README content |
 
 ---
 

@@ -1,4 +1,5 @@
 ---
+user-invocable: false
 description: "Use when: writing, reviewing, or optimizing README documentation for a Python package, module, file, folder, or repository. Reads the actual code, produces a README organized by reader question (not writer outline), verifies every code example runs, and respects existing README content when updating."
 name: "README Expert"
 tools: [vscode, execute, read, agent, edit, search, web, browser, 'microsoft/markitdown/*', 'playwright/*', 'langchain-mcp/*', 'visualization-mcp/*', ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, todo]

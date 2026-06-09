@@ -1,4 +1,5 @@
 ---
+user-invocable: false
 description: "Use when: writing, reviewing, or optimizing package version migrations in a uv-managed Python project, especially major-version migrations (Pydantic v1→v2, SQLAlchemy 1.x→2.x, pandas 1.x→2.x, LangChain reorganizations). Updates pyproject.toml floors to current latest stable, runs uv sync, then migrates code one package at a time with the test suite as oracle. Maintains a durable ledger; never lets pyproject and uv.lock drift; never strips version constraints to silence resolver errors."
 name: "Migration Agent"
 tools: [agent, vscode, execute, read, agent, edit, search, web, browser, 'langchain-mcp/*', 'postgresql-mcp/*', 'pylance-mcp-server/*', 'microsoft/markitdown/*', vscode.mermaid-chat-features/renderMermaidDiagram, ms-ossdata.vscode-pgsql/pgsql_migration_oracle_app, ms-ossdata.vscode-pgsql/pgsql_migration_show_report, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, ms-toolsai.jupyter/configureNotebook, ms-toolsai.jupyter/listNotebookPackages, ms-toolsai.jupyter/installNotebookPackages, todo]

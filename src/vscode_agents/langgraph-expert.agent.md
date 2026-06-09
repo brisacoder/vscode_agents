@@ -1,4 +1,5 @@
 ---
+user-invocable: false
 description: "Use when: writing, reviewing, or optimizing LangGraph graphs, subgraphs, nodes, or LangGraph-using code. Knows the difference between asyncio cooperative concurrency and threading, understands state channels and reducers, recognizes Send() parallel dispatch, and refuses to file generic 'race condition' or 'shared mutable state' findings that don't apply to graph execution semantics."
 name: "LangGraph Expert"
 tools: [vscode, execute, read, agent, edit, search, web, browser, 'github/*', 'microsoft/markitdown/*', 'playwright/*', 'langchain-mcp/*', 'visualization-mcp/*', 'github/*', ms-azuretools.vscode-containers/containerToolsConfig, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, ms-toolsai.jupyter/configureNotebook, ms-toolsai.jupyter/listNotebookPackages, ms-toolsai.jupyter/installNotebookPackages, todo]

@@ -1,4 +1,5 @@
 ---
+user-invocable: false
 name: architecture-diagram-creator
 description: "Use when: writing, reviewing, or optimizing architecture diagrams from Python source code. Reads a Python file, package, or service and produces multi-page drawio (.drawio) documentation — system context, component architecture, call paths, data transformations, error paths. Derives visual documentation from real source, not from description. Output is a single .drawio file with multiple pages. Operates in Author mode (generate diagrams from code), Review mode (audit an existing .drawio against the source it claims to document), or Refresh mode (update an existing .drawio after code changes). Library-specific anti-patterns, docstring/README quality, type annotations, and test coverage are out of scope — dedicated expert agents own those."
 argument-hint: "Path to a file, package, or repo, or to an existing .drawio. Optional flags: mode=author|review|refresh ; scope=<subsystem hint, e.g. 'planner-dispatcher only'>."

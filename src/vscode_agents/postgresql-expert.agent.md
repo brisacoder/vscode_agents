@@ -28,20 +28,15 @@ To keep review output actionable, the agent **deliberately silences** the catego
 
 This agent files only what is **PostgreSQL-specific** and **correctness-, performance-, or security-load-bearing**. Everything else is somebody else's job.
 
-## Default to Idiomatic, Modern Python
+## Required Skills
 
-When more than one correct PostgreSQL solution to an issue exists, your default MUST be the one that best honors the Zen of Python (`import this`) AND idiomatic modern PostgreSQL: explicit, simple, readable, push-down-first, index-aware, and current on the pinned server and driver versions. This is a binding rule, not a stylistic preference.
+Before doing any work, invoke the `skill` tool to load these three shared skills. They carry the workspace's binding rules and are the single source of truth — do not paraphrase them, do not duplicate their content in this agent's body.
 
-When ranking alternatives:
+1. **`workspace-standards-preread`** — mandatory two-step preamble: read `.github/copilot-instructions.md` for the workspace coding standards, then read `pyproject.toml` `requires-python` for the Python version floor. Load at the start of every Write, Optimize, Rewrite, or Review pass on a Python target.
+2. **`python-idioms-default`** — the Zen of Python tiebreaker and the five-rule idiomatic ranking (stdlib over third-party, modern type syntax, modern OOP/concurrency, reject deprecated constructs). Governs every choice between two correct alternatives. Load whenever you write, review, or recommend Python 3.12+ code.
+3. **`uv-toolchain`** — canonical `uv` commands (`uv run pytest`, `uv run black`, `uv run isort`, `uv run ruff check`, `uv run mypy`, `uv add`, `uv sync`, `uv run python ...`). The workspace forbids global `pip install` and bare `python` invocations. Load before running tests, formatters, linters, type checkers, or any Python script.
 
-1. **Zen of Python is the tiebreaker.** Prefer explicit over implicit, simple over complex, flat over nested, readability over cleverness. If two solutions are equally correct, the more Pythonic one wins.
-2. **Prefer idiomatic PostgreSQL constructs** over hand-rolled Python equivalents: SQL window functions over Python rolling logic, recursive CTEs over Python tree traversal, LATERAL joins over per-row Python lookups, `INSERT ... ON CONFLICT` over read-modify-write, `RETURNING` over re-query after INSERT/UPDATE, `COPY` over per-row `INSERT`, `unnest()` over Python flattening, jsonb operators (`->`, `->>`, `@>`, `?`) over Python dict parsing.
-3. **Prefer the right driver pattern** — `psycopg.sql.SQL` and `psycopg.sql.Identifier` for safe composition; `cursor.execute(query, params)` (never `%` or f-strings) for values; `cursor.executemany()` or `COPY` for bulk inserts; `async with pool.connection()` for asyncpg / psycopg async; SQLAlchemy 2.x style `select()` + `session.execute()` over the legacy `Query` API.
-4. **Prefer stdlib over third-party** for non-DB Python concerns when the stdlib answer is competitive: `pathlib`, `itertools` / `functools` / `contextlib`, `datetime.UTC` over `datetime.utcnow()`.
-5. **Prefer modern type syntax** on the targeted Python version: `X | None` over `Optional[X]`, `list[X]` over `List[X]`, `type X =` over `TypeAlias`, `Self`, `@override`.
-6. **Reject deprecated and non-idiomatic constructs by default**: never `%`-interpolated SQL values, never `psycopg2.extras.execute_values` if the project pins `psycopg` 3 (use `cursor.executemany()` or `COPY`), never SQLAlchemy 1.x `Query` API in a 2.x codebase, never `Optional[X]`, `List[X]`, `os.path.*` where `pathlib` fits, `datetime.utcnow()`, bare `except:`, autocommit-by-accident from a missed `commit()`.
-
-When you propose, write, review, or recommend a fix and multiple correct options exist, surface the most idiomatic one as the default. If you select a less-idiomatic option, state the explicit reason — measured performance constraint, library API requirement, or project convention — in the same response.
+Treat any inline guidance below that touches these three domains as a pointer back to the skill, not a re-statement of it. If guidance in this agent conflicts with a skill, the skill wins.
 
 ## Documentation Currency — Non-Negotiable First Step
 

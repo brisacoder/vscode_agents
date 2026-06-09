@@ -20,19 +20,15 @@ To keep review output actionable, the agent deliberately silences categories own
 
 This agent files only what is **DuckDB-specific** and **performance- or correctness-load-bearing**.
 
-## Default to Idiomatic, Modern Python
+## Required Skills
 
-When more than one correct DuckDB solution to an issue exists, your default MUST be the one that best honors the Zen of Python (`import this`) AND idiomatic modern DuckDB: explicit, simple, readable, push-down-first, and current on the pinned DuckDB version. This is a binding rule, not a stylistic preference.
+Before doing any work, invoke the `skill` tool to load these three shared skills. They carry the workspace's binding rules and are the single source of truth — do not paraphrase them, do not duplicate their content in this agent's body.
 
-When ranking alternatives:
+1. **`workspace-standards-preread`** — mandatory two-step preamble: read `.github/copilot-instructions.md` for the workspace coding standards, then read `pyproject.toml` `requires-python` for the Python version floor. Load at the start of every Write, Optimize, Rewrite, or Review pass on a Python target.
+2. **`python-idioms-default`** — the Zen of Python tiebreaker and the five-rule idiomatic ranking (stdlib over third-party, modern type syntax, modern OOP/concurrency, reject deprecated constructs). Governs every choice between two correct alternatives. Load whenever you write, review, or recommend Python 3.12+ code.
+3. **`uv-toolchain`** — canonical `uv` commands (`uv run pytest`, `uv run black`, `uv run isort`, `uv run ruff check`, `uv run mypy`, `uv add`, `uv sync`, `uv run python ...`). The workspace forbids global `pip install` and bare `python` invocations. Load before running tests, formatters, linters, type checkers, or any Python script.
 
-1. **Zen of Python is the tiebreaker.** Prefer explicit over implicit, simple over complex, flat over nested, sparse over dense, readability over cleverness. If two solutions are equally correct, the more Pythonic one wins.
-2. **Prefer idiomatic DuckDB constructs** over hand-rolled Python equivalents: SQL window functions over Python rolling/expanding logic, ASOF joins over manual nearest-key lookups, CTEs over deeply nested subqueries, `read_parquet(glob)` over per-file Python loops, parameterized queries (`?` or `$1`) over string interpolation, native `LIST`/`STRUCT` types over JSON-string columns.
-3. **Prefer stdlib over third-party** for non-DuckDB Python concerns when the stdlib answer is competitive: `pathlib` over `os.path`, `itertools` / `functools` / `contextlib` over manual boilerplate, `datetime.UTC` over `datetime.utcnow()`.
-4. **Prefer modern type syntax** on the targeted Python version: `X | None` over `Optional[X]`, `list[X]` over `List[X]`, `type X =` over `TypeAlias`, `Self`, `@override`, `LiteralString`.
-5. **Reject deprecated and non-idiomatic constructs by default**: never post-scan Python filtering / aggregation / joins, never string-interpolated SQL values, never `SELECT *` when column pruning is possible, never `.df()`-then-Python-loop, never `Optional[X]`, `List[X]`, `os.path.*` where `pathlib` fits, `datetime.utcnow()`, bare `except:`, `for i in range(len(x))`.
-
-When you propose, write, review, or recommend a fix and multiple correct options exist, surface the most idiomatic one as the default. If you select a less-Pythonic or less-DuckDB-idiomatic option, state the explicit reason — measured performance constraint, library API requirement, or project convention — in the same response.
+Treat any inline guidance below that touches these three domains as a pointer back to the skill, not a re-statement of it. If guidance in this agent conflicts with a skill, the skill wins.
 
 ## Documentation Currency — Non-Negotiable First Step
 

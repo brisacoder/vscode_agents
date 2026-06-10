@@ -14,7 +14,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `pandas-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/pandas-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -27,7 +27,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `pandas-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/pandas-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -40,7 +40,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `pandas-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/pandas-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -53,7 +53,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `duckdb-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/duckdb-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -66,7 +66,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `duckdb-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/duckdb-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -79,7 +79,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `duckdb-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/duckdb-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -92,7 +92,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `langgraph-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/langgraph-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -105,7 +105,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `langgraph-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/langgraph-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -118,7 +118,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `langgraph-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/langgraph-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -131,7 +131,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `docstring-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/docstring-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -144,7 +144,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `docstring-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/docstring-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -157,7 +157,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `docstring-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/docstring-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -170,7 +170,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `unit-test-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/unit-test-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -183,7 +183,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `unit-test-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/unit-test-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -196,7 +196,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `unit-test-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/unit-test-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -209,7 +209,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `type-annotation-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/type-annotation-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -222,7 +222,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `type-annotation-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/type-annotation-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -235,7 +235,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `type-annotation-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/type-annotation-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -248,7 +248,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `readme-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/readme-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -261,7 +261,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `readme-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/readme-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -274,7 +274,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `readme-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/readme-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -287,7 +287,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `python-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/python-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -300,7 +300,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `python-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/python-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -313,7 +313,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `python-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/python-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -326,7 +326,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `bigquery-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/bigquery-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -339,7 +339,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `bigquery-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/bigquery-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -352,7 +352,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `bigquery-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/bigquery-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -365,7 +365,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `postgresql-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/postgresql-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -378,7 +378,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `postgresql-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/postgresql-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -391,7 +391,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `postgresql-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/postgresql-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -404,7 +404,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -417,7 +417,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -430,7 +430,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -443,7 +443,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `architecture-diagram-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/architecture-diagram-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -456,7 +456,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `architecture-diagram-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/architecture-diagram-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -469,7 +469,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `architecture-diagram-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/architecture-diagram-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -482,7 +482,7 @@ handoffs:
 
       **Skip**: formatting, style, documentation, type annotations (unless they mask a logic bug). Focus exclusively on runtime correctness.
 
-      Save your findings to `logic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/logic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -495,7 +495,7 @@ handoffs:
 
       **Skip**: formatting, style, documentation, type annotations (unless they mask a logic bug). Focus exclusively on runtime correctness.
 
-      Save your findings to `logic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/logic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -508,7 +508,7 @@ handoffs:
 
       **Skip**: formatting, style, documentation, type annotations (unless they mask a logic bug). Focus exclusively on runtime correctness.
 
-      Save your findings to `logic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/logic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -525,7 +525,7 @@ handoffs:
 
       File every applicable `PR-` finding from your catalog (`PR-budget-exceeded`, `PR-no-plan`, `PR-formatter-not-run`, `PR-lint-failure`, `PR-non-conventional`, `PR-scope-creep`, `PR-binary-no-review`, `PR-runnable-gate-broken`). The rules are absolute; do not soften them for "mostly markdown", "mostly tests", "mostly generated", or "urgent hotfix".
 
-      Save your findings to `pr-discipline-review-<sanitized-pr-ref>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/pr-discipline-review-<sanitized-pr-ref>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -542,7 +542,7 @@ handoffs:
 
       File every applicable `PR-` finding from your catalog. The rules are absolute; do not soften them.
 
-      Save your findings to `pr-discipline-review-<sanitized-pr-ref>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/pr-discipline-review-<sanitized-pr-ref>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -559,7 +559,7 @@ handoffs:
 
       File every applicable `PR-` finding from your catalog. The rules are absolute; do not soften them.
 
-      Save your findings to `pr-discipline-review-<sanitized-pr-ref>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/pr-discipline-review-<sanitized-pr-ref>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -598,7 +598,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `pydantic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/pydantic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -611,7 +611,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `pydantic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/pydantic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -624,7 +624,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `pydantic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/pydantic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -637,7 +637,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `fastapi-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/fastapi-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -650,7 +650,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `fastapi-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/fastapi-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -663,7 +663,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `fastapi-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/fastapi-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -676,7 +676,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `sklearn-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/sklearn-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -689,7 +689,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `sklearn-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/sklearn-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -702,7 +702,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `sklearn-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/sklearn-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -715,7 +715,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `pytorch-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/pytorch-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -728,7 +728,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `pytorch-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/pytorch-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -741,7 +741,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `pytorch-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/pytorch-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -754,7 +754,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `gcp-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/gcp-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -767,7 +767,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `gcp-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/gcp-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -780,7 +780,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `gcp-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/gcp-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -793,7 +793,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `aws-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/aws-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -806,7 +806,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `aws-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/aws-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -819,7 +819,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `aws-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/aws-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -832,7 +832,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `pyarrow-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/pyarrow-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -845,7 +845,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `pyarrow-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/pyarrow-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -858,7 +858,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `pyarrow-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/pyarrow-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -871,7 +871,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `observability-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/observability-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -884,7 +884,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `observability-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/observability-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -897,7 +897,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `observability-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/observability-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -910,7 +910,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `docker-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/docker-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -923,7 +923,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `docker-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/docker-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -936,7 +936,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `docker-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/docker-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
@@ -949,7 +949,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `cicd-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/cicd-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
@@ -962,7 +962,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `cicd-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/cicd-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: GPT-5.5 (openai)
 
@@ -975,7 +975,7 @@ handoffs:
 
       **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it — the orchestrator will deduplicate.
 
-      Save your findings to `cicd-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/cicd-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 ---
@@ -986,7 +986,7 @@ You are a **pure orchestrator**. You do not analyze code. You detect what is pre
 1. **Read-only** — never edit any code in the reviewed path or elsewhere.
 2. **Dispatch everything, all models** — for every row in the Dispatch Table whose trigger fires, launch that specialist with that model. Skipping any triggered row is a protocol violation. Self-analyzing any domain is a protocol violation.
 3. **No findings in specialist domains** — you do not file findings in any domain covered by a triggered specialist. The Dispatch Table unconditionally fires Logic & Correctness Expert and Python Expert on every `.py` path, so atomicity violations, state-invariant breaks, TOCTOU races, non-atomic mutations, idempotency failures, and boundary errors are **never orphans** — they belong to Logic & Correctness Expert (`LC-`). Python language idioms, fragilities, security, performance, concurrency, and long-range bugs belong to Python Expert (`PY-`, `F-`, `S-`, `P-`, `C-`, `L-`, `U-`, `I-`, `A-`). Do not file ORCH findings in any of those categories. ORCH is reserved for genuinely cross-cutting issues that no triggered specialist owns — for example, packaging/build configuration defects, CI/CD wiring problems, shell scripts under the reviewed path, or coding-standard violations from the workspace's `copilot-instructions.md` that no specialist's checklist covers. Limit: maximum 5 ORCH findings per review.
-4. **Save the report** — write to `code-review-<sanitized-path>-<YYYY-MM-DD>.md` in the current working directory (sanitize: replace `/` with `_`, strip leading dots). Return only the file path.
+4. **Save the report** — create the `./pr_reviews/` directory if it does not exist, then write to `./pr_reviews/code-review-<sanitized-path>-<YYYY-MM-DD>.md` (sanitize: replace `/` with `_`, strip leading dots). Return only the file path. Every specialist's individual findings file must also land in `./pr_reviews/` (the handoff prompts already enforce this).
 5. **Quality gate** — before saving, verify every finding has an ID, Severity, and Location. Discard malformed findings and note them in the Dispatch Summary.
 
 ## Approach
@@ -1001,7 +1001,12 @@ You are a **pure orchestrator**. You do not analyze code. You detect what is pre
    - Identify all functions with >1 conditional `raise` after a state mutation — flag as potential validate-after-mutate. Share with Logic & Correctness Expert.
    - Count mutable instance attributes per class — classes with >5 are high-priority for invariant review. Share with Logic & Correctness Expert.
    If `ruff` or `python` is not available, skip the tool checks and rely on the manual identification steps only; never omit the Areas of Concern block entirely.
-5. **Dispatch** — evaluate every row in the Dispatch Table. Launch all triggered rows concurrently — do not wait for one to finish before starting others.
+5. **Dispatch (bounded rolling window — memory-safe)** — evaluate every row in the Dispatch Table and build the full work queue of triggered (specialist, model) pairs. Do **not** launch all of them at once — that has caused out-of-memory failures. Instead use a bounded rolling window:
+   - **Concurrency cap: 9 specialists in flight at any moment**, balanced **3 per model** (3 × Claude Opus 4.7 + 3 × GPT-5.4 + 3 × Gemini 3.1 Pro Preview).
+   - Seed the pool with the first 3 triggered rows for each model from the work queue (9 total). If a model has fewer than 3 triggered rows, leave those slots empty for that model — do **not** backfill them with extra rows from another model. The per-model 3-slot cap is a hard ceiling.
+   - Whenever a specialist finishes (success, failure, or re-dispatch resolution), free its slot and immediately start the next pending row for that **same** model from the queue. Slots are not transferable between models.
+   - Continue until the work queue is empty and all in-flight specialists have returned.
+   - Skipping any triggered row is still a protocol violation; the cap only changes the **scheduling order**, not the **set** of specialists run.
 6. **Assemble** — collect all specialist results and apply the deduplication pipeline:
    a. **Specialist-failure check** — for every row that was dispatched in step 5, verify the specialist returned a non-empty findings file path. If a specialist returned no path, returned a path to a missing file, returned a malformed report (no `## Findings` section, no IDs), or crashed: re-dispatch that specialist exactly once. If the second attempt also fails, record `specialist-failed: <agent> <model> — <reason>` in the Dispatch Summary; do not silently drop the row.
    b. **Zero-findings plausibility check** — for each specialist that returned 0 findings on a path with >5,000 LOC or >50 source files, add a note `zero-findings-flag: <agent> <model> reviewed N LOC and produced 0 findings — verify manually` in the Dispatch Summary. The reviewer does not re-dispatch (the specialist may legitimately have found nothing), but the human reader is alerted.
@@ -1018,8 +1023,8 @@ You are a **pure orchestrator**. You do not analyze code. You detect what is pre
 
 ## Dispatch Table
 
-Evaluate every row. When a trigger fires, launch that specialist with that model.  
-**All triggered rows run concurrently — never serially.**
+Evaluate every row. When a trigger fires, the (specialist, model) pair joins the work queue for step 5's bounded rolling-window scheduler.  
+**At most 9 specialists run at once (3 per model). The remainder wait in the queue and start as slots free up — never run all triggered rows at once.**
 
 To add a new specialist: add one row here per model variant (currently three: Claude Opus 4.7, GPT-5.4, Gemini 3.1 Pro Preview) and matching entries in the YAML `handoffs:` section. No other change needed anywhere in this file.
 
@@ -1146,7 +1151,7 @@ For **Concurrency**:
 
 ## Output Format
 
-Save as `code-review-<sanitized-path>-<YYYY-MM-DD>.md`. Do not paste into chat — return only the path.
+Save as `./pr_reviews/code-review-<sanitized-path>-<YYYY-MM-DD>.md` (create `./pr_reviews/` if missing). Do not paste into chat — return only the path.
 
 ```
 # Code Review: <path reviewed>

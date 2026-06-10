@@ -1,5 +1,5 @@
 ---
-user-invocable: true
+user-invocable: false
 description: "Use when: writing, reviewing, or optimizing Python 3.12+ type hints on a module, package, or specific symbols. Reads the implementation and call sites first, never weakens hints to make errors disappear, and atomically updates docstrings whenever a type hint changes."
 name: "Type Annotation Expert"
 tools: [vscode, execute, read, agent, edit, search, web, browser, 'microsoft/markitdown/*', 'playwright/*', 'langchain-mcp/*', 'notebooks-mcp/*', 'visualization-mcp/*', ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, ms-toolsai.jupyter/configureNotebook, ms-toolsai.jupyter/listNotebookPackages, ms-toolsai.jupyter/installNotebookPackages, todo]

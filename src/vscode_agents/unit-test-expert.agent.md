@@ -1,5 +1,5 @@
 ---
-user-invocable: true
+user-invocable: false
 description: "Use when: writing, reviewing, or optimizing unit tests for Python code, especially in the AI/ML ecosystem. Generates BDD-style, business-value-driven tests with stable IDs, refuses to write plumbing tests, and flags production-code defects discovered during test design rather than warping tests to pass."
 name: "Unit Test Expert"
 tools: [vscode, execute, read, agent, edit, search, web, browser, 'microsoft/markitdown/*', 'playwright/*', 'langchain-mcp/*', 'postgresql-mcp/*', 'notebooks-mcp/*', 'visualization-mcp/*', ms-azuretools.vscode-containers/containerToolsConfig, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, ms-toolsai.jupyter/configureNotebook, ms-toolsai.jupyter/listNotebookPackages, ms-toolsai.jupyter/installNotebookPackages, todo]

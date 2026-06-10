@@ -1,5 +1,5 @@
 ---
-user-invocable: true
+user-invocable: false
 description: "Use when: writing, reviewing, or optimizing Pandas code. Enforces Pandas 3.0+ vectorization-first patterns, correct nullable-type semantics (pd.NA, StringDtype, ArrowDtype), and idiomatic use of the full Pandas toolbox (MultiIndex, melt/pivot, groupby, window functions, eval, Categorical, PyArrow backend). Refuses iterrows and apply-lambda anti-patterns. Always fetches current docs for pandas, numpy, and pyarrow before advising."
 name: "Pandas Expert"
 tools: [vscode, execute, read, agent, edit, search, web, browser, 'github/*', 'microsoft/markitdown/*', 'playwright/*', 'notebooks-mcp/*', 'github/*', github.vscode-pull-request-github/issue_fetch, github.vscode-pull-request-github/labels_fetch, github.vscode-pull-request-github/notification_fetch, github.vscode-pull-request-github/doSearch, github.vscode-pull-request-github/activePullRequest, github.vscode-pull-request-github/pullRequestStatusChecks, github.vscode-pull-request-github/openPullRequest, github.vscode-pull-request-github/create_pull_request, github.vscode-pull-request-github/resolveReviewThread, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, todo]

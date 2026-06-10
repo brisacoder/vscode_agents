@@ -16,7 +16,7 @@ handoffs:
 
       Save your findings to `pandas-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: Pandas Expert — GPT-5.4
     agent: Pandas Expert
@@ -29,7 +29,7 @@ handoffs:
 
       Save your findings to `pandas-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: Pandas Expert — Gemini 3.1 Pro Preview
     agent: Pandas Expert
@@ -42,7 +42,7 @@ handoffs:
 
       Save your findings to `pandas-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: DuckDB Expert — Claude Opus 4.7
     agent: DuckDB Expert
@@ -55,7 +55,7 @@ handoffs:
 
       Save your findings to `duckdb-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: DuckDB Expert — GPT-5.4
     agent: DuckDB Expert
@@ -68,7 +68,7 @@ handoffs:
 
       Save your findings to `duckdb-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: DuckDB Expert — Gemini 3.1 Pro Preview
     agent: DuckDB Expert
@@ -81,7 +81,7 @@ handoffs:
 
       Save your findings to `duckdb-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: LangGraph Expert — Claude Opus 4.7
     agent: LangGraph Expert
@@ -94,7 +94,7 @@ handoffs:
 
       Save your findings to `langgraph-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: LangGraph Expert — GPT-5.4
     agent: LangGraph Expert
@@ -107,7 +107,7 @@ handoffs:
 
       Save your findings to `langgraph-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: LangGraph Expert — Gemini 3.1 Pro Preview
     agent: LangGraph Expert
@@ -120,7 +120,7 @@ handoffs:
 
       Save your findings to `langgraph-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: Docstrings Expert — Claude Opus 4.7
     agent: Docstring Expert
@@ -133,7 +133,7 @@ handoffs:
 
       Save your findings to `docstring-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: Docstrings Expert — GPT-5.4
     agent: Docstring Expert
@@ -146,7 +146,7 @@ handoffs:
 
       Save your findings to `docstring-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: Docstrings Expert — Gemini 3.1 Pro Preview
     agent: Docstring Expert
@@ -159,7 +159,7 @@ handoffs:
 
       Save your findings to `docstring-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: Unit Tests Expert — Claude Opus 4.7
     agent: Unit Test Expert
@@ -172,7 +172,7 @@ handoffs:
 
       Save your findings to `unit-test-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: Unit Tests Expert — GPT-5.4
     agent: Unit Test Expert
@@ -185,7 +185,7 @@ handoffs:
 
       Save your findings to `unit-test-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: Unit Tests Expert — Gemini 3.1 Pro Preview
     agent: Unit Test Expert
@@ -198,7 +198,7 @@ handoffs:
 
       Save your findings to `unit-test-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: Type Annotations Expert — Claude Opus 4.7
     agent: Type Annotation Expert
@@ -211,7 +211,7 @@ handoffs:
 
       Save your findings to `type-annotation-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: Type Annotations Expert — GPT-5.4
     agent: Type Annotation Expert
@@ -224,7 +224,7 @@ handoffs:
 
       Save your findings to `type-annotation-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: Type Annotations Expert — Gemini 3.1 Pro Preview
     agent: Type Annotation Expert
@@ -237,7 +237,7 @@ handoffs:
 
       Save your findings to `type-annotation-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: README Expert — Claude Opus 4.7
     agent: README Expert
@@ -250,7 +250,7 @@ handoffs:
 
       Save your findings to `readme-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: README Expert — GPT-5.4
     agent: README Expert
@@ -263,7 +263,7 @@ handoffs:
 
       Save your findings to `readme-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: README Expert — Gemini 3.1 Pro Preview
     agent: README Expert
@@ -276,7 +276,7 @@ handoffs:
 
       Save your findings to `readme-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: Python Code Expert — Claude Opus 4.7
     agent: Python Expert
@@ -289,7 +289,7 @@ handoffs:
 
       Save your findings to `python-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: Python Code Expert — GPT-5.4
     agent: Python Expert
@@ -302,7 +302,7 @@ handoffs:
 
       Save your findings to `python-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: Python Code Expert — Gemini 3.1 Pro Preview
     agent: Python Expert
@@ -315,7 +315,7 @@ handoffs:
 
       Save your findings to `python-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: BigQuery Expert — Claude Opus 4.7
     agent: BigQuery Expert
@@ -328,7 +328,7 @@ handoffs:
 
       Save your findings to `bigquery-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: BigQuery Expert — GPT-5.4
     agent: BigQuery Expert
@@ -341,7 +341,7 @@ handoffs:
 
       Save your findings to `bigquery-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: BigQuery Expert — Gemini 3.1 Pro Preview
     agent: BigQuery Expert
@@ -354,7 +354,7 @@ handoffs:
 
       Save your findings to `bigquery-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: PostgreSQL Expert — Claude Opus 4.7
     agent: PostgreSQL Expert
@@ -367,7 +367,7 @@ handoffs:
 
       Save your findings to `postgresql-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: PostgreSQL Expert — GPT-5.4
     agent: PostgreSQL Expert
@@ -380,7 +380,7 @@ handoffs:
 
       Save your findings to `postgresql-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: PostgreSQL Expert — Gemini 3.1 Pro Preview
     agent: PostgreSQL Expert
@@ -393,7 +393,7 @@ handoffs:
 
       Save your findings to `postgresql-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: Spec Author — Claude Opus 4.7
     agent: Spec Author
@@ -406,7 +406,7 @@ handoffs:
 
       Save your findings to `spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: Spec Author — GPT-5.4
     agent: Spec Author
@@ -419,7 +419,7 @@ handoffs:
 
       Save your findings to `spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: Spec Author — Gemini 3.1 Pro Preview
     agent: Spec Author
@@ -432,7 +432,7 @@ handoffs:
 
       Save your findings to `spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: Architecture Diagram Creator — Claude Opus 4.7
     agent: architecture-diagram-creator
@@ -445,7 +445,7 @@ handoffs:
 
       Save your findings to `architecture-diagram-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: Architecture Diagram Creator — GPT-5.4
     agent: architecture-diagram-creator
@@ -458,7 +458,7 @@ handoffs:
 
       Save your findings to `architecture-diagram-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: Architecture Diagram Creator — Gemini 3.1 Pro Preview
     agent: architecture-diagram-creator
@@ -471,7 +471,7 @@ handoffs:
 
       Save your findings to `architecture-diagram-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: Logic & Correctness Expert — Claude Opus 4.7
     agent: Logic & Correctness Expert
@@ -484,7 +484,7 @@ handoffs:
 
       Save your findings to `logic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: Logic & Correctness Expert — GPT-5.4
     agent: Logic & Correctness Expert
@@ -497,7 +497,7 @@ handoffs:
 
       Save your findings to `logic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: Logic & Correctness Expert — Gemini 3.1 Pro Preview
     agent: Logic & Correctness Expert
@@ -510,7 +510,7 @@ handoffs:
 
       Save your findings to `logic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: PR Discipline Expert — Claude Opus 4.7
     agent: PR Discipline Expert
@@ -527,7 +527,7 @@ handoffs:
 
       Save your findings to `pr-discipline-review-<sanitized-pr-ref>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: PR Discipline Expert — GPT-5.4
     agent: PR Discipline Expert
@@ -544,7 +544,7 @@ handoffs:
 
       Save your findings to `pr-discipline-review-<sanitized-pr-ref>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: PR Discipline Expert — Gemini 3.1 Pro Preview
     agent: PR Discipline Expert
@@ -561,7 +561,7 @@ handoffs:
 
       Save your findings to `pr-discipline-review-<sanitized-pr-ref>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: PR Discipline Fix — Claude Opus 4.7
     agent: PR Discipline Expert
@@ -578,7 +578,7 @@ handoffs:
 
       The three rules are absolute. Do not soften them. Update the ledger row to `done` only after independent verification (re-run the formatter and lint commands; re-check the `git diff --shortstat`).
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: PR Discipline Fix — GPT-5.4
     agent: PR Discipline Expert
@@ -587,7 +587,7 @@ handoffs:
 
       Apply the catalog-mapped action for each pending `PR-` finding (see the PR Discipline Expert spec for the catalog). The three rules are absolute. Update the ledger row to `done` only after independent verification.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: Pydantic Expert — Claude Opus 4.7
     agent: Pydantic Expert
@@ -600,7 +600,7 @@ handoffs:
 
       Save your findings to `pydantic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: Pydantic Expert — GPT-5.4
     agent: Pydantic Expert
@@ -613,7 +613,7 @@ handoffs:
 
       Save your findings to `pydantic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: Pydantic Expert — Gemini 3.1 Pro Preview
     agent: Pydantic Expert
@@ -626,7 +626,7 @@ handoffs:
 
       Save your findings to `pydantic-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: FastAPI Expert — Claude Opus 4.7
     agent: FastAPI Expert
@@ -639,7 +639,7 @@ handoffs:
 
       Save your findings to `fastapi-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: FastAPI Expert — GPT-5.4
     agent: FastAPI Expert
@@ -652,7 +652,7 @@ handoffs:
 
       Save your findings to `fastapi-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: FastAPI Expert — Gemini 3.1 Pro Preview
     agent: FastAPI Expert
@@ -665,7 +665,7 @@ handoffs:
 
       Save your findings to `fastapi-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: Scikit-learn Expert — Claude Opus 4.7
     agent: Scikit-learn Expert
@@ -678,7 +678,7 @@ handoffs:
 
       Save your findings to `sklearn-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: Scikit-learn Expert — GPT-5.4
     agent: Scikit-learn Expert
@@ -691,7 +691,7 @@ handoffs:
 
       Save your findings to `sklearn-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: Scikit-learn Expert — Gemini 3.1 Pro Preview
     agent: Scikit-learn Expert
@@ -704,7 +704,7 @@ handoffs:
 
       Save your findings to `sklearn-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: PyTorch Expert — Claude Opus 4.7
     agent: PyTorch Expert
@@ -717,7 +717,7 @@ handoffs:
 
       Save your findings to `pytorch-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: PyTorch Expert — GPT-5.4
     agent: PyTorch Expert
@@ -730,7 +730,7 @@ handoffs:
 
       Save your findings to `pytorch-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: PyTorch Expert — Gemini 3.1 Pro Preview
     agent: PyTorch Expert
@@ -743,7 +743,7 @@ handoffs:
 
       Save your findings to `pytorch-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: GCP Expert — Claude Opus 4.7
     agent: GCP Expert
@@ -756,7 +756,7 @@ handoffs:
 
       Save your findings to `gcp-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: GCP Expert — GPT-5.4
     agent: GCP Expert
@@ -769,7 +769,7 @@ handoffs:
 
       Save your findings to `gcp-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: GCP Expert — Gemini 3.1 Pro Preview
     agent: GCP Expert
@@ -782,7 +782,7 @@ handoffs:
 
       Save your findings to `gcp-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: AWS Expert — Claude Opus 4.7
     agent: AWS Expert
@@ -795,7 +795,7 @@ handoffs:
 
       Save your findings to `aws-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: AWS Expert — GPT-5.4
     agent: AWS Expert
@@ -808,7 +808,7 @@ handoffs:
 
       Save your findings to `aws-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: AWS Expert — Gemini 3.1 Pro Preview
     agent: AWS Expert
@@ -821,7 +821,7 @@ handoffs:
 
       Save your findings to `aws-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: PyArrow Expert — Claude Opus 4.7
     agent: PyArrow Expert
@@ -834,7 +834,7 @@ handoffs:
 
       Save your findings to `pyarrow-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: PyArrow Expert — GPT-5.4
     agent: PyArrow Expert
@@ -847,7 +847,7 @@ handoffs:
 
       Save your findings to `pyarrow-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: PyArrow Expert — Gemini 3.1 Pro Preview
     agent: PyArrow Expert
@@ -860,7 +860,7 @@ handoffs:
 
       Save your findings to `pyarrow-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: Observability Expert — Claude Opus 4.7
     agent: Observability Expert
@@ -873,7 +873,7 @@ handoffs:
 
       Save your findings to `observability-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: Observability Expert — GPT-5.4
     agent: Observability Expert
@@ -886,7 +886,7 @@ handoffs:
 
       Save your findings to `observability-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: Observability Expert — Gemini 3.1 Pro Preview
     agent: Observability Expert
@@ -899,7 +899,7 @@ handoffs:
 
       Save your findings to `observability-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: Docker Expert — Claude Opus 4.7
     agent: Docker Expert
@@ -912,7 +912,7 @@ handoffs:
 
       Save your findings to `docker-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: Docker Expert — GPT-5.4
     agent: Docker Expert
@@ -925,7 +925,7 @@ handoffs:
 
       Save your findings to `docker-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: Docker Expert — Gemini 3.1 Pro Preview
     agent: Docker Expert
@@ -938,7 +938,7 @@ handoffs:
 
       Save your findings to `docker-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
+    model: Gemini 3.1 Pro Preview (gemini)
 
   - label: CI/CD Expert — Claude Opus 4.7
     agent: CI/CD Expert
@@ -951,7 +951,7 @@ handoffs:
 
       Save your findings to `cicd-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
+    model: Claude Opus 4.7 (anthropic)
 
   - label: CI/CD Expert — GPT-5.4
     agent: CI/CD Expert
@@ -964,7 +964,7 @@ handoffs:
 
       Save your findings to `cicd-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
+    model: GPT-5.5 (openai)
 
   - label: CI/CD Expert — Gemini 3.1 Pro Preview
     agent: CI/CD Expert
@@ -977,9 +977,7 @@ handoffs:
 
       Save your findings to `cicd-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` and return only the absolute path to the saved findings file.
     send: true
-    model: ["Gemini 3.1 Pro Preview (gemini)", "Gemini 2.5. Pro  (copilot)"]
-
-
+    model: Gemini 3.1 Pro Preview (gemini)
 ---
 You are a **pure orchestrator**. You do not analyze code. You detect what is present in the reviewed path, launch every matching specialist in parallel — all model variants (Claude Opus 4.7, GPT-5.4, and Gemini 3.1 Pro Preview) — collect their findings, and assemble one unified report. You produce no findings of your own.
 

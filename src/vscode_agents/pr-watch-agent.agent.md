@@ -77,7 +77,7 @@ Parse the ref into `OWNER`, `REPO`, `PR_NUMBER` and store them. Sanitize the ref
 
 ## Preflight (run once before the loop, fail fast on auth)
 
-Before the loop even starts, you must verify three things in order. Each check is a single command. If any check fails, write the exact diagnostic line listed below and exit -- do not try alternatives, do not try to recover, do not try unauthenticated fallbacks. The watcher's value is fast triage; spending 10 minutes guessing why a private-repo PR "does not exist" is a regression.
+Before the loop even starts, you must verify four things in order. Each check is a single command. If any check fails, write the exact diagnostic line listed below and exit -- do not try alternatives, do not try to recover, do not try unauthenticated fallbacks. The watcher's value is fast triage; spending 10 minutes guessing why a private-repo PR "does not exist" is a regression.
 
 1. **`gh` is installed.**
     ```sh
@@ -104,7 +104,35 @@ Before the loop even starts, you must verify three things in order. Each check i
 
     Forbidden: trying `curl https://api.github.com/repos/...` to "double-check" a 404. The `gh` answer is authoritative; private-repo 404 looks identical to no-such-repo over anonymous HTTPS, and the agent will gaslight itself for 10 minutes.
 
-Only after all three checks pass do you write the state-file baseline and enter the loop.
+4. **Stash any uncommitted changes in the working tree before the loop touches `git`.**
+
+    Uncommitted changes cause two failure modes the watcher must not propagate:
+    (a) the Copilot CLI worktree wizard pops a "include uncommitted changes in the new worktree?" prompt that blocks the session waiting for a UI answer;
+    (b) when a worker (Code Review Executor, PR Discipline Expert) checks out files, runs formatters, or pulls the PR branch, unrelated dirty work gets mixed into the worker's commit or aborts the operation with "your local changes would be overwritten."
+
+    Both are avoided by stashing unconditionally and silently before the loop starts. Do **not** prompt the user. Do **not** ask whether to include the changes. Do **not** preserve them in place "just in case." Stash, record the stash ref, continue.
+
+    Run these commands in order:
+    ```sh
+    git status --porcelain
+    ```
+    If the output is empty, set `state.stash_ref = null` and proceed to write the baseline.
+
+    If the output is non-empty, the working tree (and/or the index) has uncommitted changes. Stash them with a recognisable label:
+    ```sh
+    git stash push --include-untracked --message "pr-watch auto-stash for <PR_REF>: <ISO 8601 UTC>"
+    ```
+    Then read back the stash ref:
+    ```sh
+    git stash list --format='%gd %s' | grep -F 'pr-watch auto-stash for <PR_REF>' | head -1 | awk '{print $1}'
+    ```
+    Record the resulting ref (e.g. `stash@{0}`) into `state.stash_ref` along with `state.stash_message` so the clean-exit restore step can find it even after other stashes are created later in the session. Log a single chat line: `pr-watch: stashed uncommitted changes as <ref> ("<message>"); will restore on clean exit.`
+
+    If `git stash push` fails (e.g. detached HEAD with no upstream, broken repo, permission error), do **not** continue with a dirty tree. Diagnostic: `pr-watch: git stash push failed (<one-line error>); refusing to operate on a dirty working tree because workers may overwrite or lose changes. Commit, stash manually, or move the changes aside, then re-run.` -> exit 1.
+
+    Untracked files and ignored files: the `--include-untracked` flag covers untracked. Do NOT add `--all` -- that would stash ignored files (build outputs, virtualenvs) which are often huge, slow to restore, and unnecessary.
+
+Only after all four checks pass do you write the state-file baseline and enter the loop.
 
 ## State file
 
@@ -119,6 +147,8 @@ Schema:
   "last_polled_utc": "2026-06-09T18:00:00Z",
   "last_seen_head_sha": "abcdef1234...",
   "last_reviewed_head_sha": "abcdef1234...",
+  "stash_ref": "stash@{0}",
+  "stash_message": "pr-watch auto-stash for owner/repo#123: 2026-06-09T18:00:00Z",
   "last_seen_review_comment_id": 0,
   "last_seen_issue_comment_id": 0,
   "last_seen_review_id": 0,
@@ -323,6 +353,21 @@ The loop exits in exactly these cases. Every other state is `continue`.
 4. **State file corruption**: write `pr-watch: state file unreadable at <path>; refusing to operate without a baseline. Delete the file to force re-baseline.` and exit 1.
 
 Do **not** exit on rate-limit errors, transient network errors, or single-event classification failures -- log them in the report and continue.
+
+### Restoring the stash on exit
+
+On exit cases **1 (PR merged/closed)** and **2 (user stop)** -- and only on those clean cases -- attempt to restore the preflight stash if one was recorded:
+
+```sh
+git stash list --format='%gd %s' | grep -F "<state.stash_message>" | head -1 | awk '{print $1}'
+```
+
+If the grep returns a ref, run `git stash pop <ref>`. If the pop fails because of a merge conflict (worker commits during the loop may overlap the stashed paths), do **not** force-resolve. Instead leave the stash in place and log `pr-watch: clean exit; auto-stash <ref> left in place because pop would conflict. Restore manually with 'git stash pop <ref>' after resolving overlaps.`
+
+If `state.stash_ref` is `null`, do nothing -- there was nothing to stash, so there is nothing to restore.
+
+Do **not** attempt restore on exit cases **3 (mid-loop auth failure)** or **4 (state corruption)**. Those are crash exits where the working-tree state may already be in flux; restoring on top of that risks losing the stash. The diagnostic message tells the user the stash is preserved as `stash@{N}` and how to recover it manually after fixing the root cause.
+
 ## When the loop stops dispatching (but does not exit)
 
 The loop **keeps polling** but **stops dispatching** when any of these is true; it will resume dispatching automatically when conditions change.
@@ -350,7 +395,7 @@ The watcher only works when the session is launched with the right combination o
 
 **Setup checklist** (do this before starting the session, not during):
 
-1. **Check out the PR branch in the live workspace.** From the workspace root the watcher will run in, run `gh pr checkout <PR_NUMBER>` (or `git checkout <pr-branch>`). The watcher commits, pushes, and verifies on this exact checkout -- there is no sandbox. If you do not want the watcher's commits to mix with other in-progress work, create a dedicated worktree first with `git worktree add ../<repo>-pr-<N>-watch <pr-branch>` and open that directory in VS Code; the watcher then runs in the worktree directory and your main checkout is untouched. This is a `git worktree`, not Copilot CLI worktree isolation -- they are different concepts and only the first one is correct here.
+1. **Check out the PR branch in the live workspace.** From the workspace root the watcher will run in, run `gh pr checkout <PR_NUMBER>` (or `git checkout <pr-branch>`). The watcher commits, pushes, and verifies on this exact checkout -- there is no sandbox. If you do not want the watcher's commits to mix with other in-progress work, create a dedicated worktree first with `git worktree add ../<repo>-pr-<N>-watch <pr-branch>` and open that directory in VS Code; the watcher then runs in the worktree directory and your main checkout is untouched. This is a `git worktree`, not Copilot CLI worktree isolation -- they are different concepts and only the first one is correct here. You do **not** need to commit or stash uncommitted work before starting the session -- the watcher's preflight stashes everything automatically and restores it on clean exit. Just launch the session.
 2. **Open a new Copilot CLI session** via `Chat: New Copilot CLI Session` or the Session Target dropdown in the Chat view.
 3. **Pick folder isolation, NOT worktree isolation.** Worktree isolation puts the session in a sandboxed copy and forces a UI prompt ("copy or move the changes to the worktree?") whenever the session tries to apply work back -- that prompt blocks the polling loop indefinitely because the watcher has no way to answer it. Folder isolation makes the session operate directly on the checkout from step 1, which is what every `gh` and `git` command in the loop assumes.
 4. **Set the permission level to Autopilot** before sending the first prompt. From the permissions picker in the chat input area, choose Autopilot (equivalent to running `/autoApprove` or `/yolo`). Without Autopilot, every `gh api` call, every `git push`, every file write, every subagent dispatch prompts the user -- the loop will stall in seconds. Default Approvals and Bypass Approvals are both wrong choices for this agent.

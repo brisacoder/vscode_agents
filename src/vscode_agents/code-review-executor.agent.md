@@ -3,7 +3,7 @@ description: "Use when: applying fixes from a code-review report produced by the
 name: "Code Review Executor"
 tools: [vscode, execute, read, agent, browser, 'microsoft/markitdown/*', 'playwright/*', 'huggingface/hf-mcp-server/*', 'langchain-mcp/*', edit, search, web, 'postgresql-mcp/*', 'pylance-mcp-server/*', vscode.mermaid-chat-features/renderMermaidDiagram, ms-azuretools.vscode-containers/containerToolsConfig, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, ms-toolsai.jupyter/configureNotebook, ms-toolsai.jupyter/listNotebookPackages, ms-toolsai.jupyter/installNotebookPackages, todo]
 argument-hint: Path to a code-review Markdown report produced by the Code Review agent.
-model: Claude Opus 4.7 (anthropic)
+model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 agents: ["*"]
 handoffs:
   - label: Docstring Review — Claude Opus 4.7
@@ -15,7 +15,7 @@ handoffs:
 
       Save your findings file to `docstring-review-<sanitized-path>-<YYYY-MM-DD>.md` and return only the absolute path to the saved file. The executor will parse your findings and merge them into the ledger.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: Docstring Review — GPT-5.4
     agent: Docstring Expert
@@ -26,7 +26,7 @@ handoffs:
 
       Save your findings file to `docstring-review-<sanitized-path>-<YYYY-MM-DD>.md` and return only the absolute path to the saved file. The executor will parse your findings and merge them into the ledger.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: Test Quality Review — Claude Opus 4.7
     agent: Unit Test Expert
@@ -37,7 +37,7 @@ handoffs:
 
       Save your test plan and defect log to disk (per your Output section) and return only the paths. The executor will parse your findings and merge them into the ledger.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: Test Quality Review — GPT-5.4
     agent: Unit Test Expert
@@ -48,7 +48,7 @@ handoffs:
 
       Save your test plan and defect log to disk (per your Output section) and return only the paths. The executor will parse your findings and merge them into the ledger.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: Type Annotation Review — Claude Opus 4.7
     agent: Type Annotation Expert
@@ -59,7 +59,7 @@ handoffs:
 
       Save your inventory, findings, and session summary to disk (per your Output section) and return only the paths. The executor will parse your findings and merge them into the ledger.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: Type Annotation Review — GPT-5.4
     agent: Type Annotation Expert
@@ -70,7 +70,7 @@ handoffs:
 
       Save your inventory, findings, and session summary to disk (per your Output section) and return only the paths. The executor will parse your findings and merge them into the ledger.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: README Review — Claude Opus 4.7
     agent: README Expert
@@ -81,7 +81,7 @@ handoffs:
 
       Return the README path and a summary of sections written or updated. Mark completed DOC findings `done` in the ledger.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: README Review — GPT-5.4
     agent: README Expert
@@ -92,7 +92,7 @@ handoffs:
 
       Return the README path and a summary of sections written or updated. Mark completed DOC findings `done` in the ledger.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: Pandas Author — Claude Opus 4.7
     agent: Pandas Expert
@@ -111,7 +111,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, vectorized replacement applied, performance improvement (if measured), and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: Pandas Author — GPT-5.4
     agent: Pandas Expert
@@ -130,7 +130,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, vectorized replacement applied, performance improvement (if measured), and commit SHA for each finding you addressed.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: DuckDB Author — Claude Opus 4.7
     agent: DuckDB Expert
@@ -150,7 +150,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, DuckDB replacement applied, EXPLAIN verification result, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: DuckDB Author — GPT-5.4
     agent: DuckDB Expert
@@ -170,7 +170,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, DuckDB replacement applied, EXPLAIN verification result, and commit SHA for each finding you addressed.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: LangGraph Author — Claude Opus 4.7
     agent: LangGraph Expert
@@ -188,7 +188,7 @@ handoffs:
 
       Return a structured summary: finding ID, LangGraph defect fixed, files touched, test result, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: LangGraph Author — GPT-5.4
     agent: LangGraph Expert
@@ -206,7 +206,7 @@ handoffs:
 
       Return a structured summary: finding ID, LangGraph defect fixed, files touched, test result, and commit SHA for each finding you addressed.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: Python Author — Claude Opus 4.7
     agent: Python Expert
@@ -224,7 +224,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, idiomatic replacement applied, test result, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: Python Author — GPT-5.4
     agent: Python Expert
@@ -242,7 +242,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, idiomatic replacement applied, test result, and commit SHA for each finding you addressed.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: BigQuery Author — Claude Opus 4.7
     agent: BigQuery Expert
@@ -261,7 +261,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, BigQuery replacement applied, dry_run verification result, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: BigQuery Author — GPT-5.4
     agent: BigQuery Expert
@@ -280,7 +280,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, BigQuery replacement applied, dry_run verification result, and commit SHA for each finding you addressed.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: PostgreSQL Author — Claude Opus 4.7
     agent: PostgreSQL Expert
@@ -300,7 +300,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, PostgreSQL replacement applied, EXPLAIN ANALYZE verification result, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: PostgreSQL Author — GPT-5.4
     agent: PostgreSQL Expert
@@ -320,7 +320,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, PostgreSQL replacement applied, EXPLAIN ANALYZE verification result, and commit SHA for each finding you addressed.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: Logic & Correctness Author — Claude Opus 4.7
     agent: Logic & Correctness Expert
@@ -341,7 +341,7 @@ handoffs:
 
       Return a structured summary: finding ID, LC section (atomicity / invariants / check-then-act / idempotency / boundary), failure scenario eliminated, correctness pattern applied (two-phase / copy-and-replace / atomic primitive / guard clause / idempotency key), test result, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: Logic & Correctness Author — GPT-5.4
     agent: Logic & Correctness Expert
@@ -362,7 +362,7 @@ handoffs:
 
       Return a structured summary: finding ID, LC section (atomicity / invariants / check-then-act / idempotency / boundary), failure scenario eliminated, correctness pattern applied (two-phase / copy-and-replace / atomic primitive / guard clause / idempotency key), test result, and commit SHA for each finding you addressed.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: Pydantic Expert Author — Claude Opus 4.7
     agent: Pydantic Expert
@@ -380,7 +380,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: Pydantic Expert Author — GPT-5.4
     agent: Pydantic Expert
@@ -398,7 +398,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: FastAPI Expert Author — Claude Opus 4.7
     agent: FastAPI Expert
@@ -416,7 +416,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: FastAPI Expert Author — GPT-5.4
     agent: FastAPI Expert
@@ -434,7 +434,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: Scikit-learn Expert Author — Claude Opus 4.7
     agent: Scikit-learn Expert
@@ -452,7 +452,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: Scikit-learn Expert Author — GPT-5.4
     agent: Scikit-learn Expert
@@ -470,7 +470,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: PyTorch Expert Author — Claude Opus 4.7
     agent: PyTorch Expert
@@ -488,7 +488,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: PyTorch Expert Author — GPT-5.4
     agent: PyTorch Expert
@@ -506,7 +506,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: GCP Expert Author — Claude Opus 4.7
     agent: GCP Expert
@@ -524,7 +524,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: GCP Expert Author — GPT-5.4
     agent: GCP Expert
@@ -542,7 +542,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: AWS Expert Author — Claude Opus 4.7
     agent: AWS Expert
@@ -560,7 +560,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: AWS Expert Author — GPT-5.4
     agent: AWS Expert
@@ -578,7 +578,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: PyArrow Expert Author — Claude Opus 4.7
     agent: PyArrow Expert
@@ -596,7 +596,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: PyArrow Expert Author — GPT-5.4
     agent: PyArrow Expert
@@ -614,7 +614,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: Observability Expert Author — Claude Opus 4.7
     agent: Observability Expert
@@ -632,7 +632,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: Observability Expert Author — GPT-5.4
     agent: Observability Expert
@@ -650,7 +650,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: Docker Expert Author — Claude Opus 4.7
     agent: Docker Expert
@@ -668,7 +668,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: Docker Expert Author — GPT-5.4
     agent: Docker Expert
@@ -686,7 +686,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
   - label: CI/CD Expert Author — Claude Opus 4.7
     agent: CI/CD Expert
@@ -704,7 +704,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: Claude Opus 4.7 (anthropic)
+    model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 
   - label: CI/CD Expert Author — GPT-5.4
     agent: CI/CD Expert
@@ -722,7 +722,7 @@ handoffs:
 
       Return a structured summary: finding ID, anti-pattern found, fix applied, and commit SHA for each finding you addressed.
     send: true
-    model: GPT-5.4 (copilot)
+    model: ["GPT-5.5 (openai)", "GPT-5.4 (copilot)"]
 
 
 ---

@@ -4,7 +4,7 @@ description: "Use when: writing, reviewing, or optimizing Python 3.12+ code with
 name: "Python Expert"
 tools: [vscode, execute, read, agent, edit, search, web, browser, 'github/*', 'microsoft/markitdown/*', 'playwright/*', 'langchain-mcp/*', 'notebooks-mcp/*', 'visualization-mcp/*', 'github/*', github.vscode-pull-request-github/issue_fetch, github.vscode-pull-request-github/labels_fetch, github.vscode-pull-request-github/notification_fetch, github.vscode-pull-request-github/doSearch, github.vscode-pull-request-github/activePullRequest, github.vscode-pull-request-github/pullRequestStatusChecks, github.vscode-pull-request-github/openPullRequest, github.vscode-pull-request-github/create_pull_request, github.vscode-pull-request-github/resolveReviewThread, ms-azuretools.vscode-containers/containerToolsConfig, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, ms-toolsai.jupyter/configureNotebook, ms-toolsai.jupyter/listNotebookPackages, ms-toolsai.jupyter/installNotebookPackages, todo]
 model: Claude Opus 4.6 (copilot)
-agents: [*]
+agents: ["*"]
 ---
 You are a senior Python expert. You write, review, and optimize Python 3.12+ code with deep language specialization. Your operating mode is determined by the user's request — see **Mode Detection** below.
 

@@ -4,7 +4,7 @@ name: "Code Review Executor"
 tools: [vscode, execute, read, agent, browser, 'microsoft/markitdown/*', 'playwright/*', 'huggingface/hf-mcp-server/*', 'langchain-mcp/*', edit, search, web, 'postgresql-mcp/*', 'pylance-mcp-server/*', vscode.mermaid-chat-features/renderMermaidDiagram, ms-azuretools.vscode-containers/containerToolsConfig, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, ms-toolsai.jupyter/configureNotebook, ms-toolsai.jupyter/listNotebookPackages, ms-toolsai.jupyter/installNotebookPackages, todo]
 argument-hint: Path to a code-review Markdown report produced by the Code Review agent.
 model: Claude Opus 4.7 (anthropic)
-agents: [*]
+agents: ["*"]
 handoffs:
   - label: Docstring Review — Claude Opus 4.7
     agent: Docstring Expert

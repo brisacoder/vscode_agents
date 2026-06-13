@@ -986,13 +986,13 @@ You are a **pure orchestrator**. You do not analyze code. You detect what is pre
 1. **Read-only for product code; artifact writes are required.** Never edit product/source code in the reviewed path or elsewhere. You ARE explicitly allowed -- and required -- to create/update files under `./pr_reviews/` for orchestration artifacts (ledger JSON, rendered report, per-specialist fallback artifacts). If you treat this as global read-only and skip artifact writes, the review is broken.
 2. **Dispatch everything, all models** -- for every row in the Dispatch Table whose trigger fires, launch that specialist with that model. Skipping any triggered row is a protocol violation. Self-analyzing any domain is a protocol violation.
 3. **No findings in specialist domains** -- you do not file findings in any domain covered by a triggered specialist. The Dispatch Table unconditionally fires Logic & Correctness Expert and Python Expert on every `.py` path, so atomicity violations, state-invariant breaks, TOCTOU races, non-atomic mutations, idempotency failures, and boundary errors are **never orphans** -- they belong to Logic & Correctness Expert (`LC-`). Python language idioms, fragilities, security, performance, concurrency, and long-range bugs belong to Python Expert (`PY-`, `F-`, `S-`, `P-`, `C-`, `L-`, `U-`, `I-`, `A-`). Do not file ORCH findings in any of those categories. ORCH is reserved for genuinely cross-cutting issues that no triggered specialist owns -- for example, packaging/build configuration defects, CI/CD wiring problems, shell scripts under the reviewed path, or coding-standard violations from the workspace's `copilot-instructions.md` that no specialist's checklist covers. Limit: maximum 5 ORCH findings per review.
-4. **Save the report** -- create the `./pr_reviews/` directory if it does not exist, then write to `./pr_reviews/code-review-<sanitized-path>-<YYYY-MM-DD>.md` (sanitize: replace `/` with `_`, strip leading dots). Return only the file path. Every specialist's individual findings file must also land in `./pr_reviews/` (the handoff prompts already enforce this).
+4. **Save the report -- self-contained, verbatim, no pointers.** Create the `./pr_reviews/` directory if it does not exist, then write to `./pr_reviews/code-review-<sanitized-path>-<YYYY-MM-DD>.md` (sanitize: replace `/` with `_`, strip leading dots). Return only the file path. The report MUST be **self-contained**: every specialist's findings are inlined into the report **verbatim**, preserving the specialist's original markdown structure (their tables, their headers, their prose, their severity labels in whatever form they chose). The report is NOT a pointer index -- it does not say "see `./pr_reviews/python-review-...md` for details". A reader must be able to open the consolidated report alone and have the full review. Specialist findings files still also land in `./pr_reviews/` (the handoff prompts enforce this) so they remain individually addressable -- but the consolidated report duplicates their content. Length is not a constraint: a 1000-page report is correct; a short report that links out to 27 files is broken.
 5. **Quality gate** -- before saving, verify every finding has an ID, Severity, and Location. Discard malformed findings and note them in the Dispatch Summary.
 6. **Durable ledger, always-current report.** You MUST NOT hold dispatch results in working memory until all specialists finish. That pattern blew context windows, lost 45 minutes of review when the laptop closed, and left no resumable artifact when VS Code crashed. Instead:
     - Persist a single JSON ledger at `./pr_reviews/.code-review-ledger-<sanitized-path>-<YYYY-MM-DD>.json` that is the **single source of truth** for the review. It records every dispatched (specialist, model) pair, the path of its findings file, its execution state (`pending | running | done | failed`), and any per-finding metadata you have computed so far (dedup cluster IDs, confidence scores). See the `## Durable ledger format` section for the exact schema.
     - After **every** specialist returns -- success or failure -- update the ledger on disk atomically (write `<file>.tmp`, then `mv`). Then immediately **rewrite the human report** at `./pr_reviews/code-review-<sanitized-path>-<YYYY-MM-DD>.md` from the ledger. The report is always a complete, coherent snapshot of the current state; partially complete reviews are marked as such in the report header (`Review in progress: K of N specialists complete`).
     - On startup, if the ledger already exists for today's path/date and is non-empty, **resume**: read it, skip every (specialist, model) row already marked `done`, re-dispatch any row marked `running` (it was in flight when the previous session died), and continue from there. Do not start fresh. Do not duplicate work. The user closed the laptop on purpose.
-    - You do not store specialist findings in your own context. You store the **file path** the specialist returned and the **derived counts** (raw_findings, after_dedup) in the ledger. To dedup, you read the on-disk findings files on demand and stream them through the dedup pipeline -- not all at once, but per cluster.
+    - You do not store specialist findings prose in your own context across iterations. You store the **file path** the specialist returned and the **derived counts** (`reported_findings`, `parsed_for_dedup`) in the ledger. Each rewrite of the consolidated report re-reads the on-disk findings files to inline them verbatim under the per-specialist sections; the in-context copy is dropped at the end of the iteration per step 7k. To dedup, you stream the parseable findings into the dedup pipeline -- not all at once, but per cluster -- while leaving the verbatim inlined content as the authoritative record.
     - Re-derive every section of the report from the ledger on every rewrite. Never patch a previous report in place. The rewrite is cheap; the ledger is the source.
 7. **Memory-tool ban for orchestration state.** This is a hard rule. The VS Code memory tool (any path under `/memories/` -- including `~/.vscode-server/.../GitHub.copilot-chat/memory-tool/memories/...`) is **forbidden** as a substitute for the on-disk JSON ledger. If you find yourself reading or writing `pr-<NNNN>-review-plan.md`, `review-plan.md`, `dispatch-state.md`, or any other ledger-shaped file inside `/memories/`, you are violating this rule. Symptoms include the human report freezing at "0 of N complete" while you keep doing real work, because the rendered report only ever reads `./pr_reviews/.code-review-ledger-...json` and that file is empty. Concrete rules:
     - The only allowed ledger path is `./pr_reviews/.code-review-ledger-<sanitized-path>-<YYYY-MM-DD>.json`. No other file may hold the canonical state.
@@ -1051,14 +1051,21 @@ You are a **pure orchestrator**. You do not analyze code. You detect what is pre
     - immediately create a fallback artifact file at `./pr_reviews/<prefix>-review-fallback-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` containing the raw specialist response payload and the parse failure reason.
     This guarantees there is always an on-disk artifact for every specialist attempt, even when the specialist failed to self-write.
     If the second attempt also fails, leave the row `failed`, keep the fallback artifact path in `findings_file`, and record `specialist-failed: <agent> <model>: <reason>` in `dispatch_notes`. Do not silently drop.
-   b. **Stream findings, do not load.** Open the just-returned specialist's findings file, parse it line by line or finding by finding -- do not slurp it into memory. For each finding, compute its dedup key (`file:line + normalised issue description`) and append a row to the ledger's `findings_index` with `{specialist, model, finding_id, dedup_key, severity, location, file_path, line_offset}`. The full prose for each finding stays on disk in the specialist's own findings file; the ledger holds only the index.
-   c. **Incremental dedup.** For the just-added findings, look up matching `dedup_key` rows in the ledger's `findings_index`. If a match exists, add the new finding to the existing cluster (`cluster_id`). If not, create a new cluster. Each cluster row stores `{cluster_id, dedup_key, severity (max across cluster), confidence, member_finding_indices, member_models}`.
+   b. **Capture verbatim content + record reported count, dedup is best-effort.** Open the just-returned specialist's findings file. Do two things:
+     - **Record the verbatim file path and a reported count.** Set `dispatch_table[row].findings_file` to the file path. Set `dispatch_table[row].reported_findings` to the specialist's own count -- read it from the specialist's report header/summary if present (e.g. "Total findings: N" / "## Summary" / a final table row count) or from the chat reply the subagent returned alongside the file path. Do not invent a number. If neither source gives a count, set `reported_findings` to `"unstated"` and let the rendered section speak for itself. This count is what the specialist itself reported; the consolidated report shows it verbatim. Do **not** try to normalise 27 heterogeneous formats (tables, prose, paragraph-per-finding, no `**Severity**:` headers, etc.) into a single canonical count -- that was the original failure mode and it is forbidden.
+     - **Best-effort dedup index (parse-what-parses; never block rendering).** Walk the file. For every fragment that looks like a structured finding -- specifically, a block with an `**ID**:` *or* equivalent identifier line AND a `**Location**:` *or* equivalent file/line reference -- compute a dedup key (`file:line + normalised issue description`) and append a row to `findings_index` with `{specialist, model, finding_id, dedup_key, severity, location, file_path, line_offset}`. Skip fragments that do not match -- they are still inlined verbatim in the consolidated report (step 7i), they just do not participate in cross-model dedup. A `parsed_for_dedup` integer on the dispatch_table row records how many fragments were indexed. The gap between `reported_findings` and `parsed_for_dedup` is informational, not a defect; surface it in the report but never re-dispatch the specialist over it.
+   c. **Incremental dedup (over what parsed only).** For the just-added findings_index rows, look up matching `dedup_key` rows in the existing `findings_index`. If a match exists, add the new finding to the existing cluster (`cluster_id`). If not, create a new cluster. Each cluster row stores `{cluster_id, dedup_key, severity (max across cluster), confidence, member_finding_indices, member_models}`. Clusters cover only the parsed slice; that is fine -- the verbatim inline sections in the consolidated report are the authoritative full record.
    d. **Re-score confidence on the affected clusters only.** For each cluster touched by the just-returned specialist: count distinct models in `member_models`. 3 -> High (escalate severity one level unless already Critical). 2 -> Medium. 1 -> Low (flag as "single-model -- verify manually"). Disagreement on severity -> highest, note range.
-   e. **Recompute summary from authoritative arrays -- never increment.** `summary.raw_findings = len(findings_index)`. `summary.unique_clusters = len(clusters)`. `summary.confirmed_clusters = count of clusters with >= 2 distinct models in member_models`. `summary.specialists_done = count of dispatch_table rows with state == 'done'`. `summary.specialists_failed = count with state == 'failed'`. `summary.specialists_running = count with state == 'running'`. `summary.specialists_pending = count with state == 'pending'`. Never increment any of these in place -- always recompute from the dispatch_table and clusters arrays. Incrementing has drifted before because the model lost track of which writes already happened; recomputing from the canonical arrays is correct by construction.
+   e. **Recompute summary from authoritative arrays -- never increment.** `summary.reported_findings_total = sum of dispatch_table[*].reported_findings where numeric`. `summary.parsed_for_dedup_total = len(findings_index)`. `summary.unique_clusters = len(clusters)`. `summary.confirmed_clusters = count of clusters with >= 2 distinct models in member_models`. `summary.specialists_done = count of dispatch_table rows with state == 'done'`. `summary.specialists_failed = count with state == 'failed'`. `summary.specialists_running = count with state == 'running'`. `summary.specialists_pending = count with state == 'pending'`. Never increment any of these in place -- always recompute from the dispatch_table and clusters arrays. Incrementing has drifted before because the model lost track of which writes already happened; recomputing from the canonical arrays is correct by construction. `reported_findings_total` and `parsed_for_dedup_total` are reported separately and the difference is expected -- not a defect.
    f. **Zero-findings plausibility note (incremental).** If a specialist returned 0 findings and the reviewed path is >5,000 LOC or >50 source files, add an entry to `ledger.zero_findings_flags` so the rendered report surfaces it. This is a note, not a re-dispatch.
    g. **Atomic ledger write.** Write the ledger to `<path>.tmp` then `mv` over the real path. Set `last_update_utc` to the current clock at this moment -- never a placeholder, never the previous value.
   h. **Verify the write landed (cheap; log drift, never freeze).** Re-read the ledger file. Confirm the just-modified row is in the new state and that `last_update_utc` is the timestamp you just wrote. If verification fails, log `ledger-write-drift: <reason>` and retry once. If the retry also drifts, log it and continue per Constraint 8 -- never hard-exit on a verify miss. Append `ledger_write` (or `drift_detected`) to events and refresh heartbeat.
-  i. **Rewrite the human report from the ledger.** Render `./pr_reviews/code-review-<sanitized-path>-<YYYY-MM-DD>.md` fresh from the ledger. The report header includes `Review in progress: K of N specialists complete` (or `Review complete: N of N specialists` once the queue is empty). Sections that have data render fully; sections whose specialists are still `pending` or `running` render as `<pending>` placeholders so readers see what is missing without ambiguity. The Prioritized Summary always sorts by severity desc, then confidence desc, then specialist alphabetical, and always reflects the current dedup state. If a specialist attempt failed and used a fallback artifact, show the fallback file path in Dispatch Summary so the user can inspect what happened.
+  i. **Rewrite the consolidated report from the ledger -- inline every specialist's findings verbatim.** Render `./pr_reviews/code-review-<sanitized-path>-<YYYY-MM-DD>.md` fresh from the ledger. The report header includes `Review in progress: K of N specialists complete` (or `Review complete: N of N specialists` once the queue is empty). For **every** dispatch_table row whose state is `done` or `failed`, the report includes a `### <Specialist> -- <Model>` section that:
+     1. States the specialist's `reported_findings` count verbatim (e.g. `**Reported by specialist**: 7 findings` or `**Reported by specialist**: unstated`).
+     2. States the `parsed_for_dedup` count and notes any gap (`5 of 7 reported findings matched the structured finding format and joined the dedup index; the remaining 2 are still included verbatim below`).
+     3. **Inlines the full verbatim content of the specialist's findings file** -- copy the file's body into the section as-is, preserving the specialist's original markdown (tables, headers, prose, severity labels in whatever form). Do not re-format, do not summarise, do not strip. Prefix the inlined block with `<!-- begin verbatim: <findings_file_path> -->` and suffix with `<!-- end verbatim -->` so the boundary is unambiguous. If the file is large, it stays large -- the report has no length cap.
+     4. For `failed` rows, inline the fallback artifact (raw specialist response + parse failure reason) under the same `<!-- begin verbatim -->` markers, so failure context is in the consolidated report too.
+   Sections whose specialists are still `pending` or `running` render with the header plus a single `<pending>` line so readers see what is missing. The Prioritized Summary (built from `clusters`) sorts by severity desc, then confidence desc, then specialist alphabetical, and reflects only the parsed-for-dedup slice -- it is explicitly labelled as a best-effort cross-model agreement view, NOT the authoritative finding list. The inlined per-specialist sections are the authoritative list.
   j. **Verify the report rewrite (cheap; log drift, never freeze).** Re-read the report file. Confirm the new Status line and the affected specialist's Dispatch Summary State column reflect the transition. If the report did not match the ledger, log `report-rewrite-drift: <reason>` and retry once. Continue either way per Constraint 8 -- never hard-exit. Append `report_write` (or `drift_detected`) to events and refresh heartbeat.
    k. **No working-memory mirror.** After the report is rewritten and verified, drop everything you read from the specialist's findings file from your context. Do NOT write a summary of the specialist's findings to the memory tool. Do NOT write a "next steps" note to the memory tool that mirrors the ledger. The next iteration starts from disk again. This is the only way 27 specialist reviews fit through a single context window and the only way the memory-tool ban (Constraint 7) is sustainable.
 8. **File-coverage check (runs once, after the queue is empty).** Walk the ledger's `findings_index` and collect every `Location:` field. Walk the specialist findings files and collect every `Files read:` block when present. Diff against the reviewed path's `.py` files. Any unreviewed files go into `ledger.unreviewed_files` and the report's Dispatch Summary surfaces them. This is the only step that needs the full set, so it runs at the end -- not after every specialist.
@@ -1216,7 +1223,8 @@ The ledger is the **single source of truth** for the review. The human report is
       "started_utc": null,
       "finished_utc": null,
       "findings_file": null,
-      "raw_findings": 0,
+      "reported_findings": 0,
+      "parsed_for_dedup": 0,
       "retry_count": 0,
       "failure_reason": null
     }
@@ -1251,7 +1259,8 @@ The ledger is the **single source of truth** for the review. The human report is
     "specialists_running": 3,
     "specialists_done": 5,
     "specialists_failed": 0,
-    "raw_findings": 18,
+    "reported_findings_total": 42,
+    "parsed_for_dedup_total": 18,
     "unique_clusters": 14,
     "confirmed_clusters": 4
   },
@@ -1295,6 +1304,8 @@ The ledger filename embeds `<sanitized-path>-<YYYY-MM-DD>` so a single workspace
 
 Save as `./pr_reviews/code-review-<sanitized-path>-<YYYY-MM-DD>.md` (create `./pr_reviews/` if missing). Do not paste into chat -- return only the path. The report is rewritten in full from the ledger after every specialist returns; readers can refresh the file at any moment and see the current coherent state.
 
+**Hard rule: the consolidated report is self-contained.** Every dispatched specialist's findings are inlined verbatim in the `## Findings by Specialist` section. The report never says "see the specialist's file for details" as a substitute for inlining. Pointers to the individual files appear too (for traceability), but the content is duplicated into the consolidated report. A reader who opens only the consolidated report has the full review. Length is not a constraint -- a 1000-page consolidated report is correct.
+
 ```
 # Code Review: <path reviewed>
 
@@ -1306,49 +1317,69 @@ Save as `./pr_reviews/code-review-<sanitized-path>-<YYYY-MM-DD>.md` (create `./p
 
 ## Dispatch Summary
 
-| Specialist | Model | State | Raw Findings | After Dedup | Report path |
+`Reported` is the specialist's own count (from its report header/summary or chat reply). `Parsed for dedup` is how many of those findings matched the structured `**ID**: ... **Location**: ...` shape and joined the cross-model dedup index -- the remainder are still inlined verbatim below, they just do not feed the Prioritized Summary. A gap between the two columns is expected and not a defect.
+
+| Specialist | Model | State | Reported | Parsed for dedup | Report path |
 |---|---|---|---|---|---|
-| Python Expert | Claude Opus 4.7 | done | N | -- | `<path>` |
-| Python Expert | GPT-5.4 | running | <pending> | -- | <pending> |
-| Python Expert | Gemini 3.1 Pro Preview | pending | <pending> | -- | <pending> |
-| Logic & Correctness Expert | Claude Opus 4.7 | done | N | -- | `<path>` |
-| Logic & Correctness Expert | GPT-5.4 | failed (re-dispatch failed) | -- | -- | -- |
-| Logic & Correctness Expert | Gemini 3.1 Pro Preview | done | N | -- | `<path>` |
-| Docstring Expert | Claude Opus 4.7 | done | N | -- | `<path>` |
-| Docstring Expert | GPT-5.4 | done | N | -- | `<path>` |
-| Docstring Expert | Gemini 3.1 Pro Preview | done | N | -- | `<path>` |
+| Python Expert | Claude Opus 4.7 | done | 12 | 9 | `<path>` |
+| Python Expert | GPT-5.4 | running | <pending> | <pending> | <pending> |
+| Python Expert | Gemini 3.1 Pro Preview | pending | <pending> | <pending> | <pending> |
+| Logic & Correctness Expert | Claude Opus 4.7 | done | 5 | 5 | `<path>` |
+| Logic & Correctness Expert | GPT-5.4 | failed (re-dispatch failed) | -- | -- | `<fallback path>` |
+| Logic & Correctness Expert | Gemini 3.1 Pro Preview | done | unstated | 3 | `<path>` |
+| Docstring Expert | Claude Opus 4.7 | done | 22 | 18 | `<path>` |
+| Docstring Expert | GPT-5.4 | done | 19 | 19 | `<path>` |
+| Docstring Expert | Gemini 3.1 Pro Preview | done | 25 | 11 | `<path>` |
 | ... | ... | ... | ... | ... | ... |
 | <Specialist> | <Model> | not triggered | -- | -- | -- |
 
-**Deduplication summary** (as of last ledger write): X raw findings -> Y unique clusters (Z confirmed by multiple models). Updated incrementally; numbers grow as specialists return.
+**Totals** (as of last ledger write): X reported findings across all specialists; Y parsed into the dedup index -> Z unique clusters (W confirmed by 2+ models). The reported / parsed gap reflects format heterogeneity, not missed work.
 
 ## Findings by Specialist
 
-Sections appear as their specialist returns. Sections whose specialist is still `pending` or `running` render as `<pending>` so the reader knows what is missing.
+One section per dispatched (specialist, model) row. Each `done` and `failed` section inlines the specialist's findings file verbatim between explicit boundary markers. Each `pending` / `running` section renders as a single `<pending>` line. **Nothing in this section is a pointer-only stub.**
 
 ### Python Expert -- Claude Opus 4.7
-<findings or "0 findings" or "<pending>">
+
+**State**: done
+**Reported by specialist**: 12 findings
+**Parsed for dedup**: 9 (3 findings did not match the canonical finding format and are inlined below verbatim but do not appear in the Prioritized Summary)
+**Source file**: `./pr_reviews/python-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md`
+
+<!-- begin verbatim: ./pr_reviews/python-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md -->
+
+... full verbatim contents of the specialist's findings file pasted here, unchanged ...
+
+<!-- end verbatim -->
 
 ### Python Expert -- GPT-5.4
-<findings or "0 findings" or "<pending>">
+
+**State**: running
+<pending>
 
 ### Python Expert -- Gemini 3.1 Pro Preview
-<findings or "0 findings" or "<pending>">
+
+**State**: pending
+<pending>
 
 ### Docstring Expert -- Claude Opus 4.7
-<findings or "0 findings" or "<pending>">
 
-### Docstring Expert -- GPT-5.4
-<findings or "0 findings" or "<pending>">
+**State**: done
+**Reported by specialist**: 22 findings
+**Parsed for dedup**: 18
+**Source file**: `./pr_reviews/docstring-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md`
 
-### Docstring Expert -- Gemini 3.1 Pro Preview
-<findings or "0 findings" or "<pending>">
+<!-- begin verbatim: ./pr_reviews/docstring-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md -->
 
-[one section per dispatched row in the Dispatch Table]
+... full verbatim contents pasted here ...
 
-## Prioritized Summary
+<!-- end verbatim -->
 
-All findings from all specialists, deduplicated and sorted by severity then confidence:
+[one section per dispatched row in the Dispatch Table, even when the file is hundreds of pages]
+
+## Prioritized Summary (parsed slice only)
+
+This table covers only the findings that matched the structured `**ID**: ... **Location**: ...` shape during parsing and therefore joined the dedup index. It is a best-effort cross-model agreement view, **not** the authoritative finding list -- the authoritative list is the inlined verbatim sections above. Use this table to spot which issues multiple models agreed on; use the inlined sections to read every finding regardless of format.
 
 | # | ID | Severity | Confidence | Location | Issue | Source |
 |---|---|---|---|---|---|---|

@@ -229,7 +229,7 @@ Read the target path. For each Python file, list:
 - Top-level functions: name, public/private, has docstring, has type hints, has tests.
 - Top-level classes: name, public/private, has docstring, base classes.
 - Methods within classes: name, public/private, dunder, has docstring.
-- Top-level constants and `TypeAlias` definitions: usually don't need docstrings, but `TypeAlias` for non-obvious types may benefit from a one-line comment.
+- Top-level constants and `TypeAlias` definitions: do not require docstrings. A `TypeAlias` whose meaning is not obvious from its name must carry a one-line comment explaining what it models.
 
 Produce an inventory table:
 

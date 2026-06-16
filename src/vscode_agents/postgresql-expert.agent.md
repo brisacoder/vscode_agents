@@ -706,7 +706,7 @@ SELECT ... FROM ... WHERE ...;
 What to look for:
 - **Seq Scan** on a large table when you expect an index hit → index missing, or `WHERE` predicate not sargable (function applied to column).
 - **Rows estimate vs. actual** wildly off (e.g., estimated 1, actual 1,000,000) → stale `ANALYZE`; run `ANALYZE table_name` or check `pg_stat_user_tables`.
-- **Hash Join with high `Memory Usage`** spilling to `temp written` → `work_mem` too low for this query; consider `SET LOCAL work_mem = '64MB'` for the session.
+- **Hash Join with high `Memory Usage`** spilling to `temp written` → `work_mem` too low for this query; raise it with `SET LOCAL work_mem = '64MB'` for the session.
 - **Nested Loop with high iteration count** on the inner side → planner picked nested loop on bad cardinality estimate; ANALYZE the joined tables.
 - **External merge `Disk: ... kB`** → sort spilling to disk; raise `work_mem` for this session or add an index that satisfies the sort.
 

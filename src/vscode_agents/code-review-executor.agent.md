@@ -17,7 +17,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: Docstring Review — GPT-5.4
+  - label: Docstring Review — GPT-5.5
     agent: Docstring Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory). Find the specialist trigger entry for Docstring Expert and use the path listed there.
@@ -39,7 +39,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: Test Quality Review — GPT-5.4
+  - label: Test Quality Review — GPT-5.5
     agent: Unit Test Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory). Find the specialist trigger entry for Unit Test Expert and use the path listed there.
@@ -61,7 +61,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: Type Annotation Review — GPT-5.4
+  - label: Type Annotation Review — GPT-5.5
     agent: Type Annotation Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory). Find the specialist trigger entry for Type Annotation Expert and use the path listed there.
@@ -83,7 +83,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: README Review — GPT-5.4
+  - label: README Review — GPT-5.5
     agent: README Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory). Find the specialist trigger entry for README Expert and use the path listed there.
@@ -113,7 +113,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: Pandas Author — GPT-5.4
+  - label: Pandas Author — GPT-5.5
     agent: Pandas Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -152,7 +152,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: DuckDB Author — GPT-5.4
+  - label: DuckDB Author — GPT-5.5
     agent: DuckDB Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -190,7 +190,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: LangGraph Author — GPT-5.4
+  - label: LangGraph Author — GPT-5.5
     agent: LangGraph Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -226,7 +226,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: Python Author — GPT-5.4
+  - label: Python Author — GPT-5.5
     agent: Python Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -263,7 +263,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: BigQuery Author — GPT-5.4
+  - label: BigQuery Author — GPT-5.5
     agent: BigQuery Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -302,7 +302,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: PostgreSQL Author — GPT-5.4
+  - label: PostgreSQL Author — GPT-5.5
     agent: PostgreSQL Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -343,7 +343,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: Logic & Correctness Author — GPT-5.4
+  - label: Logic & Correctness Author — GPT-5.5
     agent: Logic & Correctness Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -382,7 +382,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: Pydantic Expert Author — GPT-5.4
+  - label: Pydantic Expert Author — GPT-5.5
     agent: Pydantic Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -418,7 +418,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: FastAPI Expert Author — GPT-5.4
+  - label: FastAPI Expert Author — GPT-5.5
     agent: FastAPI Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -454,7 +454,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: Scikit-learn Expert Author — GPT-5.4
+  - label: Scikit-learn Expert Author — GPT-5.5
     agent: Scikit-learn Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -490,7 +490,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: PyTorch Expert Author — GPT-5.4
+  - label: PyTorch Expert Author — GPT-5.5
     agent: PyTorch Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -526,7 +526,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: GCP Expert Author — GPT-5.4
+  - label: GCP Expert Author — GPT-5.5
     agent: GCP Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -562,7 +562,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: AWS Expert Author — GPT-5.4
+  - label: AWS Expert Author — GPT-5.5
     agent: AWS Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -598,7 +598,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: PyArrow Expert Author — GPT-5.4
+  - label: PyArrow Expert Author — GPT-5.5
     agent: PyArrow Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -634,7 +634,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: Observability Expert Author — GPT-5.4
+  - label: Observability Expert Author — GPT-5.5
     agent: Observability Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -670,7 +670,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: Docker Expert Author — GPT-5.4
+  - label: Docker Expert Author — GPT-5.5
     agent: Docker Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -706,7 +706,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: CI/CD Expert Author — GPT-5.4
+  - label: CI/CD Expert Author — GPT-5.5
     agent: CI/CD Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -761,24 +761,24 @@ The agent is invoked with the path to a code-review Markdown report produced by 
 
 ## Routing Table
 
-Every finding is routed by its ID prefix. The prefix tells you which specialist owns it. The orchestrator auto-dispatches the Claude variant; the user can manually click the GPT-5.4 button from the handoffs panel for a second opinion on any finding.
+Every finding is routed by its ID prefix. The prefix tells you which specialist owns it. The orchestrator auto-dispatches the Claude variant; the user can manually click the GPT-5.5 button from the handoffs panel for a second opinion on any finding.
 
 Adding a new specialist? Add one row here and two entries in YAML `handoffs:`. No other change anywhere.
 
 | ID prefix | Specialist | Auto-dispatch handoff label | Manual second-opinion handoff label |
 |---|---|---|---|
-| `LC-`, `ORCH-` | Logic & Correctness Expert | Logic & Correctness Author — Claude Opus 4.7 | Logic & Correctness Author — GPT-5.4 |
-| `F-`, `I-`, `A-`, `C-`, `S-`, `L-`, `U-`, `PY-` | Python Expert | Python Author — Claude Opus 4.7 | Python Author — GPT-5.4 |
-| `PA-` | Pandas Expert | Pandas Author — Claude Opus 4.7 | Pandas Author — GPT-5.4 |
-| `DB-` | DuckDB Expert | DuckDB Author — Claude Opus 4.7 | DuckDB Author — GPT-5.4 |
-| `BQ-` | BigQuery Expert | BigQuery Author — Claude Opus 4.7 | BigQuery Author — GPT-5.4 |
-| `PG-` | PostgreSQL Expert | PostgreSQL Author — Claude Opus 4.7 | PostgreSQL Author — GPT-5.4 |
-| `G-` | LangGraph Expert | LangGraph Author — Claude Opus 4.7 | LangGraph Author — GPT-5.4 |
-| `D-` | Docstring Expert | Docstring Review — Claude Opus 4.7 | Docstring Review — GPT-5.4 |
-| `TY-` | Type Annotation Expert | Type Annotation Review — Claude Opus 4.7 | Type Annotation Review — GPT-5.4 |
-| `T-` | Unit Test Expert | Test Quality Review — Claude Opus 4.7 | Test Quality Review — GPT-5.4 |
-| `DOC-` | README Expert | README Review — Claude Opus 4.7 | README Review — GPT-5.4 |
-| `PR-` | PR Discipline Expert | PR Discipline Fix — Claude Opus 4.7 | PR Discipline Fix — GPT-5.4 |
+| `LC-`, `ORCH-` | Logic & Correctness Expert | Logic & Correctness Author — Claude Opus 4.7 | Logic & Correctness Author — GPT-5.5 |
+| `F-`, `I-`, `A-`, `C-`, `S-`, `L-`, `U-`, `PY-` | Python Expert | Python Author — Claude Opus 4.7 | Python Author — GPT-5.5 |
+| `PA-` | Pandas Expert | Pandas Author — Claude Opus 4.7 | Pandas Author — GPT-5.5 |
+| `DB-` | DuckDB Expert | DuckDB Author — Claude Opus 4.7 | DuckDB Author — GPT-5.5 |
+| `BQ-` | BigQuery Expert | BigQuery Author — Claude Opus 4.7 | BigQuery Author — GPT-5.5 |
+| `PG-` | PostgreSQL Expert | PostgreSQL Author — Claude Opus 4.7 | PostgreSQL Author — GPT-5.5 |
+| `G-` | LangGraph Expert | LangGraph Author — Claude Opus 4.7 | LangGraph Author — GPT-5.5 |
+| `D-` | Docstring Expert | Docstring Review — Claude Opus 4.7 | Docstring Review — GPT-5.5 |
+| `TY-` | Type Annotation Expert | Type Annotation Review — Claude Opus 4.7 | Type Annotation Review — GPT-5.5 |
+| `T-` | Unit Test Expert | Test Quality Review — Claude Opus 4.7 | Test Quality Review — GPT-5.5 |
+| `DOC-` | README Expert | README Review — Claude Opus 4.7 | README Review — GPT-5.5 |
+| `PR-` | PR Discipline Expert | PR Discipline Fix — Claude Opus 4.7 | PR Discipline Fix — GPT-5.5 |
 
 Spawned findings (`Fx-`, `Sx-`, etc.) route by their base prefix (e.g., `Fx-3` → Python Expert).
 
@@ -946,7 +946,7 @@ Append-only. One entry per completed (or blocked / superseded) finding:
 
 ### <ID> — <one-line summary> — <state> — <ISO timestamp>
 - **Specialist**: <name>
-- **Model**: <Claude Opus 4.7 | GPT-5.4>
+- **Model**: <Claude Opus 4.7 | GPT-5.5>
 - **Files touched**: <list as reported by specialist>
 - **Commit**: <sha as reported by specialist>
 - **Specialist summary**: <one-line>

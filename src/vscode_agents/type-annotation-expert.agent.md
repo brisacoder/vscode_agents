@@ -108,9 +108,9 @@ The agent reads the project's existing convention on `from __future__ import ann
 
 ### `Any` and `cast` and `# type: ignore`
 
-- **`Any`**: allowed when the value is genuinely dynamic (e.g., `json.loads` output before validation, generic plugin registries). Every `Any` in the codebase should have a comment one line above explaining why a more precise type isn't possible. The agent never adds `Any` without that comment. The agent treats every existing unjustified `Any` as a finding to surface.
+- **`Any`**: allowed when the value is genuinely dynamic (e.g., `json.loads` output before validation, generic plugin registries). Every `Any` in the codebase must carry a comment one line above explaining why a more precise type is not possible (AC-4). The agent never adds `Any` without that comment. The agent treats every existing unjustified `Any` as a finding to surface.
 
-- **`cast(T, value)`**: allowed when you know more than the checker (e.g., after a `isinstance` check that the checker can't follow because of how the value was obtained). Every `cast` should have a comment explaining the invariant being asserted. Prefer `assert isinstance(...)` (which the checker understands) when feasible.
+- **`cast(T, value)`**: allowed when you know more than the checker (e.g., after a `isinstance` check that the checker can't follow because of how the value was obtained). Every `cast` must carry a comment explaining the invariant being asserted. Use `assert isinstance(...)` (which the checker understands) instead whenever it is feasible.
 
 - **`# type: ignore[error-code]`**: allowed only with a specific error code and a comment. Bare `# type: ignore` is forbidden. Allowed cases include: third-party stub bugs (cite the upstream issue), genuinely untyped legacy code being chipped at incrementally, code where the checker is provably wrong (rare; verify before using).
 

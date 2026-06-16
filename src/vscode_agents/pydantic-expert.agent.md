@@ -306,7 +306,7 @@ Delegate, do not file:
 
 ### Write / Optimize mode
 
-1. Prefer native Pydantic v2 APIs over compatibility shims.
+1. Use native Pydantic v2 APIs; never reach for `v1` compatibility shims when a v2 equivalent exists.
 2. Keep validators pure, narrow, and explicit about `before` vs `after` semantics.
 3. Make dump/JSON/schema intent explicit at each call site.
 4. Hoist adapters and schema generation out of hot paths.

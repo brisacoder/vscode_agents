@@ -284,7 +284,7 @@ Delegate, do not file:
 
 ### Write / Optimize mode
 
-1. Prefer declarative dependencies over hidden globals.
+1. Use declarative `Depends` dependencies; never reach into hidden module-level globals for request-scoped state.
 2. Keep async paths non-blocking and make sync work explicit.
 3. Separate input models, domain objects, and response contracts.
 4. Treat middleware order and proxy trust as security-sensitive code.

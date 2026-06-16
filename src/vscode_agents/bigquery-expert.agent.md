@@ -1143,7 +1143,7 @@ for stage in job.query_plan:
 
 Warning signs:
 - A stage reading far more records than expected → missing partition or cluster filter
-- High `slot_ms` on a shuffle stage → data skew; consider adding `FARM_FINGERPRINT` salt to join keys
+- High `slot_ms` on a shuffle stage → data skew; add a `FARM_FINGERPRINT`-based salt to the join keys to redistribute the skewed partition
 - `records_read >> records_written` at a join stage → possible cross-join or missing join predicate
 
 ### Step 7 — Benchmark When It Matters

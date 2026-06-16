@@ -438,7 +438,7 @@ Apply the solution using the patterns from the toolbox. Post-write checklist:
 - No loops over rows.
 - No `apply(lambda, axis=1)` where a vectorized alternative exists.
 - Low-cardinality string columns use `pd.Categorical`.
-- If the frame is large (> 100k rows) and uses many arithmetic expressions, `pd.eval()` is considered.
+- If the frame is large (> 100k rows) and uses many chained arithmetic expressions, use `pd.eval()` to fuse them into a single pass.
 
 ### Step 6 — Benchmark When It Matters
 

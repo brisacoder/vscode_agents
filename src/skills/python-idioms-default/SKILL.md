@@ -18,3 +18,12 @@ When ranking alternatives:
 5. **Reject deprecated and non-idiomatic constructs by default**: never `Optional[X]`, `List[X]`, `os.path.*` where `pathlib` fits, `datetime.utcnow()`, bare `except:`, `for i in range(len(x))`, string concatenation in hot loops where `"".join()` fits.
 
 When you propose, write, review, or recommend a fix and multiple correct options exist, surface the most idiomatic one as the default. If you select a less-Pythonic option, state the explicit reason — measured performance constraint, library API requirement, or project convention — in the same response.
+
+## Hard file-size constraint
+
+**No single `.py` file — source or test — may exceed 300 lines.** This is a CI gate, not a guideline. When writing or reviewing code:
+
+- If a source module approaches 300 lines, split it into focused sub-modules before it crosses the limit.
+- If a test file approaches 300 lines, split it into multiple `test_<module>_<aspect>.py` files (e.g., `test_router_happy_path.py`, `test_router_error_cases.py`).
+- When reviewing, any file exceeding 300 lines is a **High** severity finding regardless of content quality.
+- Shared fixtures that multiple test files need go into `conftest.py` (which is also subject to the 300-line cap — use multiple `conftest.py` at different directory levels if needed).

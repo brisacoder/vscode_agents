@@ -455,6 +455,7 @@ Scope: modernizing *syntax* of existing type annotations. Adding missing annotat
 - `@classmethod` used where `@staticmethod` or a module-level function would be clearer [3.12+]
 - Class used in positional match pattern (`case Foo(x, y):`) without `__match_args__` defined — positional pattern matching silently falls back to keyword-only without it [3.10+]
 - **God class**: a single class exceeding 500 LOC or 20 public methods. Flag for splitting into cohesive components; document the responsibility and identify the seams (commonly: state container vs. behaviour, request handling vs. business logic, persistence vs. domain). **Medium**. [3.12+]
+- **File exceeds 300-line CI gate**: any `.py` file (source or test) exceeding 300 lines. CI rejects files over this threshold — this is not a guideline, it is a hard gate. For source modules: split by responsibility into focused sub-modules. For test files: split by aspect (`test_<module>_<aspect>.py`) and extract shared fixtures into `conftest.py`. **High**. [3.12+]
 - **Deep inheritance**: MRO depth greater than 3 levels (counting `object`) without a documented reason. Each level can override behaviour; reasoning becomes intractable. Prefer composition or `Protocol`-based design. **Medium**. [3.12+]
 
 #### Available in Python 3.13 (`[3.13+]`)

@@ -749,6 +749,7 @@ Every specialist dispatched through this executor is expected, as a standing req
 2. **Dispatch every finding** — every finding goes to a specialist via the Routing Table. No domain is handled by the executor.
 3. **Ledger is the source of truth** — every state transition (`pending` → `in-progress` → `done` / `blocked` / `superseded`) is recorded before the next dispatch.
 4. **Respect dependencies** — never dispatch a dependent finding before its prerequisites are `done`.
+5. **300-line file cap** — after every specialist fix, verify that no touched `.py` file (source or test) exceeds 300 lines. If a fix pushes a file over the limit, mark the row `blocked: file-size-exceeded` and surface it. The specialist must split the file before the fix can be accepted. This is a CI hard gate.
 
 ## Inputs
 

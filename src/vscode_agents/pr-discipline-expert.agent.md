@@ -30,6 +30,7 @@ These rules are non-negotiable. They apply to every PR, every commit, every bran
 3. `black` and `isort` on every modified file, every commit, every PR.
 4. Refresh the base branch and sync it into the working branch before opening any PR -- never let CI gate the PR as "branch behind base".
 5. Every changed or added `*.py` file ships tests in the same PR that keep total coverage at or above 75%.
+6. No single `.py` file (source or test) exceeds 300 lines. CI rejects files over this threshold.
 
 ### Rule 1 -- The 2,000-line PR cap
 
@@ -151,6 +152,37 @@ DEFAULT_BRANCH=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null |
 - A PR that excludes the new file from coverage via `# pragma: no cover` or a `[tool.coverage.run] omit = ...` addition without an explicit written justification in the PR description (and a `PR-coverage-exclusion` follow-up issue to remove the exclusion).
 
 **Coverage is computed on the post-merge tree**: if the PR adds `baz.py` and `test_baz.py`, the gate runs against the package containing both, not just against `baz.py`. The 75% number is the project's CI threshold; this agent does not raise or lower it. If the project's `pyproject.toml` sets a higher threshold (e.g. `--cov-fail-under=85`), the higher threshold wins; this rule provides the floor.
+
+### Rule 6 -- No `.py` file exceeds 300 lines
+
+**CI rejects any `.py` file -- source or test -- that exceeds 300 lines.** This is a hard gate identical in enforcement to the formatter gate (Rule 3): the PR cannot merge while any file in the diff is over the limit.
+
+**The 300-line check** runs as part of every Enforce and Review pass:
+
+```bash
+find_oversize() {
+  git diff --name-only --diff-filter=ACMR "${1:-HEAD~1}" -- '*.py' |
+    while read -r f; do
+      lines=$(wc -l < "$f")
+      [ "$lines" -gt 300 ] && echo "FAIL: $f ($lines lines > 300)"
+    done
+}
+```
+
+**What this rule rejects**:
+
+- A source module that grew past 300 lines. Split by responsibility into focused sub-modules.
+- A test file that grew past 300 lines. Split by aspect (`test_<module>_happy_path.py`, `test_<module>_error_cases.py`, `test_<module>_edge_cases.py`). Extract shared fixtures into `conftest.py`.
+- A `conftest.py` that grew past 300 lines. Use multiple `conftest.py` files at different directory levels.
+- A generated file that exceeds 300 lines. Exclude it from coverage and add a `# generated -- do not edit` header, or split the generation template.
+
+**No exceptions for "but it's mostly docstrings", "but it's parametrize data", or "but it's one big class that can't be split".** Every file fits in 300 lines or gets refactored until it does. This rule is the single most effective lever against test bloat and module sprawl.
+
+When the agent is in **Plan** mode and decomposing work: factor the 300-line cap into the file-set design. A module whose behavior inventory suggests >300 lines of tests must be planned as 2+ test files from the start.
+
+When the agent is in **Review** mode: any file in the diff exceeding 300 lines is a `PR-file-size-exceeded` finding at **High** severity.
+
+When the agent is in **Fix** mode on a `PR-file-size-exceeded` finding: split the offending file, update imports, and verify tests still pass.
 
 ## Mode Detection
 

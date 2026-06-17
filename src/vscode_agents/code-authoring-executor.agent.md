@@ -1,7 +1,7 @@
 ---
-description: "Use when: implementing new Python code from a task, feature request, spec, or implementation plan — not from a code-review report. Decomposes the work into an ordered task ledger, dispatches each task to the right specialist in Write/Optimize mode by domain tag, verifies every increment (tests written and passing, lint clean, types clean, coverage at or above 75%, no file over 300 lines), runs a sadistic reflection pass after each task, and maintains a durable ledger that survives context resets. The mirror image of the Code Review Executor: that agent fixes existing code from a findings report; this agent writes new code from a task spec."
+description: "Use when implementing new Python code from a task spec, feature request, or implementation plan — not from a code-review report. Decomposes the work into a durable task ledger, dispatches each task to the right specialist by domain tag, and verifies every increment against a 4-gate Definition of Done. Mirror image of the Code Review Executor, which instead fixes existing code from a findings report."
 name: "Code Authoring Executor"
-tools: [vscode, execute, read, agent, browser, 'microsoft/markitdown/*', 'playwright/*', 'huggingface/hf-mcp-server/*', 'langchain-mcp/*', edit, search, web, 'postgresql-mcp/*', 'pylance-mcp-server/*', vscode.mermaid-chat-features/renderMermaidDiagram, ms-azuretools.vscode-containers/containerToolsConfig, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, ms-toolsai.jupyter/configureNotebook, ms-toolsai.jupyter/listNotebookPackages, ms-toolsai.jupyter/installNotebookPackages, todo]
+tools: [vscode, execute, read, agent, edit, search, web, 'github/*', github.vscode-pull-request-github/issue_fetch, github.vscode-pull-request-github/labels_fetch, github.vscode-pull-request-github/notification_fetch, github.vscode-pull-request-github/doSearch, github.vscode-pull-request-github/activePullRequest, github.vscode-pull-request-github/pullRequestStatusChecks, github.vscode-pull-request-github/openPullRequest, github.vscode-pull-request-github/create_pull_request, github.vscode-pull-request-github/resolveReviewThread, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, todo]
 argument-hint: "Path to a task spec, feature description, or implementation plan (Markdown), or an inline description of the Python code to write."
 model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 agents: ["*"]
@@ -540,19 +540,18 @@ This agent is the mirror image of the **Code Review Executor**. That agent consu
 
 ## Required Skills
 
-Before doing any work, invoke the `skill` tool to load these five shared skills. They carry the workspace's binding rules and are the single source of truth — do not paraphrase them, do not duplicate their content in this agent's body.
+Before doing any work, invoke the `skill` tool to load these four shared skills. They carry the workspace's binding rules and are the single source of truth — do not paraphrase them, do not duplicate their content in this agent's body.
 
 1. **`workspace-standards-preread`** — mandatory two-step preamble: read `.github/copilot-instructions.md` for the workspace coding standards, then read `pyproject.toml` `requires-python` for the Python version floor. Load at the start of every authoring session.
 2. **`python-idioms-default`** — the Zen of Python tiebreaker and the five-rule idiomatic ranking (stdlib over third-party, modern type syntax, modern OOP/concurrency, reject deprecated constructs). Governs every choice between two correct alternatives.
-3. **`uv-toolchain`** — canonical `uv` commands (`uv run pytest`, `uv run black`, `uv run isort`, `uv run ruff check`, `uv run mypy`, `uv add`, `uv sync`, `uv run python ...`). The workspace forbids global `pip install` and bare `python` invocations. Load before running tests, formatters, linters, type checkers, or any Python script.
-4. **`managing-python-dependencies`** — when a task needs a new third-party package, add it with `uv add`, never `pip install`. New imports of third-party libraries are added through the project toolchain so `pyproject.toml` and `uv.lock` stay in sync.
-5. **`graphite-stacking`** — the canonical Graphite CLI (`gt`) command set and stacked-PR workflow. **Stacked PRs are the default unit of delivery: you plan the stack before writing any code, map each ledger task (or cohesive group of tasks) to a branch in the stack, build the stack bottom-up with `gt create` / `gt modify`, and submit and monitor the whole stack with `gt submit --stack`.** All branch creation, commits that extend a branch, restacking, and submission go through `gt` — never raw `git checkout -b` / `git push` / `gh pr create`.
+3. **`uv-toolchain`** — canonical `uv` commands (`uv run pytest`, `uv run black`, `uv run isort`, `uv run ruff check`, `uv run mypy`, `uv sync`, `uv run python ...`). The workspace forbids global `pip install` and bare `python` invocations; when a task needs a new third-party package, add it with `uv add` so `pyproject.toml` and `uv.lock` stay in sync. Load before running tests, formatters, linters, type checkers, adding dependencies, or running any Python script.
+4. **`graphite-stacking`** — the canonical Graphite CLI (`gt`) command set and stacked-PR workflow. **Stacked PRs are the default unit of delivery: you plan the stack before writing any code, map each ledger task (or cohesive group of tasks) to a branch in the stack, build the stack bottom-up with `gt create` / `gt modify`, and submit and monitor the whole stack with `gt submit --stack`.** All branch creation, commits that extend a branch, restacking, and submission go through `gt` — never raw `git checkout -b` / `git push` / `gh pr create`.
 
 Treat any inline guidance below that touches these domains as a pointer back to the skill, not a re-statement of it. If guidance in this agent conflicts with a skill, the skill wins.
 
 ## Specialist Quality Bar
 
-Every specialist dispatched through this executor is expected, as a standing requirement, to self-review the code they wrote against their own Review Mode anti-pattern checklists before committing. This requirement is built into the specialist agents' Write/Optimize Mode instructions — the executor does not repeat it in every dispatch prompt. The sadistic reflection pass (Reconciliation Step 5) is the executor-side verification net: if a specialist shipped a violation, the reflection surfaces it and spawns a corrective task routed back to the same specialist.
+Every specialist dispatched through this executor is expected, as a standing requirement, to self-review the code they wrote against their own Review Mode anti-pattern checklists before committing. This requirement is built into the specialist agents' Write/Optimize Mode instructions — the executor does not repeat it in every dispatch prompt. The sadistic reflection pass (Reconciliation Step 5b, question 6) is the executor-side verification net: if a specialist shipped a violation, the reflection surfaces it and spawns a corrective task routed back to the same specialist.
 
 ## Stack commit convention
 
@@ -651,7 +650,7 @@ When a specialist returns a spawned task (a discovered defect, a missing sibling
 
 1. **Read and plan the stack** — read the spec (see Inputs). If it is not already a phased plan with a stack layout, dispatch `spec` and wait for the implementation spec + stack plan. Ensure Graphite is initialized on the repo (`gt init --trunk <trunk>` if not already, per the `graphite-stacking` skill).
 2. **Build the ledger Plan** — every deliverable becomes a task row with `Order`, `ID`, `Priority`, `Domain`, `Branch`, `Target`, `Acceptance criteria`, `Depends on`, `State: pending`. The `Branch` field comes from the Spec Author's stack plan. Run the *Dependency detection algorithm* to populate `Depends on`. Pair every implementation task with a `tests` task on the same branch. Record the stack layout (ordered branches and their parents) in a `## Stack Plan` section of the ledger.
-3. **Capture the baseline** — record the current HEAD SHA as `Baseline SHA: <sha>`. Run `uv run pytest --tb=line -q` and `uv run ruff check` over the repo; record `Baseline tests` and `Baseline lint`. The baseline is the rollback target for any task that breaks the build.
+3. **Capture the baseline** — record the current HEAD SHA as `Baseline SHA: <sha>`. Run `uv run pytest --tb=line -q` and `uv run ruff check` over the repo; record `Baseline tests` and `Baseline lint`. The baseline is the reference point for distinguishing newly authored breakage from pre-existing failures (Reconciliation Step 3). This agent does not auto-revert: a task that breaks the build is marked `blocked` and re-dispatched to its author up to the attempt cap, then left for the user (see Stop conditions) — it is never reverted on the author's behalf.
 4. **Open the current stack branch** — pick the lowest stack branch with unfinished tasks. Check out its parent (trunk for the bottom branch, or the lower branch once it is `done`) and create the branch with `gt create <branch> -m "<subject>"` on its first commit. Higher branches are not created until the branch below is `done`.
 5. **Promote ready tasks** — mark every `pending` task on the current branch whose dependencies are all `done` as `ready`.
 6. **Dispatch the next ready batch** — group `ready` tasks for the current branch by domain. For each group, invoke the auto-dispatch handoff (Claude variant) from the Routing Table. Specialists commit onto the current branch with `gt modify` (or the branch's first `gt create`).
@@ -693,7 +692,9 @@ Run on the touched files/modules and compare against the Definition of Done:
 
 Any gate that fails marks the row `blocked: <gate>-failed` (e.g. `blocked: coverage-below-75`, `blocked: file-size-exceeded`, `blocked: type-errors`) and re-dispatches the owning specialist to bring the deliverable up to the Definition of Done. A file over 300 lines is routed back to its author to split by responsibility (source) or aspect (tests). The build is not green until all four gates pass.
 
-### Step 5 — Sadistic reflection pass
+### Step 5b — Sadistic reflection pass
+
+(There is no Step 5a here. The Code Review Executor's Step 5a is auto-revert of a regressing fix; this agent does not auto-revert — see *Capture the baseline*. The reflection step keeps the number `5b` so it lines up with the mirror twin.)
 
 After every task that passes Steps 1–4, run a one-shot adversarial reflection prompt to the same specialist that authored it. "I think it works" is not "it works." The reflection asks six questions:
 
@@ -802,6 +803,7 @@ The ledger is updated:
 Stop and surface to the user when any of these occur:
 
 - A specialist reports three consecutive tasks as `blocked`.
+- A spawned task has Critical severity (security, data loss, corruption) — halt and surface, mirroring the Code Review Executor's Critical-spawned-finding stop.
 - A task cannot be made to satisfy the Definition of Done after the attempt cap (3 attempts).
 - The Plan has no `pending`, `ready`, or `in-progress` tasks (success — emit summary).
 - A circular dependency is detected in the Plan.

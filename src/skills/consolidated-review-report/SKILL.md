@@ -43,6 +43,8 @@ Render sections in exactly this order. Do not reorder, merge, or skip any sectio
 ## Findings by Specialist
 
 ## Orchestrator notes
+
+## Specialist Review Triggers
 ```
 
 ---
@@ -240,9 +242,26 @@ Brief operational notes about the review run itself. Not findings -- metadata on
 
 ---
 
+## Section 8: Specialist Review Triggers
+
+The path each dispatched specialist must review. Every specialist handoff prompt instructs the specialist to read this section, find its own row, and review the listed path. **This section MUST be present in the initial report written before any specialist is dispatched** (Code Reviewer V3 Approach step 5) and preserved on every rewrite — a specialist dispatched before the section exists has no target path.
+
+```markdown
+## Specialist Review Triggers
+
+| Specialist | Path / scope to review |
+|---|---|
+| Python Expert | `<path reviewed>` |
+| ... one row per triggered specialist ... | `<path or narrower scope>` |
+```
+
+All specialists review the full reviewed path unless a narrower scope is noted in their row.
+
+---
+
 ## Finding ID conventions (per specialist)
 
-Each specialist owns its own ID prefix. The orchestrator does not invent or reassign IDs.
+Each specialist owns its own ID prefix. The orchestrator does not invent or reassign IDs. This table is the canonical prefix set; it MUST stay identical to the Finding ID Prefixes table in `code-reviewer-v3` and the Routing Table in `code-review-executor`.
 
 | Specialist | ID prefix pattern | Example |
 |---|---|---|

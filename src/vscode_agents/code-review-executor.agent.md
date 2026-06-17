@@ -1,7 +1,7 @@
 ---
 description: "Use when: applying fixes from a code-review report produced by the Code Review agent. Walks the report finding-by-finding, fixes one issue at a time, runs a sadistic reflection pass after each fix, and maintains a durable ledger that survives context resets."
 name: "Code Review Executor"
-tools: [vscode, execute, read, agent, browser, 'microsoft/markitdown/*', 'playwright/*', 'huggingface/hf-mcp-server/*', 'langchain-mcp/*', edit, search, web, 'postgresql-mcp/*', 'pylance-mcp-server/*', vscode.mermaid-chat-features/renderMermaidDiagram, ms-azuretools.vscode-containers/containerToolsConfig, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, ms-toolsai.jupyter/configureNotebook, ms-toolsai.jupyter/listNotebookPackages, ms-toolsai.jupyter/installNotebookPackages, todo]
+tools: [vscode, execute, read, agent, edit, search, web, 'github/*', github.vscode-pull-request-github/issue_fetch, github.vscode-pull-request-github/labels_fetch, github.vscode-pull-request-github/notification_fetch, github.vscode-pull-request-github/doSearch, github.vscode-pull-request-github/activePullRequest, github.vscode-pull-request-github/pullRequestStatusChecks, github.vscode-pull-request-github/openPullRequest, github.vscode-pull-request-github/create_pull_request, github.vscode-pull-request-github/resolveReviewThread, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, todo]
 argument-hint: Path to a code-review Markdown report produced by the Code Review agent.
 model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
 agents: ["*"]
@@ -172,7 +172,7 @@ handoffs:
     send: true
     model: GPT-5.5 (openai)
 
-  - label: LangGraph Author — Claude Opus 4.7
+  - label: LangGraph Expert — Claude Opus 4.7
     agent: LangGraph Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -190,7 +190,7 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: LangGraph Author — GPT-5.5
+  - label: LangGraph Expert — GPT-5.5
     agent: LangGraph Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
@@ -746,6 +746,11 @@ When the reviewed code is delivered as a Graphite stack, fixes respect the stack
 - A finding's fix lands on the **branch that owns the code** it touches — typically the lowest branch where the defect appears. Fixing it lower and restacking propagates the change up; fixing it on a higher branch leaves the lower PR still broken.
 - After a fix commits on a branch (`gt modify`), run `gt restack` so descendant branches pick up the change, then re-verify the affected branches.
 - The specialist dispatch prompts say "commit"; that means a `gt`-tracked commit on the owning stack branch, never a raw `git commit` that starts or pushes a branch. Re-submission of the stack (`gt submit --stack`) is the PR Discipline Expert's job, dispatched on the `PR-` findings or at session end.
+- **Commit trailers are echoed, never invented.** When this executor is driven by a PR resolver/watch agent, its dispatch prompt may carry commit trailers to propagate onto every fix commit (e.g. `Pr-Review-Resolver:`, `Pr-Watch-Routed-By:`, `Refs:`). The executor passes those exact trailers through to the specialist's `gt modify` commit unchanged; it does not originate trailers of its own beyond the ones it was handed.
+
+### PR-comment replies are not this executor's job
+
+This executor fixes code and reports commits; it does **not** post replies on PR review threads. The PR resolver and PR Watch agents own per-thread replies because they hold the PR context (thread IDs, comment URLs) that this executor never sees. The executor's contract to those callers is to surface, for every finding it closed, the **commit SHA(s)** and a **one-line description of what the fix changed** (the Routing Table prefix + Location make the owning thread identifiable). The caller maps each SHA back to its review thread and posts the reply. The per-finding History entry (Commit + Specialist summary) and the session-end return (below) are where those values live.
 
 ## Specialist Quality Bar
 
@@ -757,7 +762,8 @@ Every specialist dispatched through this executor is expected, as a standing req
 2. **Dispatch every finding** — every finding goes to a specialist via the Routing Table. No domain is handled by the executor.
 3. **Ledger is the source of truth** — every state transition (`pending` → `in-progress` → `done` / `blocked` / `superseded`) is recorded before the next dispatch.
 4. **Respect dependencies** — never dispatch a dependent finding before its prerequisites are `done`.
-5. **300-line file cap** — after every specialist fix, verify that no touched `.py` file (source or test) exceeds 300 lines. If a fix pushes a file over the limit, mark the row `blocked: file-size-exceeded` and surface it. The specialist must split the file before the fix can be accepted. This is a CI hard gate.
+5. **300-line file cap** — after every specialist fix, verify that no touched `.py` file (source or test) exceeds 300 lines. If a fix pushes a file over the limit, mark the row `blocked: file-size-exceeded` and surface it. The specialist must split the file before the fix can be accepted. This is a CI hard gate, re-checked in Reconciliation Step 4.
+6. **Definition of Done is non-negotiable** — a fix is `done` only when ALL of the following hold for the code it touched: the filed anti-pattern is gone (Step 2); tests pass with no new regression (Step 3); `uv run ruff check` is clean or no-worse-than-baseline; `uv run mypy --strict` (or pyright) is clean or no-worse-than-baseline; coverage on every touched package is at or above 75%; and no touched `.py` file exceeds 300 lines. The four lint/type/coverage/file-size gates are enforced together in Reconciliation Step 4 — the same four-gate Definition of Done the Code Authoring Executor applies to authored code.
 
 ## Inputs
 
@@ -773,20 +779,37 @@ Every finding is routed by its ID prefix. The prefix tells you which specialist 
 
 Adding a new specialist? Add one row here and two entries in YAML `handoffs:`. No other change anywhere.
 
+These prefixes are the contract shared verbatim with Code Reviewer V3's "Finding ID Prefixes" table and the `consolidated-review-report` skill's ID-conventions table. All three MUST stay identical — a prefix that exists in the report but not here is an unroutable finding. When you add or rename a specialist, update all three tables in the same edit.
+
 | ID prefix | Specialist | Auto-dispatch handoff label | Manual second-opinion handoff label |
 |---|---|---|---|
-| `LC-`, `ORCH-` | Logic & Correctness Expert | Logic & Correctness Author — Claude Opus 4.7 | Logic & Correctness Author — GPT-5.5 |
-| `F-`, `I-`, `A-`, `C-`, `S-`, `L-`, `U-`, `PY-` | Python Expert | Python Author — Claude Opus 4.7 | Python Author — GPT-5.5 |
-| `PA-` | Pandas Expert | Pandas Author — Claude Opus 4.7 | Pandas Author — GPT-5.5 |
-| `DB-` | DuckDB Expert | DuckDB Author — Claude Opus 4.7 | DuckDB Author — GPT-5.5 |
+| `PY-` (and the Python sub-prefixes `F-`, `I-`, `A-`, `C-`, `S-`, `L-`, `U-`) | Python Expert | Python Author — Claude Opus 4.7 | Python Author — GPT-5.5 |
+| `LC-` | Logic & Correctness Expert | Logic & Correctness Author — Claude Opus 4.7 | Logic & Correctness Author — GPT-5.5 |
+| `DOC-` | Docstring Expert | Docstring Review — Claude Opus 4.7 | Docstring Review — GPT-5.5 |
+| `TA-` | Type Annotation Expert | Type Annotation Review — Claude Opus 4.7 | Type Annotation Review — GPT-5.5 |
+| `RM-` | README Expert | README Review — Claude Opus 4.7 | README Review — GPT-5.5 |
+| `UT-` | Unit Test Expert | Test Quality Review — Claude Opus 4.7 | Test Quality Review — GPT-5.5 |
+| `PD-` | Pandas Expert | Pandas Author — Claude Opus 4.7 | Pandas Author — GPT-5.5 |
+| `PA-` | PyArrow Expert | PyArrow Expert Author — Claude Opus 4.7 | PyArrow Expert Author — GPT-5.5 |
+| `DQ-` | DuckDB Expert | DuckDB Author — Claude Opus 4.7 | DuckDB Author — GPT-5.5 |
 | `BQ-` | BigQuery Expert | BigQuery Author — Claude Opus 4.7 | BigQuery Author — GPT-5.5 |
 | `PG-` | PostgreSQL Expert | PostgreSQL Author — Claude Opus 4.7 | PostgreSQL Author — GPT-5.5 |
-| `G-` | LangGraph Expert | LangGraph Author — Claude Opus 4.7 | LangGraph Author — GPT-5.5 |
-| `D-` | Docstring Expert | Docstring Review — Claude Opus 4.7 | Docstring Review — GPT-5.5 |
-| `TY-` | Type Annotation Expert | Type Annotation Review — Claude Opus 4.7 | Type Annotation Review — GPT-5.5 |
-| `T-` | Unit Test Expert | Test Quality Review — Claude Opus 4.7 | Test Quality Review — GPT-5.5 |
-| `DOC-` | README Expert | README Review — Claude Opus 4.7 | README Review — GPT-5.5 |
-| `PR-` | PR Discipline Expert | PR Discipline Fix — Claude Opus 4.7 | PR Discipline Fix — GPT-5.5 |
+| `LG-` | LangGraph Expert | LangGraph Expert — Claude Opus 4.7 | LangGraph Expert — GPT-5.5 |
+| `PYD-` | Pydantic Expert | Pydantic Expert Author — Claude Opus 4.7 | Pydantic Expert Author — GPT-5.5 |
+| `FA-` | FastAPI Expert | FastAPI Expert Author — Claude Opus 4.7 | FastAPI Expert Author — GPT-5.5 |
+| `SK-` | Scikit-learn Expert | Scikit-learn Expert Author — Claude Opus 4.7 | Scikit-learn Expert Author — GPT-5.5 |
+| `PT-` | PyTorch Expert | PyTorch Expert Author — Claude Opus 4.7 | PyTorch Expert Author — GPT-5.5 |
+| `GCP-` | GCP Expert | GCP Expert Author — Claude Opus 4.7 | GCP Expert Author — GPT-5.5 |
+| `AWS-` | AWS Expert | AWS Expert Author — Claude Opus 4.7 | AWS Expert Author — GPT-5.5 |
+| `OBS-` | Observability Expert | Observability Expert Author — Claude Opus 4.7 | Observability Expert Author — GPT-5.5 |
+| `DK-` | Docker Expert | Docker Expert Author — Claude Opus 4.7 | Docker Expert Author — GPT-5.5 |
+| `CI-` | CI/CD Expert | CI/CD Expert Author — Claude Opus 4.7 | CI/CD Expert Author — GPT-5.5 |
+| `SP-` | Spec Author | (none — see note) | (none — see note) |
+| `AD-` | Architecture Diagram Creator | (none — see note) | (none — see note) |
+| `PR-` | PR Discipline Expert | (none — see note) | (none — see note) |
+| `ORCH-` | Logic & Correctness Expert (orchestrator safety-net findings) | Logic & Correctness Author — Claude Opus 4.7 | Logic & Correctness Author — GPT-5.5 |
+
+**Rows without a handoff.** `SP-` (Spec Author), `AD-` (Architecture Diagram Creator), and `PR-` (PR Discipline Expert) are valid finding prefixes in the shared contract, but this executor carries no Author-mode handoff for them: a `SP-`/`AD-` finding is a spec or diagram gap and an `PR-` finding is a PR-hygiene gap, none of which is a code fix this executor applies. Route these to the Blocked/Escalations sections and surface them at session end for the user (or the orchestrator) to dispatch to the owning agent. `ORCH-` safety-net findings are runtime-correctness defects and are dispatched to the Logic & Correctness Expert (matching the dedup precedence rule that the most specific specialist owns the fix).
 
 Spawned findings (`Fx-`, `Sx-`, etc.) route by their base prefix (e.g., `Fx-3` → Python Expert).
 
@@ -809,10 +832,10 @@ Multiple specialists run in parallel and on overlapping code surfaces. The same 
 
 | # | When ... | Winner | Loser becomes |
 |---|---|---|---|
-| 1 | `G-` (LangGraph) overlaps `LC-` on framework-state | `G-` | `LC-` superseded |
-| 2 | `G-` (LangGraph) overlaps `PY-` / `F-` / `C-` on framework-state (e.g., `asyncio.run()` inside a graph node) | `G-` | `PY-` / `F-` / `C-` superseded |
-| 3 | `LC-` overlaps `PG-` / `BQ-` / `DB-` on db-transactional that is also a runtime-correctness pattern (TOCTOU, atomicity, idempotency, boundary) | **`LC-`** owns the generic defect; **`PG-` / `BQ-` / `DB-` is kept** when the fix is database-engine-specific (e.g., `INSERT ... ON CONFLICT`, `SELECT ... FOR UPDATE`, `MERGE`). If both are filed and the SQL-specific fix is required, **keep the SQL specialist's finding and supersede LC** because the fix is engine-specific. If only LC is filed, dispatch LC. | the other superseded |
-| 4 | `LC-` overlaps `PA-` (Pandas) on atomicity / invariants for DataFrame mutation | `PA-` (idiom fix supplies the atomicity) | `LC-` superseded |
+| 1 | `LG-` (LangGraph) overlaps `LC-` on framework-state | `LG-` | `LC-` superseded |
+| 2 | `LG-` (LangGraph) overlaps `PY-` / `F-` / `C-` on framework-state (e.g., `asyncio.run()` inside a graph node) | `LG-` | `PY-` / `F-` / `C-` superseded |
+| 3 | `LC-` overlaps `PG-` / `BQ-` / `DQ-` on db-transactional that is also a runtime-correctness pattern (TOCTOU, atomicity, idempotency, boundary) | **`LC-`** owns the generic defect; **`PG-` / `BQ-` / `DQ-` is kept** when the fix is database-engine-specific (e.g., `INSERT ... ON CONFLICT`, `SELECT ... FOR UPDATE`, `MERGE`). If both are filed and the SQL-specific fix is required, **keep the SQL specialist's finding and supersede LC** because the fix is engine-specific. If only LC is filed, dispatch LC. | the other superseded |
+| 4 | `LC-` overlaps `PD-` (Pandas) on atomicity / invariants for DataFrame mutation | `PD-` (idiom fix supplies the atomicity) | `LC-` superseded |
 | 5 | `LC-` overlaps `F-` / `PY-` on runtime-correctness | `LC-` | `F-` / `PY-` superseded |
 | 6 | `ORCH-` overlaps any specialist finding | the specialist | `ORCH-` superseded |
 
@@ -831,7 +854,7 @@ When the winning specialist finishes, the History entry lists the superseded IDs
 The ledger Plan is ordered before any dispatch. Two rules:
 
 1. **Severity descending**: Critical → High → Medium → Low.
-2. **Dependency precedence within severity**: behavioral fixes (F/I/A/C/S/L/U/PY/G/PA/DB/BQ) come before documentation and verification fixes (D/TY/T/DOC) for any symbol that both touch.
+2. **Dependency precedence within severity**: behavioral/code fixes (`PY` and its sub-prefixes `F/I/A/C/S/L/U`, plus `LC/LG/PD/PA/DQ/BQ/PG/PYD/FA/SK/PT/GCP/AWS/OBS/DK/CI`) come before documentation and verification fixes (`DOC` docstrings, `TA` types, `UT` tests, `RM` README) for any symbol that both touch.
 
 Same-specialist findings whose Locations do not overlap can be batched into a single dispatch. Cross-specialist work runs serially in the order above when symbols overlap, parallel when they do not.
 
@@ -882,12 +905,23 @@ Run `uv run pytest --tb=line -q` scoped to the affected modules. The affected mo
 - **Tests fail** and the failures were present in the baseline → continue to Step 4 (the specialist did not introduce them).
 - **Tests fail** and the failures were absent in the baseline → the fix introduced regressions. Run **Step 5 — Auto-revert**.
 
-### Step 4 — Independent lint and type-check
+### Step 4 — Independent lint, type-check, coverage, and file-size gates
 
-Run `uv run ruff check` on the touched files and `uv run mypy --strict` (or `uv run pyright`) on the touched modules. Compare against the baseline.
+A fix is **done** only when all four gates below pass on the touched files/modules — the same Definition of Done the Code Authoring Executor enforces on authored code. Run each against the touched surface and compare against the baseline where noted:
 
-- **Clean or no-worse-than-baseline** → continue to Step 5b.
-- **New lint or type errors** introduced by the fix → mark the row `blocked: lint-or-type-regression` and surface. Do NOT auto-revert lint/type failures (they are not load-bearing the way tests are); a human reviews them. The build is still broken; the next dispatch waits.
+- `uv run ruff check <touched files>` — clean or no-worse-than-baseline.
+- `uv run mypy --strict <touched modules>` (or `uv run pyright`) — clean or no-worse-than-baseline.
+- `uv run pytest --cov=<touched package> --cov-fail-under=75 -q` — coverage at or above 75% on every touched package (per `uv-toolchain`). A fix that drops a touched package below 75% is not done.
+- File-size check: `wc -l` on every touched `.py` file (source or test) — none may exceed 300 lines. This operationalizes Constraint 5; the cap is a CI hard gate.
+
+Routing:
+
+- **All four gates pass (or no-worse-than-baseline on lint/type)** → continue to Step 5b.
+- **New lint or type errors** introduced by the fix → mark the row `blocked: lint-or-type-regression` and surface. Do NOT auto-revert lint/type failures (they are not load-bearing the way tests are); a human reviews them.
+- **Coverage below 75% on a touched package** → mark `blocked: coverage-below-75` and re-dispatch the owning specialist (or a paired `UT-` finding) to restore coverage.
+- **A touched `.py` file over 300 lines** → mark `blocked: file-size-exceeded` and re-dispatch the owning specialist to split the file by responsibility (source) or aspect (tests) before the fix is accepted.
+
+The build is not green and the next dependent dispatch waits until all four gates pass. (Auto-revert in Step 5a applies to test regressions only, never to a coverage, file-size, lint, or type failure.)
 
 ### Step 5a — Auto-revert (test regression only)
 
@@ -1016,8 +1050,13 @@ Findings blocked: <N>
 Spawned findings: <N> (M completed, K pending)
 Commits: <N>
 
+Fixes applied (for the calling PR resolver/watch agent to post per-thread replies):
+  - <finding-id> (<Location>) -> <commit-sha> -- <one-line description of what the fix changed>
+  - ... (one line per closed finding; the caller maps each SHA back to its review thread)
+
 Top issues remaining: <list of pending IDs, one line each>
 Escalations: <list, if any>
+SP-/AD-/PR- findings surfaced (no handoff here): <list, if any>
 ```
 
-Return only the ledger path. Do not paste the full ledger into chat.
+Return the ledger path plus the "Fixes applied" map. Do not paste the full ledger into chat. This executor does not post PR-thread replies — it hands the commit SHAs and one-line descriptions to the caller, which owns the replies.

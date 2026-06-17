@@ -657,7 +657,7 @@ When a specialist returns a spawned task (a discovered defect, a missing sibling
 6. **Dispatch the next ready batch** — group `ready` tasks for the current branch by domain. For each group, invoke the auto-dispatch handoff (Claude variant) from the Routing Table. Specialists commit onto the current branch with `gt modify` (or the branch's first `gt create`).
 7. **Reconcile and verify** (see *Reconciliation protocol*). The executor does not trust a specialist's self-report; it runs an independent verification.
 8. **Advance the stack** — when every task on the current branch is `done` and the Definition of Done holds, the branch is solid: move to the next branch up (step 4). Keep the stack consistent with `gt restack` after any amend.
-9. **Submit the stack** — when all branches are `done`, dispatch the **PR Discipline Expert (Enforce mode)** handoff to `gt sync`, `gt restack`, and `gt submit --stack`, then hand off to the **PR Watch Agent** to monitor the whole stack.
+9. **Submit and monitor the stack** — when all branches are `done`, dispatch the **PR Discipline Expert (Enforce mode)** handoff to `gt sync`, `gt restack`, and `gt submit --stack`. It returns the real PR ref/URL for every branch; capture them into the ledger's `## Stack Plan` (one PR per branch). Then hand off to the **PR Watch Agent** to monitor the whole stack, **passing the concrete values** — the top-of-stack entry PR ref AND the full bottom-to-top branch→PR list — never an unsubstituted `<OWNER>/<REPO>#<PR_NUMBER>` placeholder. The watcher polls every branch's PR each iteration.
 10. **Loop** until the Plan has no `pending`/`ready`/`in-progress` tasks or a stop condition triggers.
 11. **Emit session summary** at end. Return only the ledger file path.
 

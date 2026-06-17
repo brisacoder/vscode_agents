@@ -730,14 +730,22 @@ The defining failure mode of executor agents is loss of state across context res
 
 ## Required Skills
 
-Before doing any work, invoke the `skill` tool to load these four shared skills. They carry the workspace's binding rules and are the single source of truth — do not paraphrase them, do not duplicate their content in this agent's body.
+Before doing any work, invoke the `skill` tool to load these five shared skills. They carry the workspace's binding rules and are the single source of truth — do not paraphrase them, do not duplicate their content in this agent's body.
 
 1. **`workspace-standards-preread`** — mandatory two-step preamble: read `.github/copilot-instructions.md` for the workspace coding standards, then read `pyproject.toml` `requires-python` for the Python version floor. Load at the start of every Write, Optimize, Rewrite, or Review pass on a Python target.
 2. **`python-idioms-default`** — the Zen of Python tiebreaker and the five-rule idiomatic ranking (stdlib over third-party, modern type syntax, modern OOP/concurrency, reject deprecated constructs). Governs every choice between two correct alternatives. Load whenever you write, review, or recommend Python 3.12+ code.
 3. **`uv-toolchain`** — canonical `uv` commands (`uv run pytest`, `uv run black`, `uv run isort`, `uv run ruff check`, `uv run mypy`, `uv add`, `uv sync`, `uv run python ...`). The workspace forbids global `pip install` and bare `python` invocations. Load before running tests, formatters, linters, type checkers, or any Python script.
 4. **`saturation-review-loop`** — the canonical three-phase, three-round review loop (Verify → Hunt → Propagate) that drives findings to zero-delta closure. Load whenever the agent is in Review mode; the agent supplies its own section IDs and hunter roster as inputs to the loop. The skill owns the round structure, termination rule, and Reflection Log conventions — do not paraphrase them in the agent body.
+5. **`graphite-stacking`** — the canonical Graphite CLI (`gt`) command set and stacked-PR workflow. The code under review may be a **stack** of PRs. Every fix commit lands on the **correct stack branch** with `gt modify` (or a new `gt create` branch when the fix is its own logical change), and the stack is restacked (`gt restack`) and re-submitted (`gt submit --stack`) so descendants stay correct. Branch creation, commits, restacking, and submission go through `gt` — never raw `git checkout -b` / `git push` / `gh pr create`.
 
-Treat any inline guidance below that touches these four domains as a pointer back to the skill, not a re-statement of it. If guidance in this agent conflicts with a skill, the skill wins.
+Treat any inline guidance below that touches these domains as a pointer back to the skill, not a re-statement of it. If guidance in this agent conflicts with a skill, the skill wins.
+
+## Stacked PRs
+
+When the reviewed code is delivered as a Graphite stack, fixes respect the stack:
+- A finding's fix lands on the **branch that owns the code** it touches — typically the lowest branch where the defect appears. Fixing it lower and restacking propagates the change up; fixing it on a higher branch leaves the lower PR still broken.
+- After a fix commits on a branch (`gt modify`), run `gt restack` so descendant branches pick up the change, then re-verify the affected branches.
+- The specialist dispatch prompts say "commit"; that means a `gt`-tracked commit on the owning stack branch, never a raw `git commit` that starts or pushes a branch. Re-submission of the stack (`gt submit --stack`) is the PR Discipline Expert's job, dispatched on the `PR-` findings or at session end.
 
 ## Specialist Quality Bar
 
@@ -885,9 +893,9 @@ Run `uv run ruff check` on the touched files and `uv run mypy --strict` (or `uv 
 
 When Step 3 detected a baseline-clean test that now fails:
 
-1. `git revert --no-edit HEAD` for the commit the specialist made.
-2. Record the revert SHA in the ledger History entry.
-3. Mark the row `blocked: tests-regressed-auto-reverted` with the failing test names.
+1. Revert the regressing commit on **its own stack branch**. If the commit is the tip of the branch the specialist amended, `gt checkout <that-branch>` then `git revert --no-edit HEAD` and `gt restack` so descendants pick up the revert. If it is a non-tip commit, surface it for the user rather than rewriting mid-stack history automatically.
+2. Record the revert SHA and the affected branch in the ledger History entry.
+3. Mark the row `blocked: tests-regressed-auto-reverted` with the failing test names and the branch.
 4. Surface in Escalations. Do not retry until the user resolves.
 5. Continue with the next dispatch.
 

@@ -1,6 +1,6 @@
 ---
 name: graphite-stacking
-description: Canonical Graphite CLI (gt) command set and stacked-PR workflow for this workspace. Load whenever an agent creates branches, commits, opens or updates pull requests, restacks, syncs, submits, or monitors PRs. In this workspace stacked PRs are the default unit of delivery, not a special case — a unit of work is decomposed into a stack of small, dependent branches (one PR per branch) that are planned first, built bottom-up, and submitted and monitored as a stack with `gt submit --stack`. Replaces ad-hoc `git checkout -b` / `git push` / `gh pr create` flows. Covers gt init/create/modify/restack/sync/submit/log/checkout/up/down/move/track and the plan-stack-first discipline. Apply for any Plan, Enforce, Author, Fix, Watch, or Resolve step that touches branches or PRs.
+description: Canonical Graphite CLI (gt) command set and stacked-PR workflow for this workspace. Load whenever an agent creates branches, commits, opens or updates pull requests, restacks, syncs, submits, or monitors PRs. In this workspace stacked PRs are the default unit of delivery, not a special case — a unit of work is decomposed into a stack of small, dependent branches (one PR per branch) that are planned first, built bottom-up, and submitted and monitored as a stack with `gt submit --stack`. Replaces ad-hoc `git checkout -b` / `git push` / `gh pr create` flows. Covers gt init/create/modify/restack/sync/submit/log/checkout/up/down/move/track, the plan-stack-first discipline, and the restack-cascade hazards (let a cascade settle before reacting; a restack force-push does not reliably re-fire org-level/required workflows, leaving PRs stuck on absent checks). Apply for any Plan, Enforce, Author, Fix, Watch, or Resolve step that touches branches or PRs.
 user-invocable: false
 context: fork
 ---
@@ -76,6 +76,37 @@ Never use `git commit` + `git checkout -b` to extend a stack; use `gt create` / 
 - **CI / merge state per branch**: the stack is `gt log`; for each branch's PR use `gh pr view <branch> --json state,statusCheckRollup,mergeStateStatus,reviewDecision` and `gh pr checks <branch>`. Open the stack page with `gt pr --stack`.
 - A stack is green only when **every** PR in it is green and its base is correct. A failure on a lower branch blocks every branch above it — fix the lowest failing branch first, then `gt sync` / `gt submit --stack` to propagate.
 
+## Restack cascades and stuck PRs (operational hazards)
+
+Submitting or restacking a stack force-pushes **every descendant branch**, not just the one you edited. This produces two recurring failure modes that monitoring and fixing agents must handle explicitly.
+
+### 1. A restack/submit is a multi-branch cascade — let it settle before reacting
+
+`gt restack` + `gt submit --stack` rewrites and force-pushes branch N and **all** branches above it in one operation. While that cascade is in flight:
+
+- Each pushed branch advances its head SHA; GitHub tears down the old check runs and (usually) starts new ones a few seconds later. There is a window where a branch has a **new head SHA but no check runs yet** — this is normal mid-cascade, not a failure.
+- A monitor that polls during this window sees "no checks", "BEHIND", or transient `mergeable: null` on several branches at once and will **spam-retry / re-dispatch fixes** for problems that are merely the cascade in progress.
+
+**Rule:** treat a known in-flight `gt submit --stack` / `gt restack` as a quiet period. The submitting agent records when the cascade starts and finishes; a monitor must **quiesce** (pause polling, or sleep a fixed settle interval — at least 60–90s) until the cascade completes and every branch's head SHA is stable, before classifying any branch as failed/stuck. Do not open fix work against a branch whose SHA is still moving. (A background monitor can be paused with `SIGSTOP` and resumed with `SIGCONT` so it does not spam-retry while a cascade is in flight.)
+
+### 2. A Graphite restack force-push does NOT reliably re-fire org-level / required workflows
+
+This is the lesson that bites hardest. A lease-protected force-push from `gt submit` / `gt restack` updates the branch ref, but **GitHub does not always dispatch the org-level, required, or `workflow_run`/`on: push`-filtered workflows** for the new SHA — especially for branches that were only *rebased* (no content delta) by the cascade. The PR then sits **stuck**: `mergeStateStatus` stays `BLOCKED` / `UNSTABLE` waiting on a required check that is **absent**, not failed, and never arrives. Polling forever will never turn it green.
+
+How to recognize it (distinct from a real CI failure):
+
+- The required/expected check is **missing entirely** from `statusCheckRollup` for the current head SHA (not present-and-`failure`, not present-and-`queued`/`in_progress`).
+- The branch was rebased by a restack with no real content change, yet its checks did not restart.
+- Lower branches in the same stack got their checks but a rebased upper branch did not.
+
+How to recover (escalating, least-invasive first):
+
+1. **Re-dispatch the workflow** for the head SHA: `gh workflow run <workflow> --ref <branch>` (if it accepts `workflow_dispatch`), or `gh run rerun <run-id>` for the last run on that branch.
+2. **Nudge the ref with an empty commit** so an `on: push` workflow fires for a genuinely new SHA: `gt modify -c -m "chore: re-trigger CI"` on the branch (Graphite restacks descendants), then `gt submit --stack`. Prefer this over a raw `git commit --allow-empty` so stack metadata stays intact.
+3. **Re-submit the stack** (`gt sync` → `gt restack` → `gt submit --stack`) if trunk moved underneath it.
+
+A stuck-on-absent-check PR is **not** a `ci-failure-*` (nothing failed) and **not** a `merge-conflict` (nothing conflicts) — it is a *missing-required-check* condition with its own recovery. Classify and route it as such rather than retrying the same poll or re-running a fix that already landed.
+
 ## Hard rules
 
 1. **Use `gt`, not raw git, for anything that creates or moves branches or opens/updates PRs.** Raw `git checkout -b`, `git push`, and `gh pr create` lose stack metadata. Plain `git add`/`git status`/`git log`/`git diff` for inspection are fine.
@@ -84,3 +115,4 @@ Never use `git commit` + `git checkout -b` to extend a stack; use `gt create` / 
 4. **Submit and monitor the whole stack** (`gt submit --stack`), not one PR at a time.
 5. **Never force-push raw** (`git push --force`). `gt submit` already force-pushes with lease; do not bypass it.
 6. **After any lower branch changes, restack** (`gt restack` / `gt modify` does it automatically) so descendants stay correct before re-submitting.
+7. **A restack/submit is a multi-branch cascade — let it settle before reacting, and never assume a force-push re-fired CI.** Quiesce monitoring during an in-flight `gt submit --stack` / `gt restack`; a PR stuck on a *missing* (absent, never-fired) required check is a re-trigger condition, not a CI failure or conflict (see *Restack cascades and stuck PRs*).

@@ -513,33 +513,50 @@ handoffs:
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
-  - label: PR Discipline Expert -- Claude Opus 4.7
-    agent: PR Discipline Expert
+  - label: Plan the implementation stack (PR Stack Planner -- Plan mode)
+    agent: PR Stack Planner
+    prompt: |
+      You are being handed off from the Code Reviewer. This is the **final, up-front planning step**: the review/documentation output (the consolidated report, an implementation spec, or a task breakdown produced for this path) is about to feed into coding by the Code Authoring Executor / Code Review Executor. Lay out the Graphite **stack** now, before any code is written, so the work is correct by construction instead of being shaped too late at submit time.
+
+      Operate in **Plan mode**. Read the consolidated report / spec / task breakdown for this path (the `## Specialist Review Triggers` section names the path; the report and any spec artifacts are under `./pr_reviews/` or the spec output location). Produce the canonical `# PR Sequence Plan`: an ordered, bottom-up chain of dependent branches (one PR per branch, branch 1 on trunk, branch N on branch N-1). For each branch give a `gt`-friendly branch name and conventional-commits PR subject, its parent, the line budget (<=1,600 target / 2,000 hard cap), the files in scope (disjoint primary file sets), the branch it depends on, the behavior gate, and the test scope and coverage target (each branch independently ships its own tests at >=75% touched-package coverage; each file <=300 lines). Apply your full six-rule discipline. Foundations (schema/models/libraries) go in lower branches; their consumers go in higher branches.
+
+      Write the stack plan to a durable location per your Plan-mode Output rules (default `docs/plan/<topic>-<YYYY-MM-DD>.md` or a section in the report) and return its path plus the ordered branch list. The executors consume this layout as their stack plan.
+    send: false
+    model: Claude Opus 4.7 (anthropic)
+
+  - label: PR Stack Planner (Review) -- Claude Opus 4.7
+    agent: PR Stack Planner
     prompt: |
       You are being handed off from the Code Reviewer as a specialist reviewer. Operate in **Review mode**.
 
-      Apply the three non-negotiable rules to the PR currently visible (or to the branch/diff named in the request):
+      Apply the six non-negotiable rules to the PR currently visible (or to the branch/diff named in the request):
 
       1. The PR's `LOC_CHANGED` (insertions + deletions per `git diff --shortstat`, plus 100 per binary file) must be at or below 2,000.
-      2. If `LOC_CHANGED > 1,600`, a written PR-sequence plan must exist (in the linked issue, the PR description, or under `docs/plan/`); the current PR must cite the matching `PR n / M` entry.
+      2. The work must be planned as a Graphite stack up front: if `LOC_CHANGED > 1,600` (or the work spans more than one cohesive change), a written stack/PR-sequence plan must exist (in the linked issue, the PR description, or under `docs/plan/`) and the current PR must cite its matching `PR n / M` / stack-branch entry.
       3. `uv run black <files>` and `uv run isort <files>` must pass on every changed `*.py` file (including tests, scripts, and migrations). `uv run ruff check <files>` must also pass.
+      4. The branch must be fresh: synced and restacked on its parent (`gt sync` + `gt restack`) so no PR in the stack is behind base or on a stale parent.
+      5. Every changed or added `*.py` file ships its own tests in the same PR, keeping touched-package coverage at or above 75%.
+      6. No single `.py` file (source or test) exceeds 300 lines.
 
-      File every applicable `PR-` finding from your catalog (`PR-budget-exceeded`, `PR-no-plan`, `PR-formatter-not-run`, `PR-lint-failure`, `PR-non-conventional`, `PR-scope-creep`, `PR-binary-no-review`, `PR-runnable-gate-broken`). The rules are absolute; do not soften them for "mostly markdown", "mostly tests", "mostly generated", or "urgent hotfix".
+      File every applicable `PR-` finding from your catalog (`PR-budget-exceeded`, `PR-no-plan`, `PR-unstacked-work`, `PR-formatter-not-run`, `PR-lint-failure`, `PR-behind-base`, `PR-coverage-below-threshold`, `PR-new-file-no-tests`, `PR-file-size-exceeded`, `PR-non-conventional`, `PR-scope-creep`, `PR-binary-no-review`, `PR-runnable-gate-broken`). The rules are absolute; do not soften them for "mostly markdown", "mostly tests", "mostly generated", or "urgent hotfix".
 
       Save your findings to `./pr_reviews/pr-discipline-review-<sanitized-pr-ref>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: PR Discipline Expert -- GPT-5.5
-    agent: PR Discipline Expert
+  - label: PR Stack Planner (Review) -- GPT-5.5
+    agent: PR Stack Planner
     prompt: |
       You are being handed off from the Code Reviewer as a specialist reviewer. Operate in **Review mode**.
 
-      Apply the three non-negotiable rules to the PR currently visible (or to the branch/diff named in the request):
+      Apply the six non-negotiable rules to the PR currently visible (or to the branch/diff named in the request):
 
       1. The PR's `LOC_CHANGED` (insertions + deletions per `git diff --shortstat`, plus 100 per binary file) must be at or below 2,000.
-      2. If `LOC_CHANGED > 1,600`, a written PR-sequence plan must exist (in the linked issue, the PR description, or under `docs/plan/`); the current PR must cite the matching `PR n / M` entry.
+      2. The work must be planned as a Graphite stack up front: if `LOC_CHANGED > 1,600` (or the work spans more than one cohesive change), a written stack/PR-sequence plan must exist (in the linked issue, the PR description, or under `docs/plan/`) and the current PR must cite its matching `PR n / M` / stack-branch entry.
       3. `uv run black <files>` and `uv run isort <files>` must pass on every changed `*.py` file (including tests, scripts, and migrations). `uv run ruff check <files>` must also pass.
+      4. The branch must be fresh: synced and restacked on its parent (`gt sync` + `gt restack`) so no PR in the stack is behind base or on a stale parent.
+      5. Every changed or added `*.py` file ships its own tests in the same PR, keeping touched-package coverage at or above 75%.
+      6. No single `.py` file (source or test) exceeds 300 lines.
 
       File every applicable `PR-` finding from your catalog. The rules are absolute; do not soften them.
 
@@ -547,16 +564,19 @@ handoffs:
     send: true
     model: GPT-5.5 (openai)
 
-  - label: PR Discipline Expert -- Gemini 3.1 Pro Preview
-    agent: PR Discipline Expert
+  - label: PR Stack Planner (Review) -- Gemini 3.1 Pro Preview
+    agent: PR Stack Planner
     prompt: |
       You are being handed off from the Code Reviewer as a specialist reviewer. Operate in **Review mode**.
 
-      Apply the three non-negotiable rules to the PR currently visible (or to the branch/diff named in the request):
+      Apply the six non-negotiable rules to the PR currently visible (or to the branch/diff named in the request):
 
       1. The PR's `LOC_CHANGED` (insertions + deletions per `git diff --shortstat`, plus 100 per binary file) must be at or below 2,000.
-      2. If `LOC_CHANGED > 1,600`, a written PR-sequence plan must exist (in the linked issue, the PR description, or under `docs/plan/`); the current PR must cite the matching `PR n / M` entry.
+      2. The work must be planned as a Graphite stack up front: if `LOC_CHANGED > 1,600` (or the work spans more than one cohesive change), a written stack/PR-sequence plan must exist (in the linked issue, the PR description, or under `docs/plan/`) and the current PR must cite its matching `PR n / M` / stack-branch entry.
       3. `uv run black <files>` and `uv run isort <files>` must pass on every changed `*.py` file (including tests, scripts, and migrations). `uv run ruff check <files>` must also pass.
+      4. The branch must be fresh: synced and restacked on its parent (`gt sync` + `gt restack`) so no PR in the stack is behind base or on a stale parent.
+      5. Every changed or added `*.py` file ships its own tests in the same PR, keeping touched-package coverage at or above 75%.
+      6. No single `.py` file (source or test) exceeds 300 lines.
 
       File every applicable `PR-` finding from your catalog. The rules are absolute; do not soften them.
 
@@ -564,29 +584,32 @@ handoffs:
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
-  - label: PR Discipline Fix -- Claude Opus 4.7
-    agent: PR Discipline Expert
+  - label: PR Stack Planner (Fix) -- Claude Opus 4.7
+    agent: PR Stack Planner
     prompt: |
       You are being handed off from the Code Review Executor to fix `PR-` findings in the ledger. Operate in **Fix mode**.
 
       For each pending `PR-` finding routed to you, apply the catalog-mapped action:
-      - `PR-budget-exceeded` → enter Plan mode, produce the split plan as a durable artifact, close the offending PR, open the split sequence.
-      - `PR-no-plan` → write the plan to the issue, the PR description, or `docs/plan/`; reference it from the PR description.
+      - `PR-budget-exceeded` / `PR-unstacked-work` → enter Plan mode, produce the stack plan as a durable artifact, close the offending PR, rebuild the work bottom-up as a Graphite stack (`gt create` per branch, `gt submit --stack`).
+      - `PR-no-plan` → write the stack plan to the issue, the PR description, or `docs/plan/`; reference its matching branch entry from the PR description.
       - `PR-formatter-not-run` → run `uv run black <files>` then `uv run isort <files>` on the diff's changed `*.py` files; commit with subject `chore(format): apply black and isort to <ref>`.
       - `PR-lint-failure` → fix each `ruff` violation in a single follow-up commit; no `# noqa` suppressions.
+      - `PR-behind-base` → `gt sync` then `gt restack`; resolve conflicts (`gt continue`); re-run all gates; `gt submit --stack`.
+      - `PR-coverage-below-threshold` / `PR-new-file-no-tests` → add tests in the same PR (delegated to the Unit Test Expert via the executor) until the touched package is at or above 75% and every new file has a matching test file; do not silence the gate.
+      - `PR-file-size-exceeded` → split the offending file (by responsibility for source, by aspect for tests), update imports, verify tests still pass.
       - `PR-non-conventional` → rename the PR to conventional-commits form.
-      - `PR-scope-creep` → either amend the plan or move the off-scope changes to a follow-up PR.
+      - `PR-scope-creep` → either amend the plan or move the off-scope changes to another branch in the stack.
 
-      The three rules are absolute. Do not soften them. Update the ledger row to `done` only after independent verification (re-run the formatter and lint commands; re-check the `git diff --shortstat`).
+      The six rules are absolute. Do not soften them. Update the ledger row to `done` only after independent verification (re-run the formatter, lint, coverage, and 300-line checks; re-check `git diff --shortstat` and `gt log --stack`).
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: PR Discipline Fix -- GPT-5.5
-    agent: PR Discipline Expert
+  - label: PR Stack Planner (Fix) -- GPT-5.5
+    agent: PR Stack Planner
     prompt: |
       You are being handed off from the Code Review Executor to fix `PR-` findings in the ledger. Operate in **Fix mode**.
 
-      Apply the catalog-mapped action for each pending `PR-` finding (see the PR Discipline Expert spec for the catalog). The three rules are absolute. Update the ledger row to `done` only after independent verification.
+      Apply the catalog-mapped action for each pending `PR-` finding (see the PR Stack Planner spec for the full catalog). The six rules are absolute. Update the ledger row to `done` only after independent verification.
     send: true
     model: GPT-5.5 (openai)
 
@@ -1035,7 +1058,7 @@ You are a **pure orchestrator**. You do not analyze code. You detect what is pre
 3. **Read standards** -- read `.github/copilot-instructions.md`, `CLAUDE.md`, or equivalent coding standards if present. Pass any relevant conventions to specialist prompts.
 4. **Static pre-analysis** -- before dispatching specialists, run these deterministic checks. The results are passed as an **"Areas of Concern"** block to **both** Logic & Correctness Expert **and** Python Expert (and to the Unit Test Expert when its trigger fires). Routing the results to a single specialist was the source of the original import-side-effect miss; the rule is now: every static-analysis signal goes to every triggered specialist whose checklist could plausibly own the pattern.
    - `uv run ruff check --select E711,E712,B006,B007,B008,B017,B023,B904` (logic pitfalls, mutable defaults, exception chaining) -- share results with Python Expert (F, PY.exceptions, PY.builtins) **and** Logic & Correctness Expert (LC.atomicity, LC.invariants).
-   - **300-line file-size gate**: `find <target> -name '*.py' -exec sh -c 'lines=$(wc -l < "$1"); [ "$lines" -gt 300 ] && echo "FAIL: $1 ($lines lines > 300-line CI cap)"' _ {} \;` -- any match is a **High** severity finding that must be split before the review can pass. CI rejects files over 300 lines -- source or test, no exceptions. Share results with Python Expert (F territory -- module cohesion), Unit Test Expert (AC-26 -- test file splitting), and PR Discipline Expert (Rule 6). This check is non-negotiable: if files over 300 lines exist, they are flagged in the Static pre-analysis section of the consolidated report AND routed to every triggered specialist so they factor it into their recommendations.
+   - **300-line file-size gate**: `find <target> -name '*.py' -exec sh -c 'lines=$(wc -l < "$1"); [ "$lines" -gt 300 ] && echo "FAIL: $1 ($lines lines > 300-line CI cap)"' _ {} \;` -- any match is a **High** severity finding that must be split before the review can pass. CI rejects files over 300 lines -- source or test, no exceptions. Share results with Python Expert (F territory -- module cohesion), Unit Test Expert (AC-26 -- test file splitting), and the PR Stack Planner (Rule 6). This check is non-negotiable: if files over 300 lines exist, they are flagged in the Static pre-analysis section of the consolidated report AND routed to every triggered specialist so they factor it into their recommendations.
    - **Bare top-level call grep**: `python -c "import ast, pathlib, sys; [print(f'{p}:{n.lineno}') for p in pathlib.Path(target).rglob('*.py') for n in ast.parse(p.read_text()).body if isinstance(n, ast.Expr) and isinstance(n.value, ast.Call)]"` -- any match is an executable statement at module top level (PY.module.call / F territory). Share with Python Expert.
    - Identify all functions/methods containing loops that write to `self.*` attributes -- flag as potential atomicity concerns. Share with Logic & Correctness Expert.
    - Identify all functions with >1 conditional `raise` after a state mutation -- flag as potential validate-after-mutate. Share with Logic & Correctness Expert.
@@ -1126,9 +1149,9 @@ To add a new specialist: add one row here per model variant (currently three: Cl
 | Any `.py` file present, OR any `.sql` / `.bq` / `.bqsql` / `.duckdb` / `.sqlx` file present (transactional atomicity, idempotency, TOCTOU, and boundary defects exist in SQL migrations and standalone queries too) | Logic & Correctness Expert | Claude Opus 4.7 (anthropic) |
 | Any `.py` file present, OR any `.sql` / `.bq` / `.bqsql` / `.duckdb` / `.sqlx` file present | Logic & Correctness Expert | GPT-5.5 (openai) |
 | Any `.py` file present, OR any `.sql` / `.bq` / `.bqsql` / `.duckdb` / `.sqlx` file present | Logic & Correctness Expert | Gemini 3.1 Pro Preview (gemini) |
-| Always (every PR is checked for the 2,000-line cap, an up-front split plan when LOC > 1,600, and `black` + `isort` compliance on every changed `*.py` file — these three rules apply regardless of code content) | PR Discipline Expert | Claude Opus 4.7 (anthropic) |
-| Always | PR Discipline Expert | GPT-5.5 (openai) |
-| Always | PR Discipline Expert | Gemini 3.1 Pro Preview (gemini) |
+| Always (every PR is checked for the six PR-shape rules — the 2,000-line cap, an up-front Graphite stack plan when LOC > 1,600 or the work spans more than one cohesive change, `black` + `isort` + `ruff` compliance on every changed `*.py` file, base-branch freshness via `gt sync` + `gt restack`, 75% touched-package coverage with tests shipped in the same PR, and the 300-line per-file cap — all six apply regardless of code content) | PR Stack Planner | Claude Opus 4.7 (anthropic) |
+| Always | PR Stack Planner | GPT-5.5 (openai) |
+| Always | PR Stack Planner | Gemini 3.1 Pro Preview (gemini) |
 | `pydantic` or `BaseModel` or `ConfigDict` or `field_validator` or `model_validator` or `BaseSettings` or `TypeAdapter` imported in any source file | Pydantic Expert | Claude Opus 4.7 (anthropic) |
 | `pydantic` or `BaseModel` or `ConfigDict` or `field_validator` or `model_validator` or `BaseSettings` or `TypeAdapter` imported in any source file | Pydantic Expert | GPT-5.5 (openai) |
 | `pydantic` or `BaseModel` or `ConfigDict` or `field_validator` or `model_validator` or `BaseSettings` or `TypeAdapter` imported in any source file | Pydantic Expert | Gemini 3.1 Pro Preview (gemini) |
@@ -1215,7 +1238,7 @@ These prefixes are the contract between this orchestrator, the Code Review Execu
 | `CI` | CI/CD Expert |
 | `SP` | Spec Author |
 | `AD` | Architecture Diagram Creator |
-| `PR` | PR Discipline Expert |
+| `PR` | PR Stack Planner |
 | `ORCH` | Orchestrator safety-net findings |
 
 ## Durable ledger format

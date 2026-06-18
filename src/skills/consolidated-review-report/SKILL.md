@@ -222,7 +222,7 @@ Order subsections by specialist domain (alphabetical within domain group), then 
 8. Observability Expert (Claude, GPT, Gemini)
 9. Spec Author (Claude, GPT, Gemini)
 10. Architecture Diagram Creator (Claude, GPT, Gemini)
-11. PR Discipline Expert (Claude, GPT, Gemini)
+11. PR Stack Planner (Claude, GPT, Gemini)
 
 ---
 
@@ -276,7 +276,7 @@ Each specialist owns its own ID prefix. The orchestrator does not invent or reas
 | Observability Expert | `OBS-<model-letter>-N` | `OBS-C-1`, `OBS-M-5` |
 | Spec Author | `SP-<model-letter>-N` | `SP-C-1`, `SP-G-2` |
 | Architecture Diagram Creator | `AD-<model-letter>-N` | `AD-C-1`, `AD-G-7` |
-| PR Discipline Expert | `PR-<model-letter>-N` or `PR-budget-exceeded` etc. | `PR-C-1`, `PR-G-3` |
+| PR Stack Planner | `PR-<model-letter>-N` or `PR-budget-exceeded` etc. | `PR-C-1`, `PR-G-3` |
 | DuckDB Expert | `DQ-<model-letter>-N` | `DQ-C-1` |
 | BigQuery Expert | `BQ-<model-letter>-N` | `BQ-C-1` |
 | PostgreSQL Expert | `PG-<model-letter>-N` | `PG-C-1` |

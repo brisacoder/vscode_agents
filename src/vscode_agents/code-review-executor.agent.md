@@ -724,6 +724,42 @@ handoffs:
     send: true
     model: GPT-5.5 (openai)
 
+  - label: Generalist Fix (Python Author) — Claude Opus 4.7
+    agent: Python Expert
+    prompt: |
+      You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
+
+      Your scope: address every finding in the ledger that is currently `pending` AND carries a `GEN-` ID prefix. These come from the fresh-eyes **Code Review Generalist** — plain, obvious bugs that no domain specialist flagged (a wrong identifier, a copy-paste error, an inverted condition, an off-by-one, code that contradicts its comment/docstring/log, leftover debug, a dead branch, a thrown-away result). Because the generalist carries the lowest dedup precedence, every surviving `GEN-` finding is net-new: no specialist owns it, so you apply the plain correction the finding describes.
+
+      Operate in **Optimize mode** on the cited Location. For each finding:
+      1. Read the cited Location and confirm the bug exactly as the generalist described it (the finding states the intent-vs-code gap or the mechanical slip).
+      2. Apply the minimal correct fix — the right identifier, the corrected condition, the removed debug line, the restored result. Keep the change tightly scoped to the filed bug; do not refactor around it.
+      3. Run the affected tests with `uv run pytest`. If no test would catch a regression of this fix, file a `T-discovered-GEN-N` spawned finding for the Unit Test Expert.
+      4. Commit with a conventional-commits subject and the trailer `Authored-By: code-review-executor`.
+      5. Mark the finding `done` in the ledger Plan and append a History entry (files touched, the bug, the fix, commit SHA).
+
+      Return a structured summary: finding ID, the bug, the fix applied, and commit SHA for each finding you addressed.
+    send: true
+    model: Claude Opus 4.7 (anthropic)
+
+  - label: Generalist Fix (Python Author) — GPT-5.5
+    agent: Python Expert
+    prompt: |
+      You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
+
+      Your scope: address every finding in the ledger that is currently `pending` AND carries a `GEN-` ID prefix. These come from the fresh-eyes **Code Review Generalist** — plain, obvious bugs that no domain specialist flagged (a wrong identifier, a copy-paste error, an inverted condition, an off-by-one, code that contradicts its comment/docstring/log, leftover debug, a dead branch, a thrown-away result). Because the generalist carries the lowest dedup precedence, every surviving `GEN-` finding is net-new: no specialist owns it, so you apply the plain correction the finding describes.
+
+      Operate in **Optimize mode** on the cited Location. For each finding:
+      1. Read the cited Location and confirm the bug exactly as the generalist described it (the finding states the intent-vs-code gap or the mechanical slip).
+      2. Apply the minimal correct fix — the right identifier, the corrected condition, the removed debug line, the restored result. Keep the change tightly scoped to the filed bug; do not refactor around it.
+      3. Run the affected tests with `uv run pytest`. If no test would catch a regression of this fix, file a `T-discovered-GEN-N` spawned finding for the Unit Test Expert.
+      4. Commit with a conventional-commits subject and the trailer `Authored-By: code-review-executor`.
+      5. Mark the finding `done` in the ledger Plan and append a History entry (files touched, the bug, the fix, commit SHA).
+
+      Return a structured summary: finding ID, the bug, the fix applied, and commit SHA for each finding you addressed.
+    send: true
+    model: GPT-5.5 (openai)
+
   - label: Plan the fix stack (PR Stack Planner — Plan mode)
     agent: PR Stack Planner
     prompt: |
@@ -830,9 +866,12 @@ These prefixes are the contract shared verbatim with Code Reviewer V3's "Finding
 | `SP-` | Spec Author | (none — see note) | (none — see note) |
 | `AD-` | Architecture Diagram Creator | (none — see note) | (none — see note) |
 | `PR-` | PR Stack Planner | (none — see note) | (none — see note) |
+| `GEN-` | Code Review Generalist (fresh-eyes findings; fixed by Python Expert) | Generalist Fix (Python Author) — Claude Opus 4.7 | Generalist Fix (Python Author) — GPT-5.5 |
 | `ORCH-` | Logic & Correctness Expert (orchestrator safety-net findings) | Logic & Correctness Author — Claude Opus 4.7 | Logic & Correctness Author — GPT-5.5 |
 
 **Rows without a handoff.** `SP-` (Spec Author), `AD-` (Architecture Diagram Creator), and `PR-` (PR Stack Planner) are valid finding prefixes in the shared contract, but this executor carries no Author-mode handoff for them: a `SP-`/`AD-` finding is a spec or diagram gap and an `PR-` finding is a PR-hygiene gap, none of which is a code fix this executor applies. Route these to the Blocked/Escalations sections and surface them at session end for the user (or the orchestrator) to dispatch to the owning agent. `ORCH-` safety-net findings are runtime-correctness defects and are dispatched to the Logic & Correctness Expert (matching the dedup precedence rule that the most specific specialist owns the fix).
+
+**`GEN-` findings are fixed, but not by their author.** The Code Review Generalist is a review-only agent with no Write/Optimize mode, so it cannot fix its own findings. By the time a `GEN-` finding survives into the report it has already lost every dedup overlap to a domain specialist (the generalist carries the lowest precedence — see the precedence table below), which means it is a net-new, no-specialist-owns-it bug: a wrong identifier, an inverted condition, a copy-paste slip, code contradicting its comment. Those are plain language-level corrections, so this executor dispatches `GEN-` to the **Python Expert** in Optimize mode (the broadest code author). If a `GEN-` finding turns out to sit squarely in a framework/library domain after all (e.g., it is really a Pandas or SQL defect), prefer re-tagging it to that specialist's prefix during the dedup pass rather than sending it to the Python Expert.
 
 Spawned findings (`Fx-`, `Sx-`, etc.) route by their base prefix (e.g., `Fx-3` → Python Expert).
 
@@ -861,6 +900,9 @@ Multiple specialists run in parallel and on overlapping code surfaces. The same 
 | 4 | `LC-` overlaps `PD-` (Pandas) on atomicity / invariants for DataFrame mutation | `PD-` (idiom fix supplies the atomicity) | `LC-` superseded |
 | 5 | `LC-` overlaps `F-` / `PY-` on runtime-correctness | `LC-` | `F-` / `PY-` superseded |
 | 6 | `ORCH-` overlaps any specialist finding | the specialist | `ORCH-` superseded |
+| 7 | `GEN-` (Code Review Generalist) overlaps **any** other specialist finding, in **any** category | the other specialist (always) | `GEN-` superseded |
+
+Rule 7 is the keystone of the fresh-eyes design and overrides the "same Location ± 5 lines AND same anti-pattern category" gate that rules 1–6 require: a `GEN-` finding loses to any specialist finding that shares its Location **regardless of category**, because the generalist intentionally has no domain checklist and is expected to overlap broadly. The generalist is the universal loser in precedence. The effect is that a `GEN-` finding survives into the dispatched set **only** when no specialist filed anything at that Location — i.e., it is a genuinely net-new bug the deep reviewers all missed. That is the entire point of the generalist: it adds coverage for the obvious bugs that fall between the specialists' lanes, and it can never inject duplicate or competing patches because it always defers on overlap.
 
 Rule 3 deserves a note: when LC and a SQL specialist both file the same defect, the SQL specialist usually has the engine-specific fix language (`ON CONFLICT`, `MERGE`, `FOR UPDATE`, isolation levels). The executor keeps the SQL row and supersedes LC. LC is kept only when no SQL specialist also flagged the same Location — that means LC saw a defect the SQL specialist missed, and LC's generic guidance is the best available fix.
 
@@ -906,7 +948,8 @@ When a specialist returns a spawned finding (`Fx-3`, `Sx-1`, etc.), its severity
 5. **Dispatch the next ready batch** — find all `pending` findings whose dependencies are `done`. Group by specialist. For each group, invoke the auto-dispatch handoff (Claude variant) listed in the Routing Table.
 6. **Reconcile and verify** (see *Reconciliation protocol* below). The executor does not trust a specialist's self-report; it runs an independent verification.
 7. **Loop** until the Plan has no `pending` findings or a stop condition triggers.
-8. **Emit session summary** at end. Return only the ledger file path.
+8. **Final fresh-eyes pass over the applied diff** (see *Final holistic pass* below) — once the Plan is exhausted, run the Code Review Generalist one last time over the **cumulative diff this session produced**, to catch any plain bug a fix introduced. New `GEN-` findings are appended to the Plan and the loop resumes for them; the session ends only when this pass produces zero new actionable findings (or the round cap is hit).
+9. **Emit session summary** at end. Return only the ledger file path.
 
 ## Reconciliation protocol
 
@@ -974,6 +1017,17 @@ Record the six answers verbatim in the History entry under `Reflection`. Spawned
 ### Step 6 — Mark done
 
 Update the ledger row to `done`. Append the History entry: commit SHA, files touched, specialist summary, reflection answers, spawned findings.
+
+## Final holistic pass
+
+The per-finding reflection (Step 5b) is adversarial but **narrow** — it only re-examines the one diff a specialist just produced. It cannot see a bug that emerges from the *interaction* of several fixes, and it shares the specialists' lane discipline. After the Plan is exhausted (Approach step 7), run one last **fresh-eyes pass** to catch the plain bugs that the round of fixing may have introduced or left behind:
+
+1. Compute the cumulative diff for the session: `git diff <Baseline SHA>..HEAD` across every branch the session touched.
+2. Dispatch the **Code Review Generalist** (auto-dispatch Claude variant; the user may fire the GPT-5.5 variant for a second lens) in diff-first mode over that cumulative diff. The handoff prompt instructs it to read the diff hunks and the fix commit messages as intent, then file any plain bug — a fix that contradicts its own commit message, a wrong identifier introduced while editing, an inverted guard, an off-by-one, leftover debug, a now-dead branch, a thrown-away result.
+3. Each returned `GEN-` finding is appended to the Plan (severity per the spawned-finding rule), deduped against existing rows with **Rule 7** (a `GEN-` finding that overlaps an already-fixed specialist row is superseded), and any survivor is dispatched and reconciled like any other finding via the Routing Table (`GEN-` → Python Expert).
+4. Repeat the final pass at most **twice**. If a final pass produces zero new actionable findings, the session is complete. If the second pass still produces findings, fix them, then stop and surface the remaining churn in Escalations rather than looping indefinitely.
+
+This pass is on by default. It is the executor-side mirror of the orchestrator's always-on generalist dispatch: the orchestrator catches the obvious bugs in the *original* code, this pass catches the obvious bugs the *fixes* introduced.
 
 ## The Ledger
 

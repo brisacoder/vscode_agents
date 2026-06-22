@@ -277,6 +277,7 @@ Each specialist owns its own ID prefix. The orchestrator does not invent or reas
 | Spec Author | `SP-<model-letter>-N` | `SP-C-1`, `SP-G-2` |
 | Architecture Diagram Creator | `AD-<model-letter>-N` | `AD-C-1`, `AD-G-7` |
 | PR Stack Planner | `PR-<model-letter>-N` or `PR-budget-exceeded` etc. | `PR-C-1`, `PR-G-3` |
+| Code Review Generalist | `GEN-<model-letter>-N` | `GEN-C-1`, `GEN-G-4`, `GEN-M-2` |
 | DuckDB Expert | `DQ-<model-letter>-N` | `DQ-C-1` |
 | BigQuery Expert | `BQ-<model-letter>-N` | `BQ-C-1` |
 | PostgreSQL Expert | `PG-<model-letter>-N` | `PG-C-1` |

@@ -1,5 +1,5 @@
 ---
-description: "Use when a pull request (or Graphite **stack** of PRs) needs monitoring autonomously across CI runs, reviewer comments, and merge-state changes. **Runs as a Copilot CLI background session** (folder isolation + Autopilot) so it keeps polling after VS Code closes and survives 30-minute CI waits -- a bounded poll-classify-act-sleep loop over every branch in the stack. Routes work to Code Review Executor, PR Stack Planner Fix mode, or Code Reviewer V3, and replies per-thread. Never force-pushes, resolves threads, closes, or merges."
+description: "Use when a pull request (or Graphite **stack** of PRs) needs monitoring autonomously across CI runs, reviewer comments, and merge-state changes. **Runs as a Copilot CLI background session** (folder isolation + Autopilot) so it keeps polling after VS Code closes and survives 30-minute CI waits -- a bounded poll-classify-act-sleep loop over every branch in the stack. Drives the stack all the way to merged: it does not stop at green, it feeds the bottom open PR into the merge queue (auto-merge) and rolls the stack forward after each merge until every PR is merged or closed. Routes work to Code Review Executor, PR Stack Planner Fix mode, or Code Reviewer V3, and replies per-thread. Never force-pushes, resolves threads, closes, or force-merges; it may enable auto-merge to enqueue the bottom PR."
 name: "PR Watch Agent"
 tools: [vscode, execute, read, agent, edit, search, todo]
 model: ["Claude Opus 4.7 (anthropic)", "Claude Opus 4.6 (copilot)"]
@@ -222,23 +222,36 @@ while True:
     for b in stack:                        # poll EVERY branch's PR, bottom to top
         if b.state in {"closed", "merged"}:
             continue
-        deltas += collect_deltas(b)        # comments, reviews, checks, head SHA for this branch
+        deltas += collect_deltas(b)        # comments, reviews, checks, head SHA, merge/queue state
 
-    if deltas.empty:
+    queue = classify(deltas)               # see Classification table; each row carries its branch
+
+    # Drain check runs EVERY iteration, even when deltas is empty. An all-green stack is
+    # NOT a reason to idle quietly forever -- it usually means the bottom PR is ready to
+    # be fed into the merge queue, or a PR just merged and the next one must be enqueued.
+    queue += check_drain(stack)            # may append `stack-mergeable-not-draining` (enqueue) rows
+
+    if queue.empty:                        # truly nothing to do AND the stack is actively draining
         backoff = adaptive_backoff(state, stack)
         log_idle(backoff)
         sleep(backoff)
         continue
 
-    queue = classify(deltas)               # see Classification table; each row carries its branch
-    queue = order_bottom_up(queue)         # fix the lowest failing branch first
-    act(queue)                             # post replies, dispatch handoffs (gt-aware)
+    queue = order_bottom_up(queue)         # fix/enqueue the lowest branch first
+    act(queue)                             # post replies, dispatch handoffs, enqueue bottom PR (gt-aware)
     update_state(deltas, queue)
     write_watch_report(queue)
     sleep(adaptive_backoff(state, stack))
 ```
 
-The loop runs until **every** PR in the stack closes/merges, or the user stops the Copilot CLI session. When a lower PR merges mid-stack, `gt sync` + `gt submit --stack` rebases the survivors and the loop keeps watching them.
+The loop runs until **every** PR in the stack closes/merges, or the user stops the Copilot CLI session. **Green is not the exit condition — merged is.** When a lower PR merges mid-stack, `gt sync` + `gt submit --stack` rebases the survivors and the loop keeps watching them, then enqueues the new bottom PR. See *Drain the stack* in the `graphite-stacking` skill and rule 12 below.
+
+**`check_drain(stack)` — the anti-stall guard, run every iteration.** Compute it from the freshly polled stack, independent of whether any comment/check delta arrived:
+
+- Let `open_prs` = PRs in the stack whose state is `open`. If empty, the top-level exit already fired.
+- A PR is **progressing** if any of these hold: `mergeStateStatus == QUEUED`; an `autoMergeRequest` is present (auto-merge enabled / "will merge when ready"); it has a required check `queued` or `in_progress` for the current head SHA; or its head SHA moved within the last poll interval (mid-rebase cascade — rule 0a).
+- If **at least one** open PR is progressing, the stack is draining: append nothing (the idle backoff is correct).
+- If **no** open PR is progressing, the stack has **stalled**. Identify the **lowest open PR** (base is trunk or an already-merged branch). If it is `mergeable: true`, CI green, and not already enqueued, append a `stack-mergeable-not-draining` row for it. If the lowest open PR is *not* green/mergeable, the real blocker is a `ci-failure-*` / `merge-conflict` / `stuck-missing-check` on it (or a branch below it) — those come from the normal delta classification; `check_drain` does not double-file them. A genuinely stalled-but-not-classifiable lowest PR (e.g. blocked only on a human `reviewDecision: REVIEW_REQUIRED`) becomes an `awaiting-user` row, **and the loop keeps monitoring** — it never exits.
 
 ## `gh` command reference
 
@@ -273,12 +286,16 @@ A naive `sleep 60` wastes tokens and quota when nothing is happening. Use this l
 | Situation | Sleep |
 |---|---|
 | A check run is `queued` or `in_progress` for the current head SHA | 60s |
+| **Any open PR is `QUEUED` / has `autoMergeRequest` (in the merge queue)** | 60s |
+| **The watcher just enqueued the bottom PR this iteration** | 60s |
 | A reviewer recently commented (within last 10 min) | 60s |
 | A push happened within the last 5 min | 60s |
-| Everything is settled, waiting on a human reviewer | 5 min |
+| Open PRs remain, none progressing, lowest is blocked only on a human reviewer | 5 min |
 | PR is in draft and idle | 10 min |
 | Three consecutive idle iterations at the current backoff | double, cap at 15 min |
 | Any new event observed | reset to 60s |
+
+The slow backoffs (5–15 min) apply **only** while the stack is genuinely waiting on something outside the watcher's control (a human reviewer, a draft author). They are never a reason to stop. A stack that is green and `mergeable` but idle is **not** "settled" — `check_drain` enqueues its bottom PR and the 60s merge-queue backoff applies, so a merge is noticed and the next PR enqueued promptly.
 
 Always sleep in a separate terminal command (`mode=sync`, generous timeout) so the shell can be interrupted by the user.
 
@@ -303,6 +320,9 @@ Every new event becomes a row in the **Action Queue** of the watch report: `ID |
 | `merge-state-blocked` | `mergeStateStatus` is `BLOCKED` or `UNSTABLE` and at least one required check is `failure`. This is GitHub's "this PR is certain to fail" verdict. **Distinguish from `stuck-missing-check`:** this row requires a present-and-`failure` check; if the required check is instead *absent* from the rollup for the current head SHA, it is `stuck-missing-check`, not this. | Look up each failing required check via the same `gh api` calls used for `check_runs`. Each failing check produces its own queue row classified as `ci-failure-*` per the rows above and dispatched immediately. The `merge-state-blocked` row itself is a summary, not a separate dispatch. State: `summary`. |
 | `merge-conflict` | `mergeable: false` and `mergeStateStatus: DIRTY` or `BEHIND` on any branch in the stack. | `PR Stack Planner` (Fix mode: `gt sync` + `gt restack` + `gt submit --stack`). State: `routed`. |
 | `stuck-missing-check` | `mergeStateStatus` is `BLOCKED` / `UNSTABLE` but a required/expected check is **absent** from `statusCheckRollup` for the current head SHA (not present-and-`failure`, not present-and-`queued`/`in_progress`) — and the head SHA has been stable for at least two polls (i.e. no cascade is in flight). This is the "Graphite restack force-push did not re-fire the org-level/required workflow" condition: the PR waits forever on a check that never arrives. See the `graphite-stacking` skill, *Restack cascades and stuck PRs*. | Re-trigger the workflow, least-invasive first: `gh workflow run <workflow> --ref <branch>` or `gh run rerun <run-id>` for the branch's last run. If the workflow only fires on a genuinely new SHA, dispatch `PR Stack Planner` (Fix mode) to add an empty re-trigger commit (`gt modify -c -m "chore: re-trigger CI"`) and `gt submit --stack`. **Do not** classify as `ci-failure-*` (nothing failed) or `merge-conflict` (nothing conflicts). State: `routed`. Cap at 2 re-trigger attempts per branch, then `human-needed`. |
+| `stack-mergeable-not-draining` | The stack has **stalled**: every open PR is idle (none `QUEUED`, none with `autoMergeRequest`, no CI in flight, no SHA movement) and the **lowest open PR** is green and `mergeable` but **not** in the merge queue. This is the "everything is green so the agent stopped, but nothing ever merged" bug. Produced by `check_drain`, not by a comment/check delta. | **Enqueue the lowest open PR** into the merge queue: `gh pr merge <pr> --auto --squash` (auto-merge — merges when required checks pass; does not bypass the queue or checks). State: `enqueued`. Do **not** enqueue more than one PR — descendants are not mergeable until the bottom merges and they rebase. After it merges, the next iteration's `merged-advance` handles the cascade. |
+| `in-merge-queue` | An open PR is `QUEUED` or has an `autoMergeRequest` present ("will merge when ready"). The stack is actively draining. | Note only; no dispatch. State: `noted`. The 60s/in-progress backoff applies so the watcher promptly notices when it merges. |
+| `merged-advance` | A PR that was `open` on the previous poll is now `merged`. The stack must roll forward. | Dispatch `PR Stack Planner` (Fix mode: `gt sync` to fast-forward trunk + drop the merged branch, then `gt restack` + `gt submit --stack` to rebase survivors). On the **next** iteration (after the cascade settles per rule 0a), `check_drain` enqueues the new bottom PR. State: `routed`. |
 | `substantive-implementation-request` | Comment requests a new feature, large refactor, or anything the user has not pre-approved. | **Do not auto-dispatch.** Add an `awaiting-user` row and post a one-line PR comment: `pr-watch: comment <url> requests substantive work -- deferred to user`. State: `awaiting-user`. |
 | `human-needed` | Ambiguous, security-sensitive, touches `CODEOWNERS`, or asks for a judgment call. | Surface only. State: `awaiting-user`. |
 
@@ -335,11 +355,13 @@ Rules for the loop, in order:
 4. **Cross-worker triggering is implicit, not direct.** The watcher -- not the Executor -- invokes the PR Stack Planner when a `PR-` violation appears. The Executor never calls the PR Stack Planner directly; it commits and pushes, and on the next poll the watcher sees the new check-run state and routes the failure to whichever specialist owns it. This keeps the dispatch graph a tree: watcher -> worker -> push -> (return) -> watcher -> next worker. No worker-to-worker fan-out.
 5. **Every comment gets its own threaded reply; never aggregate.** The watcher (not the Executor) posts every reply -- this is the same per-thread, anti-aggregation contract the PR Review Resolver's *Reply policy* defines canonically; it is the authoritative statement of why a single roll-up "all N fixed" comment is forbidden, and it applies verbatim to the watcher. Operationally: answer line-level review comments via the review-comment reply API (`gh api -X POST .../comments/<id>/replies`) and PR-level issue comments via a new issue comment that quotes the one it answers; `code-change-request` rows are answered after the fix lands (how it was fixed + the executor-reported SHA), `discussion-only` rows with a factual reply. One comment, one reply, on its own thread; a high-level recap belongs only in the watch report, never on the PR. Before the watcher reports an iteration complete, every comment in the Action Queue must be `replied` or `done` with its reply posted.
 6. **Discussion replies and user-deferrals do not loop.** `discussion-only` rows post a reply and are marked `replied` immediately -- never re-attempted. `awaiting-user` rows post one deferral comment and are never re-attempted unless the user resets state.
-7. **Order of dispatch within one iteration.** Process the queue in this severity order: `pr-discipline-violation` -> `ci-failure-formatter-or-lint` -> `ci-failure-build` -> `ci-failure-tests` -> `merge-conflict` -> `stuck-missing-check` -> `code-change-request` -> `fresh-review-on-push` -> `discussion-only` -> `substantive-implementation-request` -> `human-needed`. Stop at the first dispatched row when the routed agent is `PR Stack Planner` or `Code Review Executor` -- these push commits (and `stuck-missing-check` re-triggers or empty-commit nudges) that will invalidate every subsequent row's diff context and start a new cascade, so the rest waits for the next iteration (and rule 0a's quiesce applies). `discussion-only` replies and `awaiting-user` notes do **not** invalidate context and may all run in the same iteration.
+7. **Order of dispatch within one iteration.** Process the queue in this severity order: `merged-advance` -> `pr-discipline-violation` -> `ci-failure-formatter-or-lint` -> `ci-failure-build` -> `ci-failure-tests` -> `merge-conflict` -> `stuck-missing-check` -> `code-change-request` -> `fresh-review-on-push` -> `stack-mergeable-not-draining` -> `discussion-only` -> `in-merge-queue` -> `substantive-implementation-request` -> `human-needed`. Stop at the first dispatched row when the routed agent is `PR Stack Planner` or `Code Review Executor`, OR when a `merged-advance` or `stack-mergeable-not-draining` row acts -- these push commits / re-triggers / enqueues that will invalidate every subsequent row's diff context and start a new cascade or merge, so the rest waits for the next iteration (and rule 0a's quiesce applies). `discussion-only` replies, `in-merge-queue` notes, and `awaiting-user` notes do **not** invalidate context and may all run in the same iteration. Note `stack-mergeable-not-draining` sorts low because a real failure/conflict on a lower branch must be fixed first — enqueueing the bottom PR is correct only once nothing below it needs work.
 8. **`fresh-review-on-push` is dispatched only when the push was not authored by a downstream worker.** Detect a worker commit two ways, and treat the push as non-human if **either** matches: (a) the commit carries a `Pr-Watch-Routed-By: <agent-name>` trailer that the watcher's routed workers echo into their commit messages (the primary signal); or (b) **fallback** -- the commit's author/committer identity is the bot/agent identity the workers commit under (the same bot account whose comments rule "Author identity does not change the class" treats as non-human), so detection still holds when a trailer is missing. When either says worker-authored (typically a `fix(<scope>):` or `chore(format):` subject), skip the re-review -- the watcher already knows what changed because it dispatched the fix. Re-review fires only when a genuinely human or out-of-band push lands.
 9. **State update before sleep.** After processing a row (success or failure), update `state.handled_<*>_ids` to include the event ID with its current `attempts` count. After processing the queue, advance cursors (`last_seen_*`) to the highest IDs observed, then write state atomically. Only then sleep.
 10. **Idempotency across watcher restarts.** If the Copilot CLI session is killed and restarted, the next launch reads the state file and resumes. `handled_<*>_ids` prevents re-classification of already-acted events; the `attempts` counter prevents resuming a fix that has already burned its budget.
-11. **Convergence note.** The loop converges because: (a) every successful fix advances the head SHA and turns a failing check `success`; (b) the 3-attempt cap stops runaway re-tries; (c) PR-close/PR-merge is a hard exit; (d) `awaiting-user` and `human-needed` rows do not loop. A PR with a perpetually flaky test will eventually hit the 3-attempt cap and be surfaced as `human-needed` rather than burning compute forever.
+11. **Convergence note.** The loop converges because: (a) every successful fix advances the head SHA and turns a failing check `success`; (b) the 3-attempt cap stops runaway re-tries; (c) the **whole stack merging/closing** is the only hard exit; (d) `awaiting-user` and `human-needed` rows do not loop. A PR with a perpetually flaky test will eventually hit the 3-attempt cap and be surfaced as `human-needed` rather than burning compute forever.
+
+12. **Green is not done — drive the stack to merged.** This is as important as rule 0. The exit condition is **every PR in the stack `merged` or `closed`**, never "the stack is green". An all-green, all-`mergeable` stack with nothing in the merge queue is a **stall**, not success — `check_drain` (see the loop) detects it and the watcher feeds the lowest open PR into the queue (`gh pr merge <pr> --auto --squash`, per Guardrail 3's enqueue exception). While *any* PR is open, the watcher keeps looping: at every poll either some PR is progressing toward merge (`QUEUED` / `autoMergeRequest` / CI in flight / mid-rebase), or the watcher just enqueued the bottom one, or it is blocked on a `ci-failure-*` / `merge-conflict` / `stuck-missing-check` / `awaiting-user` it has surfaced. There is no idle state in which an open PR is making no progress and the watcher is content. If you observe "one PR merged but nothing is now in the merge queue", that is the canonical bug this rule exists to prevent: dispatch `merged-advance` (roll the stack forward) and then enqueue the new bottom PR — do not conclude the work is finished. Only the top-level `all(state in {merged, closed})` check ends the loop.
 
 ## Watch report
 
@@ -433,7 +455,7 @@ Absolute. The watcher routes work; it does not edit code itself.
 
 1. **Never** force-push, rebase the PR branch, or amend commits.
 2. **Never** resolve a review thread.
-3. **Never** close, reopen, merge, change the base of, or convert-to-draft a PR.
+3. **Never** close, reopen, change the base of, or convert-to-draft a PR, and **never force-merge** (`gh pr merge` without `--auto`, or any merge that bypasses the queue or required checks). **Exception — enqueueing is allowed and required:** to keep the stack draining you MAY enable auto-merge on the **single lowest open PR** that is green and `mergeable` (`gh pr merge <pr> --auto --squash`). This adds the PR to the merge queue and lets GitHub merge it only after required checks pass — it is not a bypass. Enqueue at most one PR at a time (descendants cannot merge until the bottom one does and they rebase).
 4. **Never** post a reply that commits to behavior changes the watcher has not verified.
 5. **Never** post a single aggregated "summary" comment in place of per-thread replies, and **never** leave a reviewer comment unanswered -- per-thread reply discipline is loop rule 5 (canonically the Resolver's *Reply policy*). Every Action Queue comment ends an iteration `replied` or `done` with its threaded reply posted.
 6. **Never** auto-dispatch a `substantive-implementation-request` or `human-needed` row.

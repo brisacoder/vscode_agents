@@ -73,8 +73,30 @@ Never use `git commit` + `git checkout -b` to extend a stack; use `gt create` / 
 
 ## Monitor the stack
 
-- **CI / merge state per branch**: the stack is `gt log`; for each branch's PR use `gh pr view <branch> --json state,statusCheckRollup,mergeStateStatus,reviewDecision` and `gh pr checks <branch>`. Open the stack page with `gt pr --stack`.
+- **CI / merge state per branch**: the stack is `gt log`; for each branch's PR use `gh pr view <branch> --json state,statusCheckRollup,mergeStateStatus,reviewDecision,autoMergeRequest` and `gh pr checks <branch>`. Open the stack page with `gt pr --stack`.
 - A stack is green only when **every** PR in it is green and its base is correct. A failure on a lower branch blocks every branch above it — fix the lowest failing branch first, then `gt sync` / `gt submit --stack` to propagate.
+
+## Drain the stack (green is not done — merged is done)
+
+A green, mergeable stack is **not** a finished stack. A stack with a merge queue drains **bottom-up, one PR at a time**: the bottom PR enters the queue, merges, trunk advances, the survivors rebase, the next PR becomes mergeable, and so on. "Every PR is green and `mergeable`" is the state of a stack that is *ready to start draining* or *between merges* — it is **in progress**, not complete. The only terminal state is **every PR `merged` or `closed`**.
+
+This distinction is the cause of the most common monitoring bug: an agent sees an all-green stack, concludes "nothing to do", and stops — leaving a stack that never actually merges because nothing ever fed the bottom PR into the queue, or because one PR merged and no one advanced the next.
+
+**The draining invariant.** While *any* PR in the stack is still open, the stack is not done, and at any moment at least one open PR should be *making progress toward merge*: in the merge queue (`mergeStateStatus: QUEUED` / an `autoMergeRequest` present / GitHub's "will merge when ready"), or running/queued CI, or mid-rebase after a lower merge. If every open PR is idle — green, mergeable, but **none enqueued and none progressing** — the stack has **stalled**, and the correct action is to push the lowest open PR into the merge queue, not to exit.
+
+**Feed the bottom open PR into the merge queue.** This repo uses GitHub's native merge queue. Enqueue the lowest still-open PR whose CI is green, whose base is trunk (or an already-merged branch), and which is `mergeable`:
+
+```sh
+gh pr merge <pr-number-or-branch> --auto --squash    # adds to the merge queue; merges when required checks pass
+```
+
+`--auto` enables auto-merge, which places the PR in the queue and merges it once required checks pass — it does **not** bypass the queue or required checks. Only the **lowest open PR** is enqueued at a time (its descendants are not mergeable until it merges and they rebase onto the new trunk). After the bottom PR merges:
+
+1. `gt sync` — fast-forwards trunk, restacks survivors, prompts to delete the merged branch.
+2. `gt submit --stack` — rebases the survivors onto the new trunk and refreshes their PRs (this is a cascade; let it settle per *Restack cascades and stuck PRs*).
+3. The new bottom PR becomes `mergeable`; enqueue it next.
+
+Repeat until the stack is empty. Monitoring continues across every merge — do not stop until the **last** PR is merged or closed.
 
 ## Restack cascades and stuck PRs (operational hazards)
 
@@ -116,3 +138,4 @@ A stuck-on-absent-check PR is **not** a `ci-failure-*` (nothing failed) and **no
 5. **Never force-push raw** (`git push --force`). `gt submit` already force-pushes with lease; do not bypass it.
 6. **After any lower branch changes, restack** (`gt restack` / `gt modify` does it automatically) so descendants stay correct before re-submitting.
 7. **A restack/submit is a multi-branch cascade — let it settle before reacting, and never assume a force-push re-fired CI.** Quiesce monitoring during an in-flight `gt submit --stack` / `gt restack`; a PR stuck on a *missing* (absent, never-fired) required check is a re-trigger condition, not a CI failure or conflict (see *Restack cascades and stuck PRs*).
+8. **Green is not done — merged is done.** A stack is complete only when **every** PR is `merged` or `closed`. While any PR is open, keep driving and monitoring: at least one open PR must always be progressing toward merge (enqueued, CI running, or rebasing). A green, `mergeable` stack with nothing in the merge queue has **stalled** — feed the lowest open PR into the queue (`gh pr merge <pr> --auto --squash`), then `gt sync` + `gt submit --stack` after each merge and enqueue the next. Never treat all-green as a stop condition (see *Drain the stack*).

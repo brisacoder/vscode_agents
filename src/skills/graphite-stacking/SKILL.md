@@ -82,21 +82,30 @@ A green, mergeable stack is **not** a finished stack. A stack with a merge queue
 
 This distinction is the cause of the most common monitoring bug: an agent sees an all-green stack, concludes "nothing to do", and stops — leaving a stack that never actually merges because nothing ever fed the bottom PR into the queue, or because one PR merged and no one advanced the next.
 
-**The draining invariant.** While *any* PR in the stack is still open, the stack is not done, and at any moment at least one open PR should be *making progress toward merge*: in the merge queue (`mergeStateStatus: QUEUED` / an `autoMergeRequest` present / GitHub's "will merge when ready"), or running/queued CI, or mid-rebase after a lower merge. If every open PR is idle — green, mergeable, but **none enqueued and none progressing** — the stack has **stalled**, and the correct action is to push the lowest open PR into the merge queue, not to exit.
+**The draining invariant.** While *any* PR in the stack is still open, the stack is not done, and at any moment at least one open PR should be *making progress toward merge*: in the merge queue (`mergeStateStatus: QUEUED` / an `autoMergeRequest` present / GitHub's "will merge when ready"), or running/queued CI, or mid-rebase after a lower merge. If every open PR is idle — green, mergeable, but **none enqueued and none progressing** — the stack has **stalled**, and the correct action is to drive it forward (set auto-merge, trigger the missing required workflows), not to exit.
 
-**Feed the bottom open PR into the merge queue.** This repo uses GitHub's native merge queue. Enqueue the lowest still-open PR whose CI is green, whose base is trunk (or an already-merged branch), and which is `mergeable`:
+**Always set auto-merge on every PR in the stack. Always.** This repo uses GitHub's native merge queue and auto-merge is **mandatory**, not optional. Enable it on **every open PR**, not just the bottom one — GitHub holds each PR until its turn (its base merges and required checks pass) and admits them in order, so setting auto-merge on the whole stack up front is correct and is what keeps the stack draining without per-merge babysitting:
 
 ```sh
-gh pr merge <pr-number-or-branch> --auto --squash    # adds to the merge queue; merges when required checks pass
+# Enable auto-merge on EVERY open PR in the stack (idempotent — re-running is a no-op if already set).
+for pr in <all-open-pr-numbers>; do gh pr merge "$pr" --auto --squash; done
 ```
 
-`--auto` enables auto-merge, which places the PR in the queue and merges it once required checks pass — it does **not** bypass the queue or required checks. Only the **lowest open PR** is enqueued at a time (its descendants are not mergeable until it merges and they rebase onto the new trunk). After the bottom PR merges:
+`--auto` enables auto-merge, which places the PR in the queue and merges it once its base is current and required checks pass — it does **not** bypass the queue or required checks. After the bottom PR merges:
 
 1. `gt sync` — fast-forwards trunk, restacks survivors, prompts to delete the merged branch.
-2. `gt submit --stack` — rebases the survivors onto the new trunk and refreshes their PRs (this is a cascade; let it settle per *Restack cascades and stuck PRs*).
-3. The new bottom PR becomes `mergeable`; enqueue it next.
+2. `gt submit --stack` — rebases the survivors onto the new trunk and refreshes their PRs (this is a cascade; let it settle per *Restack cascades and stuck PRs*). Re-assert auto-merge on every still-open PR afterward (a force-push can clear a pending auto-merge request).
 
-Repeat until the stack is empty. Monitoring continues across every merge — do not stop until the **last** PR is merged or closed.
+Repeat until the stack is empty. Monitoring continues across every merge — do not stop until the **last** PR is merged or closed. **Green now does not mean green later:** each merge rebases the survivors, which can introduce conflicts, re-fire CI, or strand a PR on a missing check. Keep watching the *whole* stack through every merge; never assume a stack that is green at PR 1 stays green through PR 20.
+
+**The merge queue requires the org-required workflows to have run on the PR head SHA before it will admit the PR.** This is the most common silent stall: CI looks "green" but a required org-level workflow (for example `Require Jira Ticket` or `Trivy Scan`) is **absent** from the rollup for the current head SHA because a `gt submit` force-push (especially a no-content-delta rebase) did not re-fire it. The queue then never admits the PR and nothing visibly fails. **Do not wait for these to appear on their own — they will not.** Trigger them autonomously, least-invasive first:
+
+1. `gh workflow run <workflow> --ref <branch>` (if the workflow accepts `workflow_dispatch`), or `gh run rerun <run-id>` for the branch's last run.
+2. If the workflow only fires on a genuinely new commit (`on: push` / `pull_request` with no `workflow_dispatch`), push a **no-op amend** so a fresh head SHA exists for the required workflows to run against: `gt modify -c -m "chore: re-trigger required workflows"` (or amend the tip) on the branch, then `gt submit --stack`. This is the cleanest autonomous trigger and is explicitly sanctioned here. Let the resulting cascade settle (*Restack cascades and stuck PRs*), then re-assert auto-merge.
+
+Cap at 2 re-trigger attempts per branch, then surface to the user. See *Restack cascades and stuck PRs* below for distinguishing this missing-check condition from a real CI failure.
+
+**A `mergeable` / approved PR is done being reviewed — stop chasing approval rabbits.** When `reviewDecision` is `APPROVED` (or `mergeStateStatus` is `CLEAN`/`QUEUED`, i.e. GitHub itself considers the PR ready to merge), the review requirements — including any "at least 1 review from a code owner" rule — are **already satisfied**. Do not re-investigate `CODEOWNERS`, do not hunt for which code owner still needs to approve, do not draft comments about approvals. Set auto-merge (if not already) and let the queue take it. Re-litigating an already-satisfied approval requirement is wasted effort and a known time sink.
 
 ## Restack cascades and stuck PRs (operational hazards)
 
@@ -138,4 +147,8 @@ A stuck-on-absent-check PR is **not** a `ci-failure-*` (nothing failed) and **no
 5. **Never force-push raw** (`git push --force`). `gt submit` already force-pushes with lease; do not bypass it.
 6. **After any lower branch changes, restack** (`gt restack` / `gt modify` does it automatically) so descendants stay correct before re-submitting.
 7. **A restack/submit is a multi-branch cascade — let it settle before reacting, and never assume a force-push re-fired CI.** Quiesce monitoring during an in-flight `gt submit --stack` / `gt restack`; a PR stuck on a *missing* (absent, never-fired) required check is a re-trigger condition, not a CI failure or conflict (see *Restack cascades and stuck PRs*).
-8. **Green is not done — merged is done.** A stack is complete only when **every** PR is `merged` or `closed`. While any PR is open, keep driving and monitoring: at least one open PR must always be progressing toward merge (enqueued, CI running, or rebasing). A green, `mergeable` stack with nothing in the merge queue has **stalled** — feed the lowest open PR into the queue (`gh pr merge <pr> --auto --squash`), then `gt sync` + `gt submit --stack` after each merge and enqueue the next. Never treat all-green as a stop condition (see *Drain the stack*).
+8. **Green is not done — merged is done.** A stack is complete only when **every** PR is `merged` or `closed`. While any PR is open, keep driving and monitoring through every merge (green now does not mean green later — each rebase can re-introduce conflicts or strand a check). A green, `mergeable` stack that is not draining has **stalled** (see *Drain the stack*).
+9. **Always set auto-merge on every PR in the stack. Always.** Auto-merge is mandatory, not optional. Enable it on every open PR (`gh pr merge <pr> --auto --squash`), re-assert it after every `gt submit --stack` (a force-push can clear it), and let GitHub's native merge queue admit them in order. Never leave an open PR without auto-merge set.
+10. **The merge queue needs the org-required workflows to run on the PR head SHA before admission — trigger them, do not wait.** A "green" PR whose required org workflow (e.g. `Require Jira Ticket`, `Trivy Scan`) is *absent* for the current head SHA will never be admitted. Fire it autonomously (`gh workflow run` / `gh run rerun`, else a no-op amend `gt modify -c -m "chore: re-trigger required workflows"` + `gt submit --stack`); cap 2 attempts, then escalate.
+11. **Every PR carries a Jira ticket key in plain ASCII** (e.g. `OCTO-1234`, matching `[A-Z][A-Z0-9]+-[0-9]+`) in its title or body — the `Require Jira Ticket` org workflow enforces it, so a PR without one can never merge.
+12. **An approved / `mergeable` PR is done being reviewed.** When `reviewDecision == APPROVED` or `mergeStateStatus` is `CLEAN`/`QUEUED`, the review requirements (including any code-owner rule) are satisfied — set auto-merge and move on; never re-investigate `CODEOWNERS` or chase which owner must still approve.

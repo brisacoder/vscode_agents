@@ -2,7 +2,7 @@
 name: graphite-stacking
 description: Canonical Graphite CLI (gt) command set and stacked-PR workflow for this workspace. Load whenever an agent creates branches, commits, opens or updates pull requests, restacks, syncs, submits, or monitors PRs. In this workspace stacked PRs are the default unit of delivery, not a special case — a unit of work is decomposed into a stack of small, dependent branches (one PR per branch) that are planned first, built bottom-up, and submitted and monitored as a stack with `gt submit --stack`. Replaces ad-hoc `git checkout -b` / `git push` / `gh pr create` flows. Covers gt init/create/modify/restack/sync/submit/log/checkout/up/down/move/track and the plan-stack-first discipline. Apply for any Plan, Enforce, Author, Fix, Watch, or Resolve step that touches branches or PRs.
 user-invocable: false
-context: fork
+context: inline
 ---
 
 # Graphite Stacking — Canonical Workflow

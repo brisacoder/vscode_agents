@@ -2,7 +2,7 @@
 name: consolidated-review-report
 description: Defines the exact structure, sections, ordering, naming conventions, and formatting rules for the consolidated code-review report produced by Code Reviewer V3. Load this skill when assembling, rendering, or rewriting the final consolidated report from specialist findings. Covers report header, Dispatch Summary table, Static pre-analysis section, Cross-model agreement themes, File coverage, per-specialist verbatim inlining, and the Prioritized Summary. Eliminates on-the-fly decisions about section ordering, severity lettering, ID conventions, table columns, and verbatim-boundary markers.
 user-invocable: false
-context: fork
+context: inline
 ---
 
 # Consolidated Review Report — Format Specification

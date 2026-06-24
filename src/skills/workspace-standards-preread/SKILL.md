@@ -2,7 +2,7 @@
 name: workspace-standards-preread
 description: The mandatory two-step preamble every code-writing and code-reviewing agent runs before touching Python code in this workspace. Step 1 reads the workspace coding standards (.github/copilot-instructions.md, CLAUDE.md if present, and any equivalent) so the agent applies the project's binding rules from the first line. Step 2 reads pyproject.toml requires-python to pin the Python version floor, which gates every version-tagged recommendation ([3.12+], [3.13+], [3.14+]). Load at the start of any Write Mode, Optimize Mode, Rewrite Mode, or Review Mode procedure on a Python target. Failing to read these makes recommendations invalid because they may violate house rules or cite features the locked Python version does not have.
 user-invocable: false
-context: fork
+context: inline
 ---
 
 # Workspace Standards Pre-Read

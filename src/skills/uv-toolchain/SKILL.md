@@ -2,7 +2,7 @@
 name: uv-toolchain
 description: Canonical uv command set for Python tooling in this workspace. Load whenever an agent needs to run tests, format code, lint, type-check, install dependencies, or execute Python scripts. The workspace standard forbids global pip install and bare python invocations; everything goes through uv so the project's locked environment is used. Covers uv run pytest, uv run black, uv run isort, uv run ruff check, uv run mypy / pyright, uv add, uv pip install -e, uv sync, and uv run python script.py. Apply for any Write Mode, Optimize Mode, Quality Gate, or Reconciliation step that needs to verify tests pass, formatting is clean, lint is green, type checks pass, or a script runs in the correct environment.
 user-invocable: false
-context: fork
+context: inline
 ---
 
 # uv Toolchain — Canonical Commands

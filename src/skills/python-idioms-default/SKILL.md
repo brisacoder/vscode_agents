@@ -2,7 +2,7 @@
 name: python-idioms-default
 description: The Zen of Python tiebreaker and the five-rule idiomatic ranking that all code-writing and code-reviewing agents apply when multiple correct solutions exist. Load whenever writing, reviewing, optimizing, or recommending Python 3.12+ code so that the default choice is always the most explicit, simple, readable, modern, and idiomatic alternative. Covers stdlib-first patterns (pathlib, itertools/functools/contextlib, collections.Counter/deque/defaultdict), modern type syntax (X | None, list[X], type X =, Self, @override, LiteralString), modern OOP and concurrency idioms (Protocol over ABC, @dataclass(slots=True, frozen=True), match over isinstance chains, asyncio.TaskGroup over gather, asyncio.timeout over wait_for), and the deprecated constructs that must be rejected by default (Optional[X], List[X], os.path.* where pathlib fits, datetime.utcnow(), bare except:, for i in range(len(x)), string concatenation in hot loops).
 user-invocable: false
-context: fork
+context: inline
 ---
 
 # Default to Idiomatic, Modern Python

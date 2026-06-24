@@ -4,6 +4,27 @@ The Zen of Python governs all decisions not explicitly covered below.
 
 ---
 
+## Repository Purpose — READ FIRST
+
+This repository is a **storage and distribution library** for reusable Copilot
+agents (`src/vscode_agents/`) and skills (`src/skills/`). These artifacts are
+authored here, then **copied into other developers' `~/.copilot` directories**
+to be used in their own, separate repositories and projects.
+
+Consequences you MUST internalize:
+
+- The agents and skills in this repo are **products shipped to other repos**.
+  They are NOT meant to operate on this repo's own code.
+- **Do NOT invoke these agents or skills while working inside this repository.**
+  Running them here is off-goal and wastes time and tokens — this repo is not
+  their target environment.
+- When asked to create or modify an agent or skill, treat it as **editing a
+  document/specification** (Markdown content), not as a workflow to execute here.
+- Their instructions, examples, and assumptions are written for the consuming
+  projects, not for this repository.
+
+---
+
 ## Non-Negotiable Rules
 
 1.  NO import guards (`try/except` import patterns)

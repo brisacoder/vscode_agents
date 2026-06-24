@@ -1,13 +1,13 @@
 ---
 name: consolidated-review-report
-description: Defines the exact structure, sections, ordering, naming conventions, and formatting rules for the consolidated code-review report produced by Code Reviewer Agent. Load this skill when assembling, rendering, or rewriting the final consolidated report from specialist findings. Covers report header, Dispatch Summary table, Static pre-analysis section, Cross-model agreement themes, File coverage, per-specialist verbatim inlining, and the Prioritized Summary. Eliminates on-the-fly decisions about section ordering, severity lettering, ID conventions, table columns, and verbatim-boundary markers.
+description: Defines the exact structure, sections, ordering, naming conventions, and formatting rules for the consolidated code-review report produced by Code Reviewer V3. Load this skill when assembling, rendering, or rewriting the final consolidated report from specialist findings. Covers report header, Dispatch Summary table, Static pre-analysis section, Cross-model agreement themes, File coverage, per-specialist verbatim inlining, and the Prioritized Summary. Eliminates on-the-fly decisions about section ordering, severity lettering, ID conventions, table columns, and verbatim-boundary markers.
 user-invocable: false
-context: inline
+context: fork
 ---
 
 # Consolidated Review Report — Format Specification
 
-This skill defines the exact, reproducible structure of the consolidated code-review report. The orchestrator (Code Reviewer Agent) MUST follow this format when rendering the report. No improvisation on section names, ordering, table shapes, or marker conventions is permitted.
+This skill defines the exact, reproducible structure of the consolidated code-review report. The orchestrator (Code Reviewer V3) MUST follow this format when rendering the report. No improvisation on section names, ordering, table shapes, or marker conventions is permitted.
 
 ## File naming
 
@@ -43,6 +43,8 @@ Render sections in exactly this order. Do not reorder, merge, or skip any sectio
 ## Findings by Specialist
 
 ## Orchestrator notes
+
+## Specialist Review Triggers
 ```
 
 ---
@@ -96,7 +98,7 @@ If a check was skipped (tool unavailable), state why. Never omit the section.
 
 | Column | Content |
 |---|---|
-| Specialist | Agent name (e.g. `Python Expert`, `Logic & Correctness Expert`) |
+| Specialist | Agent name (e.g. `Python Expert`, `Logic and Correctness Expert`) |
 | Model | Model name and vendor (e.g. `Claude Opus 4.7`, `GPT-5.4`, `Gemini 3.1 Pro Preview`) |
 | State | One of: `done`, `done (after N retry)`, `running`, `pending`, `failed (terminal after N attempts)`, `not triggered` |
 | Reported | Integer count from the specialist's own summary, or `unstated`, or `--` for failed/not-triggered |
@@ -211,7 +213,7 @@ This is the bulk of the report. One subsection per dispatched (specialist, model
 Order subsections by specialist domain (alphabetical within domain group), then by model within each specialist. Recommended grouping:
 
 1. Python Expert (Claude, GPT, Gemini)
-2. Logic & Correctness Expert (Claude, GPT, Gemini)
+2. Logic and Correctness Expert (Claude, GPT, Gemini)
 3. Docstring Expert (Claude, GPT, Gemini)
 4. Type Annotation Expert (Claude, GPT, Gemini)
 5. README Expert (Claude, GPT, Gemini)
@@ -220,7 +222,7 @@ Order subsections by specialist domain (alphabetical within domain group), then 
 8. Observability Expert (Claude, GPT, Gemini)
 9. Spec Author (Claude, GPT, Gemini)
 10. Architecture Diagram Creator (Claude, GPT, Gemini)
-11. PR Discipline Expert (Claude, GPT, Gemini)
+11. PR Stack Planner (Claude, GPT, Gemini)
 
 ---
 
@@ -240,14 +242,31 @@ Brief operational notes about the review run itself. Not findings -- metadata on
 
 ---
 
+## Section 8: Specialist Review Triggers
+
+The path each dispatched specialist must review. Every specialist handoff prompt instructs the specialist to read this section, find its own row, and review the listed path. **This section MUST be present in the initial report written before any specialist is dispatched** (Code Reviewer V3 Approach step 5) and preserved on every rewrite — a specialist dispatched before the section exists has no target path.
+
+```markdown
+## Specialist Review Triggers
+
+| Specialist | Path / scope to review |
+|---|---|
+| Python Expert | `<path reviewed>` |
+| ... one row per triggered specialist ... | `<path or narrower scope>` |
+```
+
+All specialists review the full reviewed path unless a narrower scope is noted in their row.
+
+---
+
 ## Finding ID conventions (per specialist)
 
-Each specialist owns its own ID prefix. The orchestrator does not invent or reassign IDs.
+Each specialist owns its own ID prefix. The orchestrator does not invent or reassign IDs. This table is the canonical prefix set; it MUST stay identical to the Finding ID Prefixes table in `code-reviewer-v3` and the Routing Table in `code-review-executor`.
 
 | Specialist | ID prefix pattern | Example |
 |---|---|---|
 | Python Expert | `PY-<model-letter>-N` or `F-N`, `I-N`, `U-N`, `C-N` | `PY-C-1`, `F-1`, `I-1` |
-| Logic & Correctness Expert | `LC-<model-letter>-N` | `LC-C-1`, `LC-M-3` |
+| Logic and Correctness Expert | `LC-<model-letter>-N` | `LC-C-1`, `LC-M-3` |
 | Docstring Expert | `DOC-<model-letter>-N` | `DOC-C-1`, `DOC-G-5` |
 | Type Annotation Expert | `TA-<model-letter>-N` or `TA-H-N`, `TA-M-N`, `TA-L-N` | `TA-H-1`, `TA-M-4` |
 | README Expert | `RM-<model-letter>-N` | `RM-C-1`, `RM-G-3` |
@@ -257,7 +276,8 @@ Each specialist owns its own ID prefix. The orchestrator does not invent or reas
 | Observability Expert | `OBS-<model-letter>-N` | `OBS-C-1`, `OBS-M-5` |
 | Spec Author | `SP-<model-letter>-N` | `SP-C-1`, `SP-G-2` |
 | Architecture Diagram Creator | `AD-<model-letter>-N` | `AD-C-1`, `AD-G-7` |
-| PR Discipline Expert | `PR-<model-letter>-N` or `PR-budget-exceeded` etc. | `PR-C-1`, `PR-G-3` |
+| PR Stack Planner | `PR-<model-letter>-N` or `PR-budget-exceeded` etc. | `PR-C-1`, `PR-G-3` |
+| Code Review Generalist | `GEN-<model-letter>-N` | `GEN-C-1`, `GEN-G-4`, `GEN-M-2` |
 | DuckDB Expert | `DQ-<model-letter>-N` | `DQ-C-1` |
 | BigQuery Expert | `BQ-<model-letter>-N` | `BQ-C-1` |
 | PostgreSQL Expert | `PG-<model-letter>-N` | `PG-C-1` |

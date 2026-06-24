@@ -66,8 +66,8 @@ handoffs:
     send: true
     model: GPT-5.5 (openai)
 
-  - label: Author correctness-critical logic (Logic & Correctness Expert)
-    agent: Logic & Correctness Expert
+  - label: Author correctness-critical logic (Logic and Correctness Expert)
+    agent: Logic and Correctness Expert
     prompt: |
       You are being driven by the Code Authoring Executor. Read the authoring ledger (named `code-authoring-ledger-*.md` in the working directory) before doing anything.
 
@@ -79,8 +79,8 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: Author correctness-critical logic (Logic & Correctness Expert) — GPT-5.5
-    agent: Logic & Correctness Expert
+  - label: Author correctness-critical logic (Logic and Correctness Expert) — GPT-5.5
+    agent: Logic and Correctness Expert
     prompt: |
       You are being driven by the Code Authoring Executor. Read the authoring ledger (named `code-authoring-ledger-*.md` in the working directory) before doing anything.
 
@@ -637,7 +637,7 @@ Adding a new specialist? Add one row here and two entries in YAML `handoffs:`. N
 |---|---|---|---|
 | `spec` | Spec Author | Plan the work (Spec Author) | Plan the work (Spec Author) — GPT-5.5 |
 | `core` | Python Expert | Author core Python (Python Expert) | Author core Python (Python Expert) — GPT-5.5 |
-| `logic` | Logic & Correctness Expert | Author correctness-critical logic (Logic & Correctness Expert) | Author correctness-critical logic (Logic & Correctness Expert) — GPT-5.5 |
+| `logic` | Logic and Correctness Expert | Author correctness-critical logic (Logic and Correctness Expert) | Author correctness-critical logic (Logic and Correctness Expert) — GPT-5.5 |
 | `pandas` | Pandas Expert | Author Pandas code (Pandas Expert) | Author Pandas code (Pandas Expert) — GPT-5.5 |
 | `duckdb` | DuckDB Expert | Author DuckDB code (DuckDB Expert) | Author DuckDB code (DuckDB Expert) — GPT-5.5 |
 | `bigquery` | BigQuery Expert | Author BigQuery code (BigQuery Expert) | Author BigQuery code (BigQuery Expert) — GPT-5.5 |
@@ -893,7 +893,7 @@ Stack (bottom to top):
 Tasks completed: <N>
   - Spec Author: <N>
   - Python Expert: <N>
-  - Logic & Correctness Expert: <N>
+  - Logic and Correctness Expert: <N>
   - Pandas / DuckDB / BigQuery / PostgreSQL Expert: <N>
   - LangGraph / Pydantic / FastAPI / Scikit-learn / PyTorch Expert: <N>
   - GCP / AWS / PyArrow / Observability / Docker / CI/CD Expert: <N>

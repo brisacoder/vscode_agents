@@ -29,7 +29,7 @@ Treat any inline guidance below that touches these four domains as a pointer bac
 Delegate, do not file:
 
 - Pydantic model design and schema internals beyond how FastAPI consumes them → **Pydantic Expert**.
-- Generic Python async/runtime issues that are not FastAPI- or Starlette-specific → **Python Expert** / **Logic & Correctness Expert**.
+- Generic Python async/runtime issues that are not FastAPI- or Starlette-specific → **Python Expert** / **Logic and Correctness Expert**.
 - ORM internals, SQL query quality, and connection-pool tuning → dedicated database experts.
 - Type annotations, docstrings, README quality, and tests → sibling experts.
 

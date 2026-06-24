@@ -98,7 +98,7 @@ If a check was skipped (tool unavailable), state why. Never omit the section.
 
 | Column | Content |
 |---|---|
-| Specialist | Agent name (e.g. `Python Expert`, `Logic & Correctness Expert`) |
+| Specialist | Agent name (e.g. `Python Expert`, `Logic and Correctness Expert`) |
 | Model | Model name and vendor (e.g. `Claude Opus 4.7`, `GPT-5.4`, `Gemini 3.1 Pro Preview`) |
 | State | One of: `done`, `done (after N retry)`, `running`, `pending`, `failed (terminal after N attempts)`, `not triggered` |
 | Reported | Integer count from the specialist's own summary, or `unstated`, or `--` for failed/not-triggered |
@@ -213,7 +213,7 @@ This is the bulk of the report. One subsection per dispatched (specialist, model
 Order subsections by specialist domain (alphabetical within domain group), then by model within each specialist. Recommended grouping:
 
 1. Python Expert (Claude, GPT, Gemini)
-2. Logic & Correctness Expert (Claude, GPT, Gemini)
+2. Logic and Correctness Expert (Claude, GPT, Gemini)
 3. Docstring Expert (Claude, GPT, Gemini)
 4. Type Annotation Expert (Claude, GPT, Gemini)
 5. README Expert (Claude, GPT, Gemini)
@@ -266,7 +266,7 @@ Each specialist owns its own ID prefix. The orchestrator does not invent or reas
 | Specialist | ID prefix pattern | Example |
 |---|---|---|
 | Python Expert | `PY-<model-letter>-N` or `F-N`, `I-N`, `U-N`, `C-N` | `PY-C-1`, `F-1`, `I-1` |
-| Logic & Correctness Expert | `LC-<model-letter>-N` | `LC-C-1`, `LC-M-3` |
+| Logic and Correctness Expert | `LC-<model-letter>-N` | `LC-C-1`, `LC-M-3` |
 | Docstring Expert | `DOC-<model-letter>-N` | `DOC-C-1`, `DOC-G-5` |
 | Type Annotation Expert | `TA-<model-letter>-N` or `TA-H-N`, `TA-M-N`, `TA-L-N` | `TA-H-1`, `TA-M-4` |
 | README Expert | `RM-<model-letter>-N` | `RM-C-1`, `RM-G-3` |

@@ -322,12 +322,12 @@ handoffs:
     send: true
     model: GPT-5.5 (openai)
 
-  - label: Logic & Correctness Author — Claude Opus 4.7
-    agent: Logic & Correctness Expert
+  - label: Logic and Correctness Author — Claude Opus 4.7
+    agent: Logic and Correctness Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
 
-      Your scope: address every finding in the ledger that is currently `pending` AND tagged as delegated to you (look for `delegated to Logic & Correctness Expert` in the State or Notes column, or any finding with an `LC-` or `ORCH-` ID prefix). These are findings involving runtime correctness defects — atomicity violations (validate-after-mutate, partial-writes-on-exception), state invariant breaks (multi-collection inconsistency, constructor leaving object in invalid state), TOCTOU races (check-then-act with a gap, async-await between check and act), idempotency failures (non-idempotent retries, missing dedup keys), or boundary errors (off-by-one, empty/single-element edge cases, division by zero, negative indices).
+      Your scope: address every finding in the ledger that is currently `pending` AND tagged as delegated to you (look for `delegated to Logic and Correctness Expert` in the State or Notes column, or any finding with an `LC-` or `ORCH-` ID prefix). These are findings involving runtime correctness defects — atomicity violations (validate-after-mutate, partial-writes-on-exception), state invariant breaks (multi-collection inconsistency, constructor leaving object in invalid state), TOCTOU races (check-then-act with a gap, async-await between check and act), idempotency failures (non-idempotent retries, missing dedup keys), or boundary errors (off-by-one, empty/single-element edge cases, division by zero, negative indices).
 
       You are operating in **Write/Optimize mode**, not Review mode. Do not produce a fresh findings report — fix the assigned findings using the correct-by-construction patterns from your agent definition (validate-before-mutate two-phase, copy-and-replace, atomic operations like `dict.setdefault`, guard clauses, idempotency keys).
 
@@ -343,12 +343,12 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: Logic & Correctness Author — GPT-5.5
-    agent: Logic & Correctness Expert
+  - label: Logic and Correctness Author — GPT-5.5
+    agent: Logic and Correctness Expert
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory) before doing anything.
 
-      Your scope: address every finding in the ledger that is currently `pending` AND tagged as delegated to you (look for `delegated to Logic & Correctness Expert` in the State or Notes column, or any finding with an `LC-` or `ORCH-` ID prefix). These are findings involving runtime correctness defects — atomicity violations (validate-after-mutate, partial-writes-on-exception), state invariant breaks (multi-collection inconsistency, constructor leaving object in invalid state), TOCTOU races (check-then-act with a gap, async-await between check and act), idempotency failures (non-idempotent retries, missing dedup keys), or boundary errors (off-by-one, empty/single-element edge cases, division by zero, negative indices).
+      Your scope: address every finding in the ledger that is currently `pending` AND tagged as delegated to you (look for `delegated to Logic and Correctness Expert` in the State or Notes column, or any finding with an `LC-` or `ORCH-` ID prefix). These are findings involving runtime correctness defects — atomicity violations (validate-after-mutate, partial-writes-on-exception), state invariant breaks (multi-collection inconsistency, constructor leaving object in invalid state), TOCTOU races (check-then-act with a gap, async-await between check and act), idempotency failures (non-idempotent retries, missing dedup keys), or boundary errors (off-by-one, empty/single-element edge cases, division by zero, negative indices).
 
       You are operating in **Write/Optimize mode**, not Review mode. Do not produce a fresh findings report — fix the assigned findings using the correct-by-construction patterns from your agent definition (validate-before-mutate two-phase, copy-and-replace, atomic operations like `dict.setdefault`, guard clauses, idempotency keys).
 
@@ -843,7 +843,7 @@ These prefixes are the contract shared verbatim with Code Reviewer V3's "Finding
 | ID prefix | Specialist | Auto-dispatch handoff label | Manual second-opinion handoff label |
 |---|---|---|---|
 | `PY-` (and the Python sub-prefixes `F-`, `I-`, `A-`, `C-`, `S-`, `L-`, `U-`) | Python Expert | Python Author — Claude Opus 4.7 | Python Author — GPT-5.5 |
-| `LC-` | Logic & Correctness Expert | Logic & Correctness Author — Claude Opus 4.7 | Logic & Correctness Author — GPT-5.5 |
+| `LC-` | Logic and Correctness Expert | Logic and Correctness Author — Claude Opus 4.7 | Logic and Correctness Author — GPT-5.5 |
 | `DOC-` | Docstring Expert | Docstring Review — Claude Opus 4.7 | Docstring Review — GPT-5.5 |
 | `TA-` | Type Annotation Expert | Type Annotation Review — Claude Opus 4.7 | Type Annotation Review — GPT-5.5 |
 | `RM-` | README Expert | README Review — Claude Opus 4.7 | README Review — GPT-5.5 |
@@ -867,9 +867,9 @@ These prefixes are the contract shared verbatim with Code Reviewer V3's "Finding
 | `AD-` | Architecture Diagram Creator | (none — see note) | (none — see note) |
 | `PR-` | PR Stack Planner | (none — see note) | (none — see note) |
 | `GEN-` | Code Review Generalist (fresh-eyes findings; fixed by Python Expert) | Generalist Fix (Python Author) — Claude Opus 4.7 | Generalist Fix (Python Author) — GPT-5.5 |
-| `ORCH-` | Logic & Correctness Expert (orchestrator safety-net findings) | Logic & Correctness Author — Claude Opus 4.7 | Logic & Correctness Author — GPT-5.5 |
+| `ORCH-` | Logic and Correctness Expert (orchestrator safety-net findings) | Logic and Correctness Author — Claude Opus 4.7 | Logic and Correctness Author — GPT-5.5 |
 
-**Rows without a handoff.** `SP-` (Spec Author), `AD-` (Architecture Diagram Creator), and `PR-` (PR Stack Planner) are valid finding prefixes in the shared contract, but this executor carries no Author-mode handoff for them: a `SP-`/`AD-` finding is a spec or diagram gap and an `PR-` finding is a PR-hygiene gap, none of which is a code fix this executor applies. Route these to the Blocked/Escalations sections and surface them at session end for the user (or the orchestrator) to dispatch to the owning agent. `ORCH-` safety-net findings are runtime-correctness defects and are dispatched to the Logic & Correctness Expert (matching the dedup precedence rule that the most specific specialist owns the fix).
+**Rows without a handoff.** `SP-` (Spec Author), `AD-` (Architecture Diagram Creator), and `PR-` (PR Stack Planner) are valid finding prefixes in the shared contract, but this executor carries no Author-mode handoff for them: a `SP-`/`AD-` finding is a spec or diagram gap and an `PR-` finding is a PR-hygiene gap, none of which is a code fix this executor applies. Route these to the Blocked/Escalations sections and surface them at session end for the user (or the orchestrator) to dispatch to the owning agent. `ORCH-` safety-net findings are runtime-correctness defects and are dispatched to the Logic and Correctness Expert (matching the dedup precedence rule that the most specific specialist owns the fix).
 
 **`GEN-` findings are fixed, but not by their author.** The Code Review Generalist is a review-only agent with no Write/Optimize mode, so it cannot fix its own findings. By the time a `GEN-` finding survives into the report it has already lost every dedup overlap to a domain specialist (the generalist carries the lowest precedence — see the precedence table below), which means it is a net-new, no-specialist-owns-it bug: a wrong identifier, an inverted condition, a copy-paste slip, code contradicting its comment. Those are plain language-level corrections, so this executor dispatches `GEN-` to the **Python Expert** in Optimize mode (the broadest code author). If a `GEN-` finding turns out to sit squarely in a framework/library domain after all (e.g., it is really a Pandas or SQL defect), prefer re-tagging it to that specialist's prefix during the dedup pass rather than sending it to the Python Expert.
 
@@ -1112,7 +1112,7 @@ Ledger: <path>
 Branch: <name>
 
 Findings completed: <N>
-  - Logic & Correctness Expert: <N>
+  - Logic and Correctness Expert: <N>
   - Python Expert: <N>
   - Pandas Expert: <N>
   - DuckDB Expert: <N>

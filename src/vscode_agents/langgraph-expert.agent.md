@@ -50,9 +50,9 @@ Treat any inline guidance below that touches these four domains as a pointer bac
 - DO NOT skip the framework-semantics grounding line. Every finding states the relevant framework concept that makes the finding apply.
 - DO NOT review LangGraph code as if it were threading code. State the concurrency model first.
 
-## Overlap with Logic & Correctness Expert
+## Overlap with Logic and Correctness Expert
 
-This agent fires whenever LangGraph is imported. Logic & Correctness Expert fires on every Python file. Both will be present on graph code. The boundary:
+This agent fires whenever LangGraph is imported. Logic and Correctness Expert fires on every Python file. Both will be present on graph code. The boundary:
 
 - **Reducer correctness is owned by this agent, not LC.** The reducer IS the framework's atomicity primitive. LC.atomicity (validate-before-mutate) does not apply to a reducer that returns a new accumulator value — the reducer is the validation-and-mutation step in one. Do not file LC-style atomicity findings against reducer code; file under section S (state) with the reducer-correctness framing.
 - **`asyncio.run()` inside a graph node.** Python Expert and LC will flag this as a generic anti-pattern. The real defect is framework-specific: it stalls the single event loop running every superstep of the graph. File the finding under section A (Async correctness) with the framework grounding. The executor's cross-specialist dedup pass will keep this agent's finding and supersede the `LC-` / `PY-` / `C-` row.

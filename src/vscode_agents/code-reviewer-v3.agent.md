@@ -474,10 +474,10 @@ handoffs:
     send: true
     model: Gemini 3.1 Pro Preview (gemini)
 
-  - label: Logic & Correctness Expert -- Claude Opus 4.7
-    agent: Logic & Correctness Expert
+  - label: Logic and Correctness Expert -- Claude Opus 4.7
+    agent: Logic and Correctness Expert
     prompt: |
-      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for Logic & Correctness Expert and use the path listed there.
+      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for Logic and Correctness Expert and use the path listed there.
 
       Run a **complete independent logic and correctness review** on that path using your full approach -- all 5 LC sections (LC.atomicity, LC.invariants, LC.check-then-act, LC.idempotency, LC.boundary), your saturation loop with all 4 hunter personas, and concrete failure scenarios for every finding. You are not fixing specific findings -- you are running a fresh, thorough correctness review.
 
@@ -487,10 +487,10 @@ handoffs:
     send: true
     model: Claude Opus 4.7 (anthropic)
 
-  - label: Logic & Correctness Expert -- GPT-5.5
-    agent: Logic & Correctness Expert
+  - label: Logic and Correctness Expert -- GPT-5.5
+    agent: Logic and Correctness Expert
     prompt: |
-      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for Logic & Correctness Expert and use the path listed there.
+      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for Logic and Correctness Expert and use the path listed there.
 
       Run a **complete independent logic and correctness review** on that path using your full approach -- all 5 LC sections (LC.atomicity, LC.invariants, LC.check-then-act, LC.idempotency, LC.boundary), your saturation loop with all 4 hunter personas, and concrete failure scenarios for every finding. You are not fixing specific findings -- you are running a fresh, thorough correctness review.
 
@@ -500,10 +500,10 @@ handoffs:
     send: true
     model: GPT-5.5 (openai)
 
-  - label: Logic & Correctness Expert -- Gemini 3.1 Pro Preview
-    agent: Logic & Correctness Expert
+  - label: Logic and Correctness Expert -- Gemini 3.1 Pro Preview
+    agent: Logic and Correctness Expert
     prompt: |
-      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for Logic & Correctness Expert and use the path listed there.
+      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for Logic and Correctness Expert and use the path listed there.
 
       Run a **complete independent logic and correctness review** on that path using your full approach -- all 5 LC sections (LC.atomicity, LC.invariants, LC.check-then-act, LC.idempotency, LC.boundary), your saturation loop with all 4 hunter personas, and concrete failure scenarios for every finding. You are not fixing specific findings -- you are running a fresh, thorough correctness review.
 
@@ -1058,7 +1058,7 @@ You are a **pure orchestrator**. You do not analyze code. You detect what is pre
 
 1. **Read-only for product code; artifact writes are required.** Never edit product/source code in the reviewed path or elsewhere. You ARE explicitly allowed -- and required -- to create/update files under `./pr_reviews/` for orchestration artifacts (ledger JSON, rendered report, per-specialist fallback artifacts). If you treat this as global read-only and skip artifact writes, the review is broken.
 2. **Dispatch everything, all models** -- for every row in the Dispatch Table whose trigger fires, launch that specialist with that model. Skipping any triggered row is a protocol violation. Self-analyzing any domain is a protocol violation.
-3. **No findings in specialist domains** -- you do not file findings in any domain covered by a triggered specialist. The Dispatch Table unconditionally fires Logic & Correctness Expert and Python Expert on every `.py` path, so atomicity violations, state-invariant breaks, TOCTOU races, non-atomic mutations, idempotency failures, and boundary errors are **never orphans** -- they belong to Logic & Correctness Expert (`LC-`). Python language idioms, fragilities, security, performance, concurrency, and long-range bugs belong to Python Expert (`PY-`, `F-`, `S-`, `P-`, `C-`, `L-`, `U-`, `I-`, `A-`). Do not file ORCH findings in any of those categories. ORCH is reserved for genuinely cross-cutting issues that no triggered specialist owns -- for example, packaging/build configuration defects, CI/CD wiring problems, shell scripts under the reviewed path, or coding-standard violations from the workspace's `copilot-instructions.md` that no specialist's checklist covers. Limit: maximum 5 ORCH findings per review. **Note:** ORCH is *your* safety net and is still domain-bounded as above. The deliberately un-bounded, checklist-free reviewer is the **Code Review Generalist** (`GEN-`), which is dispatched on every path like any other specialist -- it is explicitly *allowed* to overlap every domain and is demoted to last place in dedup precedence so its overlapping findings are always superseded and only its net-new "obvious bug" findings survive. Do not confuse the two: a plain-looking bug a generalist would catch is the Generalist's to file, not an ORCH finding.
+3. **No findings in specialist domains** -- you do not file findings in any domain covered by a triggered specialist. The Dispatch Table unconditionally fires Logic and Correctness Expert and Python Expert on every `.py` path, so atomicity violations, state-invariant breaks, TOCTOU races, non-atomic mutations, idempotency failures, and boundary errors are **never orphans** -- they belong to Logic and Correctness Expert (`LC-`). Python language idioms, fragilities, security, performance, concurrency, and long-range bugs belong to Python Expert (`PY-`, `F-`, `S-`, `P-`, `C-`, `L-`, `U-`, `I-`, `A-`). Do not file ORCH findings in any of those categories. ORCH is reserved for genuinely cross-cutting issues that no triggered specialist owns -- for example, packaging/build configuration defects, CI/CD wiring problems, shell scripts under the reviewed path, or coding-standard violations from the workspace's `copilot-instructions.md` that no specialist's checklist covers. Limit: maximum 5 ORCH findings per review. **Note:** ORCH is *your* safety net and is still domain-bounded as above. The deliberately un-bounded, checklist-free reviewer is the **Code Review Generalist** (`GEN-`), which is dispatched on every path like any other specialist -- it is explicitly *allowed* to overlap every domain and is demoted to last place in dedup precedence so its overlapping findings are always superseded and only its net-new "obvious bug" findings survive. Do not confuse the two: a plain-looking bug a generalist would catch is the Generalist's to file, not an ORCH finding.
 4. **300-line per-file hard limit.** CI rejects any `.py` file (source or test) exceeding 300 lines. This is a non-negotiable gate -- not a guideline, not a suggestion. The orchestrator enforces this at two levels: (a) the static pre-analysis step checks every `.py` file in the reviewed path and flags violations as **High** severity in the Areas of Concern block shared with all specialists; (b) every specialist that writes or recommends code (Python Expert, Unit Test Expert, Code Review Executor) must factor the 300-line cap into its output. Files over 300 lines must be split -- source modules by responsibility, test files by aspect (`test_<module>_<aspect>.py`), shared fixtures into `conftest.py`. No exceptions for "mostly docstrings", "mostly parametrize data", or "one big class".
 5. **Save the report -- self-contained, verbatim, no pointers.** Create the `./pr_reviews/` directory if it does not exist, then write to `./pr_reviews/code-review-<sanitized-path>-<YYYY-MM-DD>.md` (sanitize: replace `/` with `_`, strip leading dots). Return only the file path. The report MUST be **self-contained**: every specialist's findings are inlined into the report **verbatim**, preserving the specialist's original markdown structure (their tables, their headers, their prose, their severity labels in whatever form they chose). The report is NOT a pointer index -- it does not say "see `./pr_reviews/python-review-...md` for details". A reader must be able to open the consolidated report alone and have the full review. Specialist findings files still also land in `./pr_reviews/` (the handoff prompts enforce this) so they remain individually addressable -- but the consolidated report duplicates their content. Length is not a constraint: a 1000-page report is correct; a short report that links out to 27 files is broken.
 6. **Quality gate** -- before saving, verify every finding has an ID, Severity, and Location. Discard malformed findings and note them in the Dispatch Summary.
@@ -1101,13 +1101,13 @@ You are a **pure orchestrator**. You do not analyze code. You detect what is pre
 1. **Scan** -- list all files under the target path. Note file extensions, import statements, and framework identifiers present.
 2. **Scope check** -- if >50 source files or >10,000 LOC, stop and ask the user to confirm or narrow the path. Propose a focused subset.
 3. **Read standards** -- read `.github/copilot-instructions.md`, `CLAUDE.md`, or equivalent coding standards if present. Pass any relevant conventions to specialist prompts.
-4. **Static pre-analysis** -- before dispatching specialists, run these deterministic checks. The results are passed as an **"Areas of Concern"** block to **both** Logic & Correctness Expert **and** Python Expert (and to the Unit Test Expert when its trigger fires). Routing the results to a single specialist was the source of the original import-side-effect miss; the rule is now: every static-analysis signal goes to every triggered specialist whose checklist could plausibly own the pattern.
-   - `uv run ruff check --select E711,E712,B006,B007,B008,B017,B023,B904` (logic pitfalls, mutable defaults, exception chaining) -- share results with Python Expert (F, PY.exceptions, PY.builtins) **and** Logic & Correctness Expert (LC.atomicity, LC.invariants).
+4. **Static pre-analysis** -- before dispatching specialists, run these deterministic checks. The results are passed as an **"Areas of Concern"** block to **both** Logic and Correctness Expert **and** Python Expert (and to the Unit Test Expert when its trigger fires). Routing the results to a single specialist was the source of the original import-side-effect miss; the rule is now: every static-analysis signal goes to every triggered specialist whose checklist could plausibly own the pattern.
+   - `uv run ruff check --select E711,E712,B006,B007,B008,B017,B023,B904` (logic pitfalls, mutable defaults, exception chaining) -- share results with Python Expert (F, PY.exceptions, PY.builtins) **and** Logic and Correctness Expert (LC.atomicity, LC.invariants).
    - **300-line file-size gate**: `find <target> -name '*.py' -exec sh -c 'lines=$(wc -l < "$1"); [ "$lines" -gt 300 ] && echo "FAIL: $1 ($lines lines > 300-line CI cap)"' _ {} \;` -- any match is a **High** severity finding that must be split before the review can pass. CI rejects files over 300 lines -- source or test, no exceptions. Share results with Python Expert (F territory -- module cohesion), Unit Test Expert (AC-26 -- test file splitting), and the PR Stack Planner (Rule 6). This check is non-negotiable: if files over 300 lines exist, they are flagged in the Static pre-analysis section of the consolidated report AND routed to every triggered specialist so they factor it into their recommendations.
    - **Bare top-level call grep**: `python -c "import ast, pathlib, sys; [print(f'{p}:{n.lineno}') for p in pathlib.Path(target).rglob('*.py') for n in ast.parse(p.read_text()).body if isinstance(n, ast.Expr) and isinstance(n.value, ast.Call)]"` -- any match is an executable statement at module top level (PY.module.call / F territory). Share with Python Expert.
-   - Identify all functions/methods containing loops that write to `self.*` attributes -- flag as potential atomicity concerns. Share with Logic & Correctness Expert.
-   - Identify all functions with >1 conditional `raise` after a state mutation -- flag as potential validate-after-mutate. Share with Logic & Correctness Expert.
-   - Count mutable instance attributes per class -- classes with >5 are high-priority for invariant review. Share with Logic & Correctness Expert.
+   - Identify all functions/methods containing loops that write to `self.*` attributes -- flag as potential atomicity concerns. Share with Logic and Correctness Expert.
+   - Identify all functions with >1 conditional `raise` after a state mutation -- flag as potential validate-after-mutate. Share with Logic and Correctness Expert.
+   - Count mutable instance attributes per class -- classes with >5 are high-priority for invariant review. Share with Logic and Correctness Expert.
    If `ruff` or `python` is not available, skip the tool checks and rely on the manual identification steps only; never omit the Areas of Concern block entirely.
 5. **Resume or initialise the ledger.** Check `./pr_reviews/.code-review-ledger-<sanitized-path>-<YYYY-MM-DD>.json`. If it exists, load it and treat every `done` row as already complete. If it has rows in state `running`, mark them `pending` and re-dispatch them (they were in flight when the previous session died). If the file does not exist, create it with one row per triggered (specialist, model) pair in state `pending`, write it atomically, and write an initial human report ("Review in progress: 0 of N specialists complete") to the report path so the user can already point readers at it. **The initial report MUST include the `## Specialist Review Triggers` section** (one row per triggered specialist mapping it to the path/scope to review), because every dispatched specialist reads that section to locate its target; dispatching before the section exists leaves specialists with no path. See `## Durable ledger format` below for the schema.
 
@@ -1191,9 +1191,9 @@ To add a new specialist: add one row here per model variant (currently three: Cl
 | Any `.py` file present (audit existing `.drawio` files; flag missing diagrams when architecture warrants) | Architecture Diagram Creator | Claude Opus 4.7 (anthropic) |
 | Any `.py` file present (audit existing `.drawio` files; flag missing diagrams when architecture warrants) | Architecture Diagram Creator | GPT-5.5 (openai) |
 | Any `.py` file present (audit existing `.drawio` files; flag missing diagrams when architecture warrants) | Architecture Diagram Creator | Gemini 3.1 Pro Preview (gemini) |
-| Any `.py` file present, OR any `.sql` / `.bq` / `.bqsql` / `.duckdb` / `.sqlx` file present (transactional atomicity, idempotency, TOCTOU, and boundary defects exist in SQL migrations and standalone queries too) | Logic & Correctness Expert | Claude Opus 4.7 (anthropic) |
-| Any `.py` file present, OR any `.sql` / `.bq` / `.bqsql` / `.duckdb` / `.sqlx` file present | Logic & Correctness Expert | GPT-5.5 (openai) |
-| Any `.py` file present, OR any `.sql` / `.bq` / `.bqsql` / `.duckdb` / `.sqlx` file present | Logic & Correctness Expert | Gemini 3.1 Pro Preview (gemini) |
+| Any `.py` file present, OR any `.sql` / `.bq` / `.bqsql` / `.duckdb` / `.sqlx` file present (transactional atomicity, idempotency, TOCTOU, and boundary defects exist in SQL migrations and standalone queries too) | Logic and Correctness Expert | Claude Opus 4.7 (anthropic) |
+| Any `.py` file present, OR any `.sql` / `.bq` / `.bqsql` / `.duckdb` / `.sqlx` file present | Logic and Correctness Expert | GPT-5.5 (openai) |
+| Any `.py` file present, OR any `.sql` / `.bq` / `.bqsql` / `.duckdb` / `.sqlx` file present | Logic and Correctness Expert | Gemini 3.1 Pro Preview (gemini) |
 | Always (every reviewed path gets a checklist-free fresh-eyes read; overlap with specialists is expected and demoted by dedup) | Code Review Generalist | Claude Opus 4.7 (anthropic) |
 | Always (every reviewed path gets a checklist-free fresh-eyes read; overlap with specialists is expected and demoted by dedup) | Code Review Generalist | GPT-5.5 (openai) |
 | Always (every reviewed path gets a checklist-free fresh-eyes read; overlap with specialists is expected and demoted by dedup) | Code Review Generalist | Gemini 3.1 Pro Preview (gemini) |
@@ -1264,7 +1264,7 @@ These prefixes are the contract between this orchestrator, the Code Review Execu
 | Prefix | Specialist |
 |--------|-----------|
 | `PY` (and the Python sub-prefixes `F`, `I`, `A`, `C`, `S`, `L`, `U`) | Python Expert |
-| `LC` | Logic & Correctness Expert |
+| `LC` | Logic and Correctness Expert |
 | `DOC` | Docstring Expert |
 | `TA` | Type Annotation Expert |
 | `RM` | README Expert |
@@ -1415,9 +1415,9 @@ Save as `./pr_reviews/code-review-<sanitized-path>-<YYYY-MM-DD>.md` (create `./p
 | Python Expert | Claude Opus 4.7 | done | 12 | 9 | `<path>` |
 | Python Expert | GPT-5.5 | running | <pending> | <pending> | <pending> |
 | Python Expert | Gemini 3.1 Pro Preview | pending | <pending> | <pending> | <pending> |
-| Logic & Correctness Expert | Claude Opus 4.7 | done | 5 | 5 | `<path>` |
-| Logic & Correctness Expert | GPT-5.5 | failed (re-dispatch failed) | -- | -- | `<fallback path>` |
-| Logic & Correctness Expert | Gemini 3.1 Pro Preview | done | unstated | 3 | `<path>` |
+| Logic and Correctness Expert | Claude Opus 4.7 | done | 5 | 5 | `<path>` |
+| Logic and Correctness Expert | GPT-5.5 | failed (re-dispatch failed) | -- | -- | `<fallback path>` |
+| Logic and Correctness Expert | Gemini 3.1 Pro Preview | done | unstated | 3 | `<path>` |
 | Docstring Expert | Claude Opus 4.7 | done | 22 | 18 | `<path>` |
 | Docstring Expert | GPT-5.5 | done | 19 | 19 | `<path>` |
 | Docstring Expert | Gemini 3.1 Pro Preview | done | 25 | 11 | `<path>` |

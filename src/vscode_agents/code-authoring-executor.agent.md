@@ -625,7 +625,7 @@ The agent is invoked with a task spec: a path to a Markdown feature description 
 2. **Plan the stack first — planner, then spec.** No code is written against an unplanned spec. Two dispatches, in order:
    - **(a) Branch layout — PR Stack Planner (Plan mode).** Dispatch the **Plan the stack (PR Stack Planner — Plan mode)** handoff first. It owns the Graphite stack shape: an ordered, bottom-up chain of branches (one PR each), each within the 2,000-line cap (≤1,600 target), each shipping its own tests at ≥75% coverage, each file ≤300 lines. It returns the canonical `# PR Sequence Plan` (branches, parents, budgets, behavior gates, test scope). Record this verbatim as the ledger's `## Stack Plan`.
    - **(b) Task decomposition — Spec Author (author mode).** Then dispatch the **Plan the work (Spec Author)** handoff to decompose each planned branch into per-branch tasks with dependencies, sequencing, and test gates. The Spec Author fills tasks *into* the planner's branches; it does not invent its own branch boundaries. Each task names the stack branch (from step a) it lands on.
-   If the spec the executor was handed already contains a valid stack layout (e.g. produced earlier by Code Reviewer V3 via the PR Stack Planner), skip step (a) and go straight to (b).
+   If the spec the executor was handed already contains a valid stack layout (e.g. produced earlier by Code Reviewer Agent via the PR Stack Planner), skip step (a) and go straight to (b).
 3. Note any ambiguity or missing acceptance criterion. If a deliverable cannot be made testable, surface it as an Escalation rather than guessing.
 
 ## Task Domains and Routing Table

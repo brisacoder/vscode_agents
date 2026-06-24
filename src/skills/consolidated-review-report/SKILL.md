@@ -1,13 +1,13 @@
 ---
 name: consolidated-review-report
-description: Defines the exact structure, sections, ordering, naming conventions, and formatting rules for the consolidated code-review report produced by Code Reviewer V3. Load this skill when assembling, rendering, or rewriting the final consolidated report from specialist findings. Covers report header, Dispatch Summary table, Static pre-analysis section, Cross-model agreement themes, File coverage, per-specialist verbatim inlining, and the Prioritized Summary. Eliminates on-the-fly decisions about section ordering, severity lettering, ID conventions, table columns, and verbatim-boundary markers.
+description: Defines the exact structure, sections, ordering, naming conventions, and formatting rules for the consolidated code-review report produced by Code Reviewer Agent. Load this skill when assembling, rendering, or rewriting the final consolidated report from specialist findings. Covers report header, Dispatch Summary table, Static pre-analysis section, Cross-model agreement themes, File coverage, per-specialist verbatim inlining, and the Prioritized Summary. Eliminates on-the-fly decisions about section ordering, severity lettering, ID conventions, table columns, and verbatim-boundary markers.
 user-invocable: false
 context: fork
 ---
 
 # Consolidated Review Report — Format Specification
 
-This skill defines the exact, reproducible structure of the consolidated code-review report. The orchestrator (Code Reviewer V3) MUST follow this format when rendering the report. No improvisation on section names, ordering, table shapes, or marker conventions is permitted.
+This skill defines the exact, reproducible structure of the consolidated code-review report. The orchestrator (Code Reviewer Agent) MUST follow this format when rendering the report. No improvisation on section names, ordering, table shapes, or marker conventions is permitted.
 
 ## File naming
 
@@ -244,7 +244,7 @@ Brief operational notes about the review run itself. Not findings -- metadata on
 
 ## Section 8: Specialist Review Triggers
 
-The path each dispatched specialist must review. Every specialist handoff prompt instructs the specialist to read this section, find its own row, and review the listed path. **This section MUST be present in the initial report written before any specialist is dispatched** (Code Reviewer V3 Approach step 5) and preserved on every rewrite — a specialist dispatched before the section exists has no target path.
+The path each dispatched specialist must review. Every specialist handoff prompt instructs the specialist to read this section, find its own row, and review the listed path. **This section MUST be present in the initial report written before any specialist is dispatched** (Code Reviewer Agent Approach step 5) and preserved on every rewrite — a specialist dispatched before the section exists has no target path.
 
 ```markdown
 ## Specialist Review Triggers
@@ -261,7 +261,7 @@ All specialists review the full reviewed path unless a narrower scope is noted i
 
 ## Finding ID conventions (per specialist)
 
-Each specialist owns its own ID prefix. The orchestrator does not invent or reassign IDs. This table is the canonical prefix set; it MUST stay identical to the Finding ID Prefixes table in `code-reviewer-v3` and the Routing Table in `code-review-executor`.
+Each specialist owns its own ID prefix. The orchestrator does not invent or reassign IDs. This table is the canonical prefix set; it MUST stay identical to the Finding ID Prefixes table in `code-reviewer-agent` and the Routing Table in `code-review-executor`.
 
 | Specialist | ID prefix pattern | Example |
 |---|---|---|

@@ -827,7 +827,7 @@ Every specialist dispatched through this executor is expected, as a standing req
 
 ## Inputs
 
-The agent is invoked with the path to a code-review Markdown report produced by Code Reviewer V3. Before anything else:
+The agent is invoked with the path to a code-review Markdown report produced by Code Reviewer Agent. Before anything else:
 
 1. Read the report end-to-end.
 2. Validate structure: every finding has an ID, severity, location, recommended fix, and a Specialist source. If malformed, stop and report what's missing.
@@ -839,7 +839,7 @@ Every finding is routed by its ID prefix. The prefix tells you which specialist 
 
 Adding a new specialist? Add one row here and two entries in YAML `handoffs:`. No other change anywhere.
 
-These prefixes are the contract shared verbatim with Code Reviewer V3's "Finding ID Prefixes" table and the `consolidated-review-report` skill's ID-conventions table. All three MUST stay identical — a prefix that exists in the report but not here is an unroutable finding. When you add or rename a specialist, update all three tables in the same edit.
+These prefixes are the contract shared verbatim with Code Reviewer Agent's "Finding ID Prefixes" table and the `consolidated-review-report` skill's ID-conventions table. All three MUST stay identical — a prefix that exists in the report but not here is an unroutable finding. When you add or rename a specialist, update all three tables in the same edit.
 
 | ID prefix | Specialist | Auto-dispatch handoff label | Manual second-opinion handoff label |
 |---|---|---|---|

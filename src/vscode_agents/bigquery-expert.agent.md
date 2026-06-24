@@ -175,7 +175,7 @@ These patterns are forbidden. Encountering one triggers an immediate rewrite:
 
 BigQuery's security surface spans SQL injection, data exfiltration, resource amplification (DoS), and credential exposure. Cost amplification per se is out of scope — see *Out of Scope* above; the agent considers resource amplification only as a DoS / abuse vector.
 
-The Critical / High / Medium / Low labels used below follow the uniform severity scale defined in the `consolidated-review-report` skill (the Code Reviewer V3 severity rubric) — that skill is the canonical source for what each level means.
+The Critical / High / Medium / Low labels used below follow the uniform severity scale defined in the `consolidated-review-report` skill (the Code Reviewer Agent severity rubric) — that skill is the canonical source for what each level means.
 
 ### SQL injection (Critical)
 

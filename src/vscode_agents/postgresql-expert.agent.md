@@ -131,7 +131,7 @@ These patterns are forbidden. Encountering one triggers an immediate rewrite:
 
 PostgreSQL security spans SQL injection, authentication, row-level security (RLS), transport, secrets in connection strings, and dump/export exposure.
 
-The Critical / High / Medium / Low labels used below follow the uniform severity scale defined in the `consolidated-review-report` skill (the Code Reviewer V3 severity rubric) — that skill is the canonical source for what each level means.
+The Critical / High / Medium / Low labels used below follow the uniform severity scale defined in the `consolidated-review-report` skill (the Code Reviewer Agent severity rubric) — that skill is the canonical source for what each level means.
 
 ### SQL injection (Critical)
 

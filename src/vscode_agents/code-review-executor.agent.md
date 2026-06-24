@@ -761,7 +761,7 @@ Every specialist dispatched through this executor is expected, as a standing req
 
 ## Inputs
 
-The agent is invoked with the path to a code-review Markdown report produced by Code Reviewer V3. Before anything else:
+The agent is invoked with the path to a code-review Markdown report produced by Code Reviewer Agent. Before anything else:
 
 1. Read the report end-to-end.
 2. Validate structure: every finding has an ID, severity, location, recommended fix, and a Specialist source. If malformed, stop and report what's missing.

@@ -99,7 +99,7 @@ If a check was skipped (tool unavailable), state why. Never omit the section.
 | Column | Content |
 |---|---|
 | Specialist | Agent name (e.g. `Python Expert`, `Logic and Correctness Expert`) |
-| Model | Model name and vendor (e.g. `Claude Opus 4.7`, `GPT-5.4`, `Gemini 3.1 Pro Preview`) |
+| Model | Model name and vendor (e.g. `Claude Sonnet 5`, `GPT-5.4`, `Gemini 3.5 Flash`) |
 | State | One of: `done`, `done (after N retry)`, `running`, `pending`, `failed (terminal after N attempts)`, `not triggered` |
 | Reported | Integer count from the specialist's own summary, or `unstated`, or `--` for failed/not-triggered |
 | Parsed for dedup | Integer count of findings that matched structured format, or `--`, or `0 (reason)` |

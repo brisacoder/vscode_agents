@@ -223,6 +223,7 @@ Order subsections by specialist domain (alphabetical within domain group), then 
 9. Spec Author (Claude, GPT, Gemini)
 10. Architecture Diagram Creator (Claude, GPT, Gemini)
 11. PR Stack Planner (Claude, GPT, Gemini)
+12. Code Review Generalist (Claude, GPT, Gemini)
 
 ---
 

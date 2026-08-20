@@ -35,6 +35,28 @@ The code executor agent can read the ouput of the code reviewer and fix everythi
 You can also choose one of the individual agents to run specific checks. For example, you can choose the "Type Annotation Auithor" agent to fix all type annotation issues in your files. 
 
 
+# Skills
+
+Drop the contents of `src/skills/` under `~/.copilot/skills` (or your workspace's `.github/skills/` folder).
+
+https://code.visualstudio.com/docs/copilot/customization/agent-skills
+
+The agents in this repo are **not self-contained** — most of them load one or more shared skills at the start of every task via the `skill` tool, and will not behave correctly if the skills are missing. Skills hold the binding rules that are shared across many agents instead of being copy-pasted into each one: workspace coding-standards pre-reads, the canonical `uv` command set, the Zen-of-Python idiom ranking, the "fix the cause, never silence the symptom" suppression ban, the three-round saturation review loop every specialist runs in Review mode, the GitHub-native stacked-PR workflow, the post-submit stack-shepherding contract, and the consolidated code-review report format.
+
+| Skill | Used by |
+|---|---|
+| `workspace-standards-preread` | Every code-writing and code-reviewing agent, at the start of any Write/Optimize/Rewrite/Review pass |
+| `python-idioms-default` | Every agent that writes, reviews, or recommends Python code |
+| `uv-toolchain` | Every agent that runs tests, formatters, linters, type checkers, or scripts |
+| `no-suppression-hacks` | The 23 code-writing agents (not pure review/orchestrate/doc agents) |
+| `saturation-review-loop` | Every Review-mode specialist, to drive findings to zero-delta closure |
+| `github-stacking` | Any agent that creates branches, commits, or opens/updates/monitors pull requests |
+| `stack-shepherding` | PR Stack Planner, PR Watch Agent, PR Review Resolver — what "done" means once a stack is submitted |
+| `consolidated-review-report` | Code Reviewer Agent, when assembling the final multi-specialist report |
+
+Without these installed, an agent that says "invoke the `skill` tool to load these N shared skills" will have nothing to load.
+
+
 # Why VSCode agents?
 
 Because VScode CoPliot agents have access to all extensions, plug-ins and MCP servers you have installed out of the box.

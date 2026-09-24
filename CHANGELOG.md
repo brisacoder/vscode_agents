@@ -12,6 +12,14 @@ starts from the point it was added rather than reconstructing every prior change
 
 ### Added
 
+- `no-historical-narrative` skill — the binding "present state only, no history" rule for
+  every document an agent writes or reviews (design specs, functional specs, implementation
+  plans, READMEs, docstrings, architecture diagrams, code-review reports). Forbids historical
+  commentary, investigation narratives ("we thought X, then found Y"), archaeological decision
+  logs, and conversational framing; a document states only the current architecture, models,
+  plan, and decisions. Wired into all 21 specialist expert agents, `Spec Author`,
+  `README Expert`, `Code Review Generalist`, `Code Reviewer Agent`, and
+  `Architecture Diagram Creator`, and referenced from the `consolidated-review-report` skill.
 - `PR Stack Planner` agent (`pr-stack-planner.agent.md`), replacing `PR Discipline Expert`.
   Plan mode is now the primary role: the stack is planned up front, before any code is
   written, instead of being shaped too late at submit time. Enforce/Review/Fix modes

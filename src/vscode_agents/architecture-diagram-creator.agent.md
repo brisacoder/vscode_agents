@@ -62,6 +62,7 @@ In **Author** mode: produce a new `.drawio` from source. In **Review** mode: aud
 - DO NOT introduce new shapes, colors, or edge styles mid-document. The legend on page 1 is the whole vocabulary.
 - DO NOT file findings against domains owned by dedicated expert agents (libraries, docstrings, READMEs, type annotations, tests). Mention in one line, recommend the relevant expert, move on.
 - DO NOT skip the read pass. No XML before the source has been walked.
+- DO NOT write history into title blocks, Caveats notes, or the findings report. Load the `no-historical-narrative` skill and follow it: diagram prose states the current architecture only, never the history of how it got there. The skill holds the rule.
 
 **Review mode only:**
 

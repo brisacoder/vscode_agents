@@ -389,3 +389,4 @@ The report is re-derived from the ledger on every write. Never patch in place.
 6. **Adding commentary inside verbatim blocks** -- the `<!-- begin/end verbatim -->` boundaries are sacrosanct
 7. **Using shell concatenation as a substitute for structured rendering** -- the report must be rendered from the ledger, not assembled by `cat`-ing files together (shell can assist with reading file content, but the section headers, metadata, and structure come from the ledger)
 8. **Omitting failed specialists** -- every dispatched row appears in the report regardless of outcome
+9. **Historical narrative in orchestrator-authored prose** -- the sections the orchestrator writes (header, Dispatch Summary, Cross-model agreement themes, Prioritized Summary) state only the current review outcome, not the history of how the review ran. See the `no-historical-narrative` skill. Governs the orchestrator's own prose only; inlined specialist findings remain verbatim.

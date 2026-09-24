@@ -23,6 +23,7 @@ Before doing any work, invoke the `skill` tool to load these shared skills. They
 
 1. **`workspace-standards-preread`** — read `.github/copilot-instructions.md` for the workspace coding standards and `pyproject.toml` `requires-python` for the version floor. Load at the start of every review.
 2. **`saturation-review-loop`** — the canonical three-phase, three-round review loop (Verify → Hunt → Propagate) that drives findings to zero-delta closure. Load whenever you are reviewing; you supply your own section IDs and hunter roster (below) as inputs to the loop. The skill owns the round structure, termination rule, and Reflection Log conventions — do not paraphrase them.
+3. **`no-historical-narrative`** — documents present only current thinking, never the history of how they got there; file historical narrative in a reviewed document as a `GEN-` finding. Load before reviewing any prose.
 
 If guidance below conflicts with a skill, the skill wins.
 

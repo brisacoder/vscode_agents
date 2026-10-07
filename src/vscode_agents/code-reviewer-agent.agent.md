@@ -167,9 +167,11 @@ handoffs:
     prompt: |
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for Unit Test Expert and use the path listed there.
 
-      Run a **complete independent test quality and coverage review** on that path using your full approach -- all acceptance criteria (AC-1 through AC-16), all approach steps (Step 0 through Step 11), and your full saturation loop. You are not fixing specific findings -- you are running a fresh, thorough review of the test suite for the reviewed path.
+      Operate in Review mode. Run a **complete independent test quality and coverage review** on that path using your deterministic protocol,
+      all applicable quality gates, and full saturation loop. Do not edit tests or production code; you are reviewing the complete in-scope suite, not fixing specific findings.
 
-      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it -- the orchestrator will deduplicate.
+      Focus on test correctness, coverage, isolation and your defined quality gates; report required checker failures as gate results, not optional style preferences.
+      Route proven production defects using `T-discovered-<owner>-N`. Put uncertain contracts and unavailable checks under Blocked/Unresolved rather than speculative findings.
 
       Save your findings to `./pr_reviews/unit-test-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
@@ -180,9 +182,11 @@ handoffs:
     prompt: |
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for Unit Test Expert and use the path listed there.
 
-      Run a **complete independent test quality and coverage review** on that path using your full approach -- all acceptance criteria (AC-1 through AC-16), all approach steps (Step 0 through Step 11), and your full saturation loop. You are not fixing specific findings -- you are running a fresh, thorough review of the test suite for the reviewed path.
+      Operate in Review mode. Run a **complete independent test quality and coverage review** on that path using your deterministic protocol,
+      all applicable quality gates, and full saturation loop. Do not edit tests or production code; you are reviewing the complete in-scope suite, not fixing specific findings.
 
-      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it -- the orchestrator will deduplicate.
+      Focus on test correctness, coverage, isolation and your defined quality gates; report required checker failures as gate results, not optional style preferences.
+      Route proven production defects using `T-discovered-<owner>-N`. Put uncertain contracts and unavailable checks under Blocked/Unresolved rather than speculative findings.
 
       Save your findings to `./pr_reviews/unit-test-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true
@@ -193,9 +197,11 @@ handoffs:
     prompt: |
       You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for Unit Test Expert and use the path listed there.
 
-      Run a **complete independent test quality and coverage review** on that path using your full approach -- all acceptance criteria (AC-1 through AC-16), all approach steps (Step 0 through Step 11), and your full saturation loop. You are not fixing specific findings -- you are running a fresh, thorough review of the test suite for the reviewed path.
+      Operate in Review mode. Run a **complete independent test quality and coverage review** on that path using your deterministic protocol,
+      all applicable quality gates, and full saturation loop. Do not edit tests or production code; you are reviewing the complete in-scope suite, not fixing specific findings.
 
-      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it -- the orchestrator will deduplicate.
+      Focus on test correctness, coverage, isolation and your defined quality gates; report required checker failures as gate results, not optional style preferences.
+      Route proven production defects using `T-discovered-<owner>-N`. Put uncertain contracts and unavailable checks under Blocked/Unresolved rather than speculative findings.
 
       Save your findings to `./pr_reviews/unit-test-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
     send: true

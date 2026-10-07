@@ -33,9 +33,11 @@ handoffs:
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory). Find the specialist trigger entry for Unit Test Expert and use the path listed there.
 
-      Run a **complete independent test quality and coverage review** on that path using your full approach — all acceptance criteria (AC-1 through AC-16), all approach steps (Step 0 through Step 11), and your full saturation loop. You are running a fresh, thorough review — not fixing a specific list of findings.
+      Operate in Review mode. Run a **complete independent test quality and coverage review** on that path using your deterministic protocol,
+      all applicable quality gates, and full saturation loop. Do not edit tests or production code; this is a fresh review, not a fix pass.
 
-      Save your test plan and defect log to disk (per your Output section) and return only the paths. The executor will parse your findings and merge them into the ledger.
+      Save your Review report to disk per your Outputs and Completion section and return only its absolute path.
+      The executor will parse your findings and merge them into the ledger; include discovered production defects and blocked/unresolved work without suppressing evidence.
     send: true
     model: Claude Sonnet 5 (anthropic)
 
@@ -44,9 +46,11 @@ handoffs:
     prompt: |
       You are being handed off from the Code Review Executor. Read the execution ledger (named `code-review-execution-*.md` in the working directory). Find the specialist trigger entry for Unit Test Expert and use the path listed there.
 
-      Run a **complete independent test quality and coverage review** on that path using your full approach — all acceptance criteria (AC-1 through AC-16), all approach steps (Step 0 through Step 11), and your full saturation loop. You are running a fresh, thorough review — not fixing a specific list of findings.
+      Operate in Review mode. Run a **complete independent test quality and coverage review** on that path using your deterministic protocol,
+      all applicable quality gates, and full saturation loop. Do not edit tests or production code; this is a fresh review, not a fix pass.
 
-      Save your test plan and defect log to disk (per your Output section) and return only the paths. The executor will parse your findings and merge them into the ledger.
+      Save your Review report to disk per your Outputs and Completion section and return only its absolute path.
+      The executor will parse your findings and merge them into the ledger; include discovered production defects and blocked/unresolved work without suppressing evidence.
     send: true
     model: GPT-5.5 (openai)
 
@@ -876,7 +880,10 @@ These prefixes are the contract shared verbatim with Code Reviewer Agent's "Find
 
 Spawned findings (`Fx-`, `Sx-`, etc.) route by their base prefix (e.g., `Fx-3` → Python Expert).
 
-**Cross-specialist test-discovery prefix**: when a Unit Test Expert finding carries a `T-discovered-<owner>-N` tag (e.g., `T-discovered-LC-1`, `T-discovered-PG-3`), the executor routes the finding to the specialist named by `<owner>`, not to Unit Test Expert. The discovering test stays in the test file as `@pytest.mark.xfail(reason="awaiting <id>")` until the dispatched specialist closes the underlying production defect; once closed, Unit Test Expert reactivates the test as part of the verification step.
+**Cross-specialist test-discovery prefix**: route `T-discovered-<owner>-N` (e.g., `T-discovered-LC-1`, `T-discovered-PG-3`) to `<owner>`, not Unit Test Expert.
+Retain any discovering regression test as unsuppressed failing evidence; a read-only review may supply a minimal repro instead.
+Keep the affected test obligation incomplete until the production owner fixes the defect, then rerun the regression and affected suite before closing it.
+Do not skip or xfail the test to make the run green.
 
 ### Cross-specialist deduplication (precedence table)
 

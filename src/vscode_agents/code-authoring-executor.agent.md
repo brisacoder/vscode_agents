@@ -427,9 +427,14 @@ handoffs:
     prompt: |
       You are being driven by the Code Authoring Executor. Read the authoring ledger (named `code-authoring-ledger-*.md` in the working directory) before doing anything.
 
-      Operate in your test-authoring approach. Your scope: every ledger task currently `ready` AND tagged `tests`, plus the test obligation for every `done` implementation task whose code shipped without tests. Write BDD-style, business-value-driven pytest tests with stable IDs and proper markers. Target at least 75% coverage on every touched package (the workspace CI gate). Keep every test file at or under 300 lines — split by aspect and use `conftest.py` for shared fixtures. If a test reveals a defect in the freshly authored code, file a `T-discovered-<owner>-N` task back to the owning specialist and mark the test `xfail(strict=True)` until it is fixed. Commit with `Authored-By: code-authoring-executor`. Mark each task `done` and append a History entry.
+      Operate in Write mode using your deterministic protocol and all applicable quality gates. Your scope: every ledger task currently `ready` AND tagged `tests`,
+      plus the test obligation for every `done` implementation task whose code shipped without tests. Write behavior-driven pytest tests with stable IDs and proper markers.
+      Target at least 75% coverage on every touched package, honoring stricter project gates. Keep each test file at or under 300 lines; share genuine common fixtures via `conftest.py`.
+      If a valid test reveals a production defect, retain the failing test without skips or xfail and spawn `T-discovered-<owner>-N` back to its owner.
+      Keep the affected test obligation incomplete and dependent on that fix; rerun the regression and affected suite afterward. Never edit production code here.
+      Commit with `Authored-By: code-authoring-executor`. Mark a task `done` only after its tests and applicable gates pass; append a History entry, including blockers when present.
 
-      Return a structured summary: task ID, behaviors covered, the coverage percentage achieved on the touched package(s), any discovered defects, and commit SHA for each task.
+      Return a structured summary: task ID, behaviors covered, achieved package coverage, discovered defects/blockers, and commit SHA for each completed task.
     send: true
     model: Claude Sonnet 5 (anthropic)
 
@@ -438,9 +443,14 @@ handoffs:
     prompt: |
       You are being driven by the Code Authoring Executor. Read the authoring ledger (named `code-authoring-ledger-*.md` in the working directory) before doing anything.
 
-      Operate in your test-authoring approach. Your scope: every ledger task currently `ready` AND tagged `tests`, plus the test obligation for every `done` implementation task whose code shipped without tests. Write BDD-style, business-value-driven pytest tests with stable IDs and proper markers. Target at least 75% coverage on every touched package (the workspace CI gate). Keep every test file at or under 300 lines — split by aspect and use `conftest.py` for shared fixtures. If a test reveals a defect in the freshly authored code, file a `T-discovered-<owner>-N` task back to the owning specialist and mark the test `xfail(strict=True)` until it is fixed. Commit with `Authored-By: code-authoring-executor`. Mark each task `done` and append a History entry.
+      Operate in Write mode using your deterministic protocol and all applicable quality gates. Your scope: every ledger task currently `ready` AND tagged `tests`,
+      plus the test obligation for every `done` implementation task whose code shipped without tests. Write behavior-driven pytest tests with stable IDs and proper markers.
+      Target at least 75% coverage on every touched package, honoring stricter project gates. Keep each test file at or under 300 lines; share genuine common fixtures via `conftest.py`.
+      If a valid test reveals a production defect, retain the failing test without skips or xfail and spawn `T-discovered-<owner>-N` back to its owner.
+      Keep the affected test obligation incomplete and dependent on that fix; rerun the regression and affected suite afterward. Never edit production code here.
+      Commit with `Authored-By: code-authoring-executor`. Mark a task `done` only after its tests and applicable gates pass; append a History entry, including blockers when present.
 
-      Return a structured summary: task ID, behaviors covered, the coverage percentage achieved on the touched package(s), any discovered defects, and commit SHA for each task.
+      Return a structured summary: task ID, behaviors covered, achieved package coverage, discovered defects/blockers, and commit SHA for each completed task.
     send: true
     model: GPT-5.5 (openai)
 

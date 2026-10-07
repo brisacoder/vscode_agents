@@ -40,6 +40,12 @@ starts from the point it was added rather than reconstructing every prior change
 
 ### Changed
 
+- Streamlined `Unit Test Expert` with a canonical gate table, fixed inventory/scenario order, stable finding IDs and deterministic default report paths.
+  Added independent-oracle, failure-state, isolation and concurrency checks; clarified read-only review and contract-based assertions.
+  Aligned its dispatcher handoffs and defect-owner prefixes, preserving failing evidence instead of automatically marking discovered defects `xfail`.
+- Streamlined `Logic and Correctness Expert` with evidence-gated runtime checks, fixed coverage and finding-order/ID rules,
+  contract-based severity, and compatible specialist reporting. Added batch, ownership, cancellation, replay, and result checks;
+  removed speculative pattern alarms and blanket fix prescriptions.
 - Migrated the stacked-PR workflow from the third-party Graphite CLI (`gt`) to GitHub's
   native stacked pull request feature, driven locally via the `gh stack` CLI extension.
   The `graphite-stacking` skill was replaced by `github-stacking`; every `gt <command>`
@@ -66,6 +72,15 @@ starts from the point it was added rather than reconstructing every prior change
 - Trimmed the `saturation-review-loop` skill's frontmatter `description` from 1,551 to
   942 characters to respect the Agent Skills spec's 1,024-character limit. The examples
   that were removed from the description remain documented in full in the skill body.
+
+- Reworked `Type Annotation Expert` into a lean, evidence-backed typing review with
+  fixed rule coverage, severity thresholds, diagnostic-identity regression checks,
+  stable finding ordering/IDs, and canonical report fields. Corrected async-return,
+  narrowing, Protocol, `Self`, and runtime-validation guidance; added defaults,
+  generator/context-manager, override, stub-packaging, and runtime-evaluation checks.
+  Removed repeated rules and unrelated tools. Review/Audit now defaults to read-only;
+  request Write/Optimize explicitly for edits. Existing strict/incremental/audit flags,
+  handoff labels, `TA-` prefixes, and atomic hint/docstring synchronization are retained.
 
 ### Removed
 

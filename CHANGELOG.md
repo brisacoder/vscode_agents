@@ -46,6 +46,19 @@ starts from the point it was added rather than reconstructing every prior change
 - Streamlined `Logic and Correctness Expert` with evidence-gated runtime checks, fixed coverage and finding-order/ID rules,
   contract-based severity, and compatible specialist reporting. Added batch, ownership, cancellation, replay, and result checks;
   removed speculative pattern alarms and blanket fix prescriptions.
+- Streamlined `Python Expert` (86 KB to 69 KB, including the embedded scanner) around one closed, version-gated rule catalogue (118 rows with
+  fixed severities, minimum Python versions, and `scan`/`read` detectors) and a detector-first Review mode:
+  an embedded scanner (stdlib plus `ruff` through `uv`/`uvx`) emits a sorted, byte-identical candidate list,
+  and verdicts, finding granularity, ordering, IDs (`PY-<letter>-<N>`), and the Issue and Recommended fix text
+  are mechanical. Independent trial reviews of the same code produced identical findings, severities,
+  locations, and fix text. Mode detection honors explicit mode phrases and fix/authoring ledgers before verb
+  matching, so executor handoffs no longer resolve to Review mode. Corrected rules that were wrong
+  (`CancelledError` is not caught by `except Exception`; positional `match` patterns without `__match_args__`
+  raise `TypeError`; `importlib.abc.Loader` is not removed in 3.14; `httpx` has a finite default timeout) and
+  added floor-syntax, `get_event_loop`, `tarfile` filter, JWT verification, constant-time comparison,
+  `argparse` `type=bool`, and stdlib-shadowing checks.
+  Removed the F plus `PY.module` double filing, subjective rules, the dangling "Execute Fixes" hand-off, the
+  Delegation Summary, the Out-of-Scope Observations and Prioritized Summary sections, and unrelated tools.
 - Migrated the stacked-PR workflow from the third-party Graphite CLI (`gt`) to GitHub's
   native stacked pull request feature, driven locally via the `gh stack` CLI extension.
   The `graphite-stacking` skill was replaced by `github-stacking`; every `gt <command>`

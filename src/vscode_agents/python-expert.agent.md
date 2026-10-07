@@ -538,11 +538,23 @@ PATTERNS = {
     "S.hardcoded-secret": (r"AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----", None),
     "S.secret-in-url": (r"[?&](api_?key|token|access_token|password|secret)=", None),
     "S.tls-verify": (r"check_hostname\s*=\s*False|\bCERT_NONE\b", None),
-    "S.timing-compare": (rf"(?i)({SECRET_WORDS}|signature|digest|hmac)\w*\s*[!=]=[ \t]*(?![ \t]|None\b|True\b|False\b|[\"'\d])|[!=]=[ \t]*(?![ \t]|None\b|True\b|False\b|[\"'\d])\w*({SECRET_WORDS}|signature|digest|hmac)", None),
+    "S.timing-compare": (
+        rf"(?i)({SECRET_WORDS}|signature|digest|hmac)\w*\s*[!=]=[ \t]*(?![ \t]|None\b|True\b|False\b|[\"'\d])"
+        rf"|[!=]=[ \t]*(?![ \t]|None\b|True\b|False\b|[\"'\d])\w*({SECRET_WORDS}|signature|digest|hmac)",
+        None,
+    ),
     "S.jwt-unverified": (r"verify_signature[\"']?\s*:\s*False|\bjwt\.decode\(", None),
     "S.prompt-injection": (r"[\"']role[\"']\s*:\s*[\"'](system|developer)[\"']|\bSystemMessage\(|\bsystem_prompt\b", None),
-    "U.generic-message": (r"(?i)\braise\s+[\w.]+\(\s*[\"'](error|failed|failure|invalid( (input|value|argument|data|request))?|bad (input|value|request)|something went wrong|unexpected error|unknown error|an error occurred|not found|not supported|unsupported)[.!]?[\"']\s*\)", None),
-    "PY.module.io": (r"^[A-Za-z_]\w*(:\s*[^=]+)?\s*=\s*.*(\b(open|read_text|read_bytes|read_csv|read_parquet|json\.load|requests\.[a-z]+|httpx\.[a-z]+|subprocess\.[a-z_]+|create_engine|boto3\.(client|resource|Session)|[A-Za-z_.]*connect|[A-Za-z_.]*Client)\(|os\.environ\[)", None),
+    "U.generic-message": (
+        r"(?i)\braise\s+[\w.]+\(\s*[\"'](error|failed|failure|invalid( (input|value|argument|data|request))?|bad (input|value|request)"
+        r"|something went wrong|unexpected error|unknown error|an error occurred|not found|not supported|unsupported)[.!]?[\"']\s*\)",
+        None,
+    ),
+    "PY.module.io": (
+        r"^[A-Za-z_]\w*(:\s*[^=]+)?\s*=\s*.*(\b(open|read_text|read_bytes|read_csv|read_parquet|json\.load|requests\.[a-z]+|httpx\.[a-z]+"
+        r"|subprocess\.[a-z_]+|create_engine|boto3\.(client|resource|Session)|[A-Za-z_.]*connect|[A-Za-z_.]*Client)\(|os\.environ\[)",
+        None,
+    ),
     "PY.module.mutable-state": (r"^_?[A-Za-z_]\w*(:\s*[^=]+)?\s*=\s*(\{\}|\[\]|set\(\)|dict\(\)|list\(\)|defaultdict\(|deque\(|OrderedDict\()", None),
     "PY.stdlib.open-encoding": (r"(?<![\w.])open\(|\.(read_text|write_text)\(|\bPath\([^)]*\)\.open\(", r"encoding\s*=|[\"'][rwxa+]*b[rwxa+]*[\"']"),
     "PY.loops.range-len": (r"\brange\(len\(", None),
@@ -563,10 +575,18 @@ PATTERNS = {
     "PY.config.argparse-bool": (r"\btype\s*=\s*bool\b", None),
     "PY.match.isinstance-chain": (r"^\s*elif\s+isinstance\(", None),
     "PY.match.match-args": (r"^\s*case\s+[A-Za-z_][\w.]*\((?![^)]*=)[^)]+\)", None),
-    "PY.deprecated.removed-modules": (r"^\s*(import|from)\s+(asynchat|asyncore|distutils|imp|smtpd|aifc|audioop|cgi|cgitb|chunk|crypt|imghdr|lib2to3|mailcap|nntplib|ossaudiodev|pipes|sndhdr|spwd|sunau|telnetlib|uu|xdrlib)\b", None),
+    "PY.deprecated.removed-modules": (
+        r"^\s*(import|from)\s+(asynchat|asyncore|distutils|imp|smtpd|aifc|audioop|cgi|cgitb|chunk|crypt|imghdr|lib2to3|mailcap"
+        r"|nntplib|ossaudiodev|pipes|sndhdr|spwd|sunau|telnetlib|uu|xdrlib)\b",
+        None,
+    ),
     "PY.deprecated.kw-functional": (r"\b(TypedDict|NamedTuple)\(\s*[\"'][^\"']+[\"']\s*,\s*[A-Za-z_]\w*\s*=", None),
     "PY.deprecated.notimplemented-bool": (r"\bNotImplemented\b", r"return\s+NotImplemented|is\s+(not\s+)?NotImplemented|NotImplementedError"),
-    "PY.deprecated.importlib-abc": (r"importlib\.abc\.(ResourceReader|Traversable|TraversableResources)|from\s+importlib\.abc\s+import\s+[^#\n]*\b(ResourceReader|Traversable|TraversableResources)\b", None),
+    "PY.deprecated.importlib-abc": (
+        r"importlib\.abc\.(ResourceReader|Traversable|TraversableResources)"
+        r"|from\s+importlib\.abc\s+import\s+[^#\n]*\b(ResourceReader|Traversable|TraversableResources)\b",
+        None,
+    ),
     "PY.deprecated.iscoroutinefunction": (r"\basyncio\.iscoroutinefunction\b", None),
     "PY.deprecated.codecs-open": (r"\bcodecs\.open\(", None),
 }
@@ -584,7 +604,7 @@ def manifest(target: Path) -> list[Path]:
     if target.is_file():
         return [target]
     found = [p for p in target.rglob("*.py") if not SKIP & set(p.relative_to(target).parts) and not any(x.endswith(".egg-info") for x in p.relative_to(target).parts)]
-    return sorted(found, key=lambda p: p.as_posix().encode())
+    return sorted(found, key=Path.as_posix)
 
 
 def module_hits(tree: ast.Module) -> list[tuple[int, str, str]]:
@@ -685,7 +705,7 @@ def main() -> None:
     version, found = ruff_hits(target, floor, lookup)
     rows.extend(found)
     sys.stdout.write(f"# manifest files={len(files)} loc={total} ruff={version}\n")
-    for path, number, rule, kind, text in sorted(set(rows), key=lambda r: (r[0].encode(), r[1], r[2], r[3], r[4])):
+    for path, number, rule, kind, text in sorted(set(rows)):
         sys.stdout.write(f"{path}:{number}: {rule} {kind}  {text}\n")
 
 

@@ -39,8 +39,8 @@ The agent runs against a directory containing `pyproject.toml` and (usually) `uv
 
 1. Verify `pyproject.toml` exists and is parseable.
 2. Verify the project is `uv`-managed (presence of `[tool.uv]` or `uv.lock`).
-3. Verify the working tree is clean. If there are uncommitted changes, stop and ask — the migration's commits should be on top of a clean tree.
-4. Verify a test suite exists (`tests/`, `pyproject.toml` has `[tool.pytest.ini_options]`, or similar). Migrations without a test oracle are dangerous; if the project has no tests, ask the user whether to proceed.
+3. Verify the working tree is clean. Do not prompt interactively — interactive prompts fail in automated workflows and CI pipelines. If there are uncommitted changes, **abort** before making any edit: record `blocked: working tree not clean` in the ledger with the output of `git status --short`, and stop. The migration's commits must sit on top of a clean tree; the recovery path is for the human to commit or stash, then re-invoke.
+4. Verify a test suite exists (`tests/`, `pyproject.toml` has `[tool.pytest.ini_options]`, or similar). Migrations without a test oracle are dangerous. If the project has no discoverable tests, **abort** before making any edit: record `blocked: no test oracle` in the ledger and stop. The recovery path is for the human to add tests or re-invoke with an explicit `audit` flag (report-only, no edits), which is the one mode that may proceed without a test oracle.
 5. Verify CI configuration if present, so the agent knows what "green" means in this project.
 
 ## The Ledger

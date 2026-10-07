@@ -40,7 +40,7 @@ If guidance below conflicts with a skill, the skill wins.
 
 ## Approach
 
-1. **Scope check first.** Estimate files and LOC. If scope exceeds ~50 source files or ~10,000 LOC, stop and ask the user to confirm or narrow before proceeding.
+1. **Scope check first.** Estimate files and LOC. Do not prompt interactively — interactive prompts fail in automated workflows and CI pipelines. If scope is at or below 50 source files **and** 10,000 LOC, review the whole path in one pass. If scope exceeds either threshold, do not stop: partition the path into deterministic chunks and review every chunk, recording the partition in the report. Partition rule: one chunk per top-level package directory under the target, in lexicographic path order; if a single package still exceeds a threshold, split it into sub-chunks by immediate child directory, again in lexicographic order. Every file lands in exactly one chunk, so the same input always yields the same partition.
 2. **Establish intent (diff-first).** Determine what this code is *supposed* to do before judging what it *does*:
    - If a PR, branch, or diff was named (or an `activePullRequest` is available), read the **commit message(s) and PR description first**. Then review the **diff hunks** as the primary surface — the changed lines and just enough surrounding context to understand them. This is where fresh-eyes review pays off most: new code, written fast, is where copy-paste errors, wrong identifiers, and code-vs-comment drift live.
    - If no diff exists, review the **full file(s)** at the path. Intent comes from the docstrings, comments, names, and log messages in the code itself.

@@ -3,7 +3,7 @@ description: "Use when: applying fixes from a code-review report produced by the
 name: "Code Review Executor"
 tools: [vscode, execute, read, agent, edit, search, web, 'github/*', github.vscode-pull-request-github/issue_fetch, github.vscode-pull-request-github/labels_fetch, github.vscode-pull-request-github/notification_fetch, github.vscode-pull-request-github/doSearch, github.vscode-pull-request-github/activePullRequest, github.vscode-pull-request-github/pullRequestStatusChecks, github.vscode-pull-request-github/openPullRequest, github.vscode-pull-request-github/create_pull_request, github.vscode-pull-request-github/resolveReviewThread, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, todo]
 argument-hint: Path to a code-review Markdown report produced by the Code Review agent.
-model: ["Claude Sonnet 5 (anthropic)", "Claude Opus 4.6 (copilot)"]
+model: ["Gemini 3.8 Flash (gemini)", "Gemini 3.8 Flash (copilot)"]
 agents: ["*"]
 handoffs:
   - label: Docstring Review — Claude Sonnet 5

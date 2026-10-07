@@ -2,7 +2,7 @@
 description: "Use when EITHER (1) performing holistic code review, auditing code quality, or reviewing a module or package; OR (2) reverse-engineering existing code into written documentation -- design documents, technical specifications, implementation plans, or task breakdowns. Modus operandi is the same in both modes: it is a **pure orchestrator** that dispatches specialist agents (Python Expert, Logic and Correctness Expert, Docstring Expert, Type Annotation Expert, README Expert, Unit Test Expert, Pandas Expert, DuckDB Expert, BigQuery Expert, PostgreSQL Expert, LangGraph Expert, Pydantic Expert, FastAPI Expert, Scikit-learn Expert, PyTorch Expert, GCP Expert, AWS Expert, PyArrow Expert, Observability Expert, Docker Expert, CI/CD Expert, Spec Author, Architecture Diagram Creator, PR Stack Planner, Code Review Generalist) in parallel across multiple models, deduplicates their findings, and assembles a unified report. It produces no findings of its own except a strictly bounded ORCH safety net for genuinely cross-cutting issues no specialist owns. For documentation, point it at a file, module, package, or repository; it reads the actual implementation (not a description), then dispatches Spec Author and Architecture Diagram Creator to produce grounded artifacts -- design doc, technical spec, phased implementation plan, task list, .drawio architecture diagrams. In both modes every claim is traced to real code by the specialist that filed it: the orchestrator never invents behavior the source does not exhibit, and it flags ambiguities and gaps rather than guessing."
 name: "Code Reviewer Agent"
 tools: [vscode, execute, read, agent, edit, search, web, browser, 'github/*', 'microsoft/markitdown/*', 'playwright/*', 'langchain-mcp/*', 'postgresql-mcp/*', 'notebooks-mcp/*', 'visualization-mcp/*', github.vscode-pull-request-github/issue_fetch, github.vscode-pull-request-github/labels_fetch, github.vscode-pull-request-github/notification_fetch, github.vscode-pull-request-github/doSearch, github.vscode-pull-request-github/activePullRequest, github.vscode-pull-request-github/pullRequestStatusChecks, github.vscode-pull-request-github/openPullRequest, github.vscode-pull-request-github/create_pull_request, github.vscode-pull-request-github/resolveReviewThread, ms-azuretools.vscode-containers/containerToolsConfig, ms-python.python/getPythonEnvironmentInfo, ms-python.python/getPythonExecutableCommand, ms-python.python/installPythonPackage, ms-python.python/configurePythonEnvironment, ms-toolsai.jupyter/configureNotebook, ms-toolsai.jupyter/listNotebookPackages, ms-toolsai.jupyter/installNotebookPackages, todo]
-model: ["Claude Sonnet 5 (anthropic)", "Claude Opus 4.6 (copilot)"]
+model: ["Gemini 3.8 Flash (gemini)", "Gemini 3.8 Flash (copilot)"]
 agents: ["*"]
 argument-hint: "Path to a file, module, package, or repository to review; or a PR ref. Optional: type=design|functional|implementation|pr-alignment to request documentation instead of a code review."
 handoffs:
@@ -399,78 +399,159 @@ handoffs:
   - label: Spec Author -- Claude Sonnet 5
     agent: Spec Author
     prompt: |
-      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for Spec Author and use the path listed there.
+      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report
+      -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for Spec Author
+      and use the path listed there.
 
-      Run a **complete independent specification audit** on that path using your full approach. Operate in **Review mode** across all four spec types -- Design (DS-1 through DS-12), Functional (FS-1 through FS-12), Implementation (IS-1 through IS-12), and PR-Alignment (AC-1 through AC-13). Identify which spec types apply to the path (existing `docs/specs/**` files, top-level READMEs claiming behavior, in-repo design docs, recent PR descriptions for diffs touching the path), audit each against the matching criteria, and flag missing specs where the subject warrants one. You are not authoring new specs -- you are running a fresh, thorough review and producing findings.
+      Run a **complete independent specification audit** on that path using your full approach.
+      Operate in **Review mode** for the canonical **Package Architecture Specification**, auditing
+      against criteria SP-1 through SP-7: Repository Layer Rules mapping completeness (slots:
+      entities, rules, ports, config, adapters/, factory, graph, tools, app/), dependency direction
+      enforcement, concrete execution paths (Setup Path, Control Path, Run Path citing real symbols),
+      component interface accuracy, deterministic template adherence, and symbol grounding. If no
+      Package Architecture Specification exists (`docs/specs/architecture-spec.md`), file a
+      Missing-Spec finding. You are not authoring new specs -- you are producing findings.
 
-      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it -- the orchestrator will deduplicate.
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation
+      suggestions (unless they mask a logic bug), and findings in domains owned by other specialists.
+      Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a
+      finding is in your domain, file it -- the orchestrator will deduplicate.
 
-      Save your findings to `./pr_reviews/spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md`
+      (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path.
     send: true
     model: Claude Sonnet 5 (anthropic)
 
   - label: Spec Author -- GPT-5.5
     agent: Spec Author
     prompt: |
-      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for Spec Author and use the path listed there.
+      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report
+      -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for Spec Author
+      and use the path listed there.
 
-      Run a **complete independent specification audit** on that path using your full approach. Operate in **Review mode** across all four spec types -- Design (DS-1 through DS-12), Functional (FS-1 through FS-12), Implementation (IS-1 through IS-12), and PR-Alignment (AC-1 through AC-13). Identify which spec types apply to the path (existing `docs/specs/**` files, top-level READMEs claiming behavior, in-repo design docs, recent PR descriptions for diffs touching the path), audit each against the matching criteria, and flag missing specs where the subject warrants one. You are not authoring new specs -- you are running a fresh, thorough review and producing findings.
+      Run a **complete independent specification audit** on that path using your full approach.
+      Operate in **Review mode** for the canonical **Package Architecture Specification**, auditing
+      against criteria SP-1 through SP-7: Repository Layer Rules mapping completeness (slots:
+      entities, rules, ports, config, adapters/, factory, graph, tools, app/), dependency direction
+      enforcement, concrete execution paths (Setup Path, Control Path, Run Path citing real symbols),
+      component interface accuracy, deterministic template adherence, and symbol grounding. If no
+      Package Architecture Specification exists (`docs/specs/architecture-spec.md`), file a
+      Missing-Spec finding. You are not authoring new specs -- you are producing findings.
 
-      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it -- the orchestrator will deduplicate.
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation
+      suggestions (unless they mask a logic bug), and findings in domains owned by other specialists.
+      Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a
+      finding is in your domain, file it -- the orchestrator will deduplicate.
 
-      Save your findings to `./pr_reviews/spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md`
+      (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path.
     send: true
     model: GPT-5.5 (openai)
 
   - label: Spec Author -- Gemini 3.5 Flash
     agent: Spec Author
     prompt: |
-      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for Spec Author and use the path listed there.
+      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report
+      -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for Spec Author
+      and use the path listed there.
 
-      Run a **complete independent specification audit** on that path using your full approach. Operate in **Review mode** across all four spec types -- Design (DS-1 through DS-12), Functional (FS-1 through FS-12), Implementation (IS-1 through IS-12), and PR-Alignment (AC-1 through AC-13). Identify which spec types apply to the path (existing `docs/specs/**` files, top-level READMEs claiming behavior, in-repo design docs, recent PR descriptions for diffs touching the path), audit each against the matching criteria, and flag missing specs where the subject warrants one. You are not authoring new specs -- you are running a fresh, thorough review and producing findings.
+      Run a **complete independent specification audit** on that path using your full approach.
+      Operate in **Review mode** for the canonical **Package Architecture Specification**, auditing
+      against criteria SP-1 through SP-7: Repository Layer Rules mapping completeness (slots:
+      entities, rules, ports, config, adapters/, factory, graph, tools, app/), dependency direction
+      enforcement, concrete execution paths (Setup Path, Control Path, Run Path citing real symbols),
+      component interface accuracy, deterministic template adherence, and symbol grounding. If no
+      Package Architecture Specification exists (`docs/specs/architecture-spec.md`), file a
+      Missing-Spec finding. You are not authoring new specs -- you are producing findings.
 
-      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it -- the orchestrator will deduplicate.
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation
+      suggestions (unless they mask a logic bug), and findings in domains owned by other specialists.
+      Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a
+      finding is in your domain, file it -- the orchestrator will deduplicate.
 
-      Save your findings to `./pr_reviews/spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/spec-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md`
+      (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path.
     send: true
     model: Gemini 3.5 Flash (gemini)
 
   - label: Architecture Diagram Creator -- Claude Sonnet 5
     agent: architecture-diagram-creator
     prompt: |
-      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for architecture-diagram-creator and use the path listed there.
+      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report
+      -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for
+      architecture-diagram-creator and use the path listed there.
 
-      Run a **complete independent architecture-diagram audit** on that path using your full approach. Operate in **Review mode**: locate every `.drawio` file in or referenced from the path, and for each one walk AD-1 through AD-15 against the current source. For paths that contain non-trivial architecture (multiple modules, async/concurrency, external I/O, data transformations) but no `.drawio` documentation, file a Missing-Diagram finding naming which standard pages (System Context, Component Architecture, Primary Call Path, Data Transformations, Error/Timeout Paths) would apply. You are not authoring or refreshing diagrams -- you are producing findings.
+      Run a **complete independent architecture-diagram audit** on that path using your full
+      approach. Operate in **Review mode**: locate the architecture diagram (`docs/architecture.drawio`
+      or path in scope), and walk AD-1 through AD-8 against current source. Verify adherence to the
+      fixed 3-page set (Page 1: System Context & External Interfaces, Page 2: Component Architecture &
+      Setup Path, Page 3: Control & Run Path), the rigid grid system (column anchors X in {40, 360,
+      680, 1000}, W=240, H=60, uniform vertical strides delta Y=100), strict draw.io XML grammar
+      (flat root cells, sibling edge labels, entity escaping), and symbol grounding. For paths with
+      non-trivial architecture but no `.drawio` documentation, file a Missing-Diagram finding.
+      You are not authoring or refreshing diagrams -- you are producing findings.
 
-      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it -- the orchestrator will deduplicate.
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation
+      suggestions (unless they mask a logic bug), and findings in domains owned by other specialists.
+      Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a
+      finding is in your domain, file it -- the orchestrator will deduplicate.
 
-      Save your findings to `./pr_reviews/architecture-diagram-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/architecture-diagram-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md`
+      (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path.
     send: true
     model: Claude Sonnet 5 (anthropic)
 
   - label: Architecture Diagram Creator -- GPT-5.5
     agent: architecture-diagram-creator
     prompt: |
-      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for architecture-diagram-creator and use the path listed there.
+      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report
+      -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for
+      architecture-diagram-creator and use the path listed there.
 
-      Run a **complete independent architecture-diagram audit** on that path using your full approach. Operate in **Review mode**: locate every `.drawio` file in or referenced from the path, and for each one walk AD-1 through AD-15 against the current source. For paths that contain non-trivial architecture (multiple modules, async/concurrency, external I/O, data transformations) but no `.drawio` documentation, file a Missing-Diagram finding naming which standard pages (System Context, Component Architecture, Primary Call Path, Data Transformations, Error/Timeout Paths) would apply. You are not authoring or refreshing diagrams -- you are producing findings.
+      Run a **complete independent architecture-diagram audit** on that path using your full
+      approach. Operate in **Review mode**: locate the architecture diagram (`docs/architecture.drawio`
+      or path in scope), and walk AD-1 through AD-8 against current source. Verify adherence to the
+      fixed 3-page set (Page 1: System Context & External Interfaces, Page 2: Component Architecture &
+      Setup Path, Page 3: Control & Run Path), the rigid grid system (column anchors X in {40, 360,
+      680, 1000}, W=240, H=60, uniform vertical strides delta Y=100), strict draw.io XML grammar
+      (flat root cells, sibling edge labels, entity escaping), and symbol grounding. For paths with
+      non-trivial architecture but no `.drawio` documentation, file a Missing-Diagram finding.
+      You are not authoring or refreshing diagrams -- you are producing findings.
 
-      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it -- the orchestrator will deduplicate.
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation
+      suggestions (unless they mask a logic bug), and findings in domains owned by other specialists.
+      Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a
+      finding is in your domain, file it -- the orchestrator will deduplicate.
 
-      Save your findings to `./pr_reviews/architecture-diagram-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/architecture-diagram-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md`
+      (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path.
     send: true
     model: GPT-5.5 (openai)
 
   - label: Architecture Diagram Creator -- Gemini 3.5 Flash
     agent: architecture-diagram-creator
     prompt: |
-      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for architecture-diagram-creator and use the path listed there.
+      You are being handed off from the Code Reviewer as a specialist reviewer. Read the code review report
+      -- it contains a `## Specialist Review Triggers` section at the end. Find the entry for
+      architecture-diagram-creator and use the path listed there.
 
-      Run a **complete independent architecture-diagram audit** on that path using your full approach. Operate in **Review mode**: locate every `.drawio` file in or referenced from the path, and for each one walk AD-1 through AD-15 against the current source. For paths that contain non-trivial architecture (multiple modules, async/concurrency, external I/O, data transformations) but no `.drawio` documentation, file a Missing-Diagram finding naming which standard pages (System Context, Component Architecture, Primary Call Path, Data Transformations, Error/Timeout Paths) would apply. You are not authoring or refreshing diagrams -- you are producing findings.
+      Run a **complete independent architecture-diagram audit** on that path using your full
+      approach. Operate in **Review mode**: locate the architecture diagram (`docs/architecture.drawio`
+      or path in scope), and walk AD-1 through AD-8 against current source. Verify adherence to the
+      fixed 3-page set (Page 1: System Context & External Interfaces, Page 2: Component Architecture &
+      Setup Path, Page 3: Control & Run Path), the rigid grid system (column anchors X in {40, 360,
+      680, 1000}, W=240, H=60, uniform vertical strides delta Y=100), strict draw.io XML grammar
+      (flat root cells, sibling edge labels, entity escaping), and symbol grounding. For paths with
+      non-trivial architecture but no `.drawio` documentation, file a Missing-Diagram finding.
+      You are not authoring or refreshing diagrams -- you are producing findings.
 
-      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation suggestions (unless they mask a logic bug), and findings in domains owned by other specialists. Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a finding is in your domain, file it -- the orchestrator will deduplicate.
+      **Skip**: formatting/style nitpicks, documentation gaps outside your domain, type annotation
+      suggestions (unless they mask a logic bug), and findings in domains owned by other specialists.
+      Focus exclusively on bugs, correctness, and safety within your specialty. If in doubt whether a
+      finding is in your domain, file it -- the orchestrator will deduplicate.
 
-      Save your findings to `./pr_reviews/architecture-diagram-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md` (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path to the saved findings file.
+      Save your findings to `./pr_reviews/architecture-diagram-review-<sanitized-path>-<YYYY-MM-DD-HHMMSS>.md`
+      (create the `./pr_reviews/` directory if it does not exist) and return only the absolute path.
     send: true
     model: Gemini 3.5 Flash (gemini)
 
@@ -1077,7 +1158,7 @@ Also load the `no-historical-narrative` skill. The sections you author yourself 
 ## Approach
 
 1. **Scan** -- list all files under the target path. Note file extensions, import statements, and framework identifiers present.
-2. **Scope check** -- if >50 source files or >10,000 LOC, stop and ask the user to confirm or narrow the path. Propose a focused subset.
+2. **Scope check** -- do not prompt interactively; interactive prompts fail in automated workflows and CI pipelines. If the target is at or below 50 source files **and** 10,000 LOC, review the whole path. If it exceeds either threshold, do not stop: partition deterministically into chunks -- one chunk per top-level package directory under the target in lexicographic path order; split any single package that still exceeds a threshold into sub-chunks by immediate child directory, again in lexicographic order -- and dispatch the specialist review over every chunk, recording the chunk boundaries in the consolidated report so the same input always yields the same partition.
 3. **Read standards** -- read `.github/copilot-instructions.md`, `CLAUDE.md`, or equivalent coding standards if present. Pass any relevant conventions to specialist prompts.
 4. **Static pre-analysis** -- before dispatching specialists, run these deterministic checks. The results are passed as an **"Areas of Concern"** block to **both** Logic and Correctness Expert **and** Python Expert (and to the Unit Test Expert when its trigger fires). Routing the results to a single specialist was the source of the original import-side-effect miss; the rule is now: every static-analysis signal goes to every triggered specialist whose checklist could plausibly own the pattern.
    - `uv run ruff check --select E711,E712,B006,B007,B008,B017,B023,B904` (logic pitfalls, mutable defaults, exception chaining) -- share results with Python Expert (F, PY.exceptions, PY.builtins) **and** Logic and Correctness Expert (LC.atomicity, LC.invariants).

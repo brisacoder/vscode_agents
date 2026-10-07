@@ -75,16 +75,16 @@ State the scope in the plan before writing.
 
 **Mode**: create (no README exists or user requests fresh) or update (README exists; produce a diff, not a rewrite).
 
-**Audience** — choose the dominant tier to set voice:
+**Audience tier** sets the README's voice. Do not pick a tier by impression — the same package must resolve to the same tier on every run. Classify by walking the signals below **in order and stopping at the first match**. Each signal is a concrete, checkable fact from `pyproject.toml` or the filesystem, not a judgment call.
 
-| Tier | Voice | Focus |
-|------|-------|-------|
-| Library | integrator-first, terse | code examples, API surface |
-| Application/service | operator-first | install, run, configure |
-| CLI/tool | user-first | "what command do I run" |
-| Research/experimental | scope-first | limitations, reproducibility |
+| Order | Tier | Deterministic trigger (first match wins) | Voice | Focus |
+|------|------|------------------------------------------|-------|-------|
+| 1 | CLI/tool | `pyproject.toml` declares `[project.scripts]` **or** `[project.entry-points."console_scripts"]`, **and** there is no `[project.entry-points]` ASGI/WSGI app | user-first | "what command do I run" |
+| 2 | Application/service | An HTTP/ASGI app object exists (`FastAPI(`, `Flask(`, `Starlette(`, `Django` `wsgi.py`/`asgi.py`) **or** a `Dockerfile`/`compose.yaml` at the package root **or** a long-running entrypoint (`__main__.py` that starts a server/loop) | operator-first | install, run, configure |
+| 3 | Research/experimental | `pyproject.toml` `[project]` `classifiers` contains `Development Status :: 1`/`2`/`3`, **or** version `< 0.1.0`, **or** a top-level `notebooks/`/`experiments/` directory and no public `__all__` | scope-first | limitations, reproducibility |
+| 4 | Library (default) | None of the above matched | integrator-first, terse | code examples, API surface |
 
-State the chosen mode, scope, and audience tier in the plan so it's an explicit decision, not an accident.
+If two triggers could both fire, the lower-numbered row wins by construction (evaluation stops at the first match). Record in the plan the tier chosen **and the exact trigger that matched** (e.g. "Tier: CLI/tool — matched `[project.scripts]` with entries `dtc=...`"), so the decision is auditable and reproducible, not an accident.
 
 ### Step 2 — Read the code and gather sources
 
@@ -317,11 +317,11 @@ For every new finding in the README of one package, search **every other package
 
 ## Output
 
-Write the README to the appropriate path:
-- Package: `<package-root>/README.md`
-- Folder: `<folder>/README.md`
-- Repo root: update `README.md`
-- Single file inside a package: ask the user whether they want the containing folder's README instead.
+Resolve the output path deterministically from the target. Never prompt interactively — interactive prompts fail in automated and CI dispatch. Apply the first rule that matches:
+- Target is a package root (contains `pyproject.toml` or `__init__.py`): write `<package-root>/README.md`.
+- Target is a non-package folder: write `<folder>/README.md`.
+- Target is the repo root: update the root `README.md`.
+- Target is a single file inside a package: write the README for that file's **containing folder** (`<folder>/README.md`). Do not prompt; the containing folder is always the unit of documentation for a single-file target.
 
 After writing, return in chat:
 

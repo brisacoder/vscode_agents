@@ -210,7 +210,12 @@ This is the bulk of the report. One subsection per dispatched (specialist, model
 
 ### Ordering of subsections
 
-Order subsections by specialist domain (alphabetical within domain group), then by model within each specialist. Recommended grouping:
+Subsection order is **binding**, not a suggestion — the same set of dispatched specialists must always render in the same order. Apply these two fixed rules:
+
+1. **Specialist order** is the numbered list below, exactly as written. Skip any specialist that was not dispatched; never reorder the ones that were.
+2. **Model order within each specialist** is always `Claude`, then `GPT`, then `Gemini`. Skip any model not dispatched; never reorder.
+
+Within the framework-specific block (row 7), order the dispatched framework experts **alphabetically by specialist name**; the list in row 7 is the full alphabetical sequence, and you render only the ones that were dispatched, in that order.
 
 1. Python Expert (Claude, GPT, Gemini)
 2. Logic and Correctness Expert (Claude, GPT, Gemini)
@@ -218,7 +223,7 @@ Order subsections by specialist domain (alphabetical within domain group), then 
 4. Type Annotation Expert (Claude, GPT, Gemini)
 5. README Expert (Claude, GPT, Gemini)
 6. Unit Test Expert (Claude, GPT, Gemini)
-7. Framework-specific experts in alphabetical order (FastAPI, LangGraph, Pandas, Pydantic, etc.)
+7. Framework-specific experts in this exact alphabetical order (render only those dispatched): AWS Expert, BigQuery Expert, CI/CD Expert, Docker Expert, DuckDB Expert, FastAPI Expert, GCP Expert, LangGraph Expert, Pandas Expert, PostgreSQL Expert, PyArrow Expert, Pydantic Expert, PyTorch Expert, Scikit-learn Expert
 8. Observability Expert (Claude, GPT, Gemini)
 9. Spec Author (Claude, GPT, Gemini)
 10. Architecture Diagram Creator (Claude, GPT, Gemini)
@@ -310,7 +315,7 @@ Model letter conventions: `C` = Claude, `G` = GPT, `M` = Gemini. Some specialist
 
 ## Individual specialist report format (reference for specialists)
 
-Each specialist's own findings file follows this general structure (specialists may vary slightly but must include all mandatory fields per finding):
+Each specialist's own findings file follows the structure below. A specialist may add section-specific headers for its own domain, but the per-finding block and its mandatory fields are fixed: every finding must carry all mandatory fields in the order shown, and the per-finding structure does not vary between specialists or between runs.
 
 ```markdown
 # <Domain> Review: <path reviewed>

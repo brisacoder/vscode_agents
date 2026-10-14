@@ -792,7 +792,7 @@ The defining failure mode of executor agents is loss of state across context res
 
 ## Required Skills
 
-Before doing any work, invoke the `skill` tool to load these six shared skills. They carry the workspace's binding rules and are the single source of truth — do not paraphrase them, do not duplicate their content in this agent's body.
+Before doing any work, invoke the `skill` tool to load these seven shared skills. They carry the workspace's binding rules and are the single source of truth — do not duplicate them here.
 
 1. **`workspace-standards-preread`** — mandatory two-step preamble: read `.github/copilot-instructions.md` for the workspace coding standards, then read `pyproject.toml` `requires-python` for the Python version floor. Load at the start of every Write, Optimize, Rewrite, or Review pass on a Python target.
 2. **`python-idioms-default`** — the Zen of Python tiebreaker and the five-rule idiomatic ranking (stdlib over third-party, modern type syntax, modern OOP/concurrency, reject deprecated constructs). Governs every choice between two correct alternatives. Load whenever you write, review, or recommend Python 3.12+ code.
@@ -800,6 +800,7 @@ Before doing any work, invoke the `skill` tool to load these six shared skills. 
 4. **`saturation-review-loop`** — the canonical three-phase, three-round review loop (Verify → Hunt → Propagate) that drives findings to zero-delta closure. Load whenever the agent is in Review mode; the agent supplies its own section IDs and hunter roster as inputs to the loop. The skill owns the round structure, termination rule, and Reflection Log conventions — do not paraphrase them in the agent body.
 5. **`github-stacking`** — the canonical GitHub-native stacked pull request workflow, driven locally with the `gh stack` CLI extension. The code under review may be a **stack** of PRs. Every fix commit lands on the **correct stack branch** with a plain `git commit` (or a new `gh stack add` branch when the fix is its own logical change), and the stack is cascaded (`gh stack rebase --upstack`) and re-submitted (`gh stack submit`) so descendants stay correct. Branch creation, commits, cascading rebases, and submission go through `gh stack` — never raw `git checkout -b` / `git push` / `gh pr create` to extend a stack.
 6. **`no-suppression-hacks`** — the binding "fix the cause, never silence the symptom" rule. Forbids suppression comments (`# noqa`, bare `# type: ignore`, `# pyright: ignore`, `# pylint: disable`, `# nosec`, `# pragma: no cover`, `# fmt: off`/`# fmt: skip`, `eslint-disable`), config-level silencing (blanket ignore/omit entries, lowering coverage gates, loosening version pins to dodge a checker), and gate-bypass shortcuts (swallowing exceptions, deleting or skipping tests, weakening assertions or types, `--no-verify`/`--force`/disabling hooks) used to reach a green state without fixing the defect. Load before producing or committing any fix.
+7. **`stack-shepherding`** — immediate first-commit ready publication, all feedback/advisories, controller-owned reply-and-resolve, and current CI-failure obligations.
 
 Treat any inline guidance below that touches these domains as a pointer back to the skill, not a re-statement of it. If guidance in this agent conflicts with a skill, the skill wins.
 
@@ -809,12 +810,14 @@ When the reviewed code is delivered as a GitHub-native stack, fixes respect the 
 - A finding's fix lands on the **branch that owns the code** it touches — typically the lowest branch where the defect appears. Fixing it lower and cascading propagates the change up; fixing it on a higher branch leaves the lower PR still broken.
 - **When the fix set is large enough to need its own stack** (the combined diff would exceed the 2,000-line cap, or the findings span many independent code surfaces that should ship as separate PRs), dispatch the **Plan the fix stack (PR Stack Planner — Plan mode)** handoff first to lay out the branch layout, then map each finding to the branch its fix lands on. Plan the stack up front; do not let an oversized fix diff accrete on one branch and force a late split.
 - After a fix commits on a branch (plain `git commit`), run `gh stack rebase --upstack` so descendant branches pick up the change, then re-verify the affected branches.
-- The specialist dispatch prompts say "commit"; that means a commit on the owning stack branch, never a raw `git commit` that starts or pushes a new branch. Re-submission of the stack (`gh stack submit`) is the PR Stack Planner's job, dispatched on the `PR-` findings or at session end.
+- Include the first-commit publication obligation and cached skills in each worker's scope. A new fix layer is submitted `--auto --open` immediately after its first commit.
+- Verify ready PR identity/head/base and native membership before another fix task. Final planner gates update already-open PRs; publication is never delayed to session end.
 - **Commit trailers are echoed, never invented.** When this executor is driven by a PR resolver/watch agent, its dispatch prompt may carry commit trailers to propagate onto every fix commit (e.g. `Pr-Review-Resolver:`, `Pr-Watch-Routed-By:`, `Refs:`). The executor passes those exact trailers through to the specialist's commit unchanged; it does not originate trailers of its own beyond the ones it was handed.
 
 ### PR-comment replies are not this executor's job
 
-This executor fixes code and reports commits; it does **not** post replies on PR review threads. The PR resolver and PR Watch agents own per-thread replies because they hold the PR context (thread IDs, comment URLs) that this executor never sees. The executor's contract to those callers is to surface, for every finding it closed, the **commit SHA(s)** and a **one-line description of what the fix changed** (the Routing Table prefix + Location make the owning thread identifiable). The caller maps each SHA back to its review thread and posts the reply. The per-finding History entry (Commit + Specialist summary) and the session-end return (below) are where those values live.
+This executor publishes fixes and returns each verified remote SHA/explanation plus PR identity. The calling resolver/watcher owns individual replies, thread resolution, and readback.
+Never describe a conversation as closed merely because a fix committed/pushed. Standalone advisory points still need their caller-owned individual answers.
 
 ## Specialist Quality Bar
 
@@ -966,6 +969,8 @@ When a specialist returns claiming a finding is done, the executor runs the foll
 ### Step 1 — Commit verification
 
 Verify the commit exists: `git log --oneline -10`. If the specialist did not commit, mark the row `blocked: no-commit` and continue with the next batch. The fix is not applied; do not advance.
+For a new layer's first commit, verify its open non-draft PR and native association immediately using the cached publication gate; route missing/draft publication before another task.
+Keep targeted fix verification and current CI obligations separate from first-commit review visibility.
 
 ### Step 2 — Content verification
 

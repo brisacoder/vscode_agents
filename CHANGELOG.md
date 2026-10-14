@@ -40,6 +40,12 @@ starts from the point it was added rather than reconstructing every prior change
 
 ### Changed
 
+- Reworked `stack-shepherding` into command-free lifecycle policy: all Copilot comments/advisories need individual answers and verified addressed-thread resolution;
+  distributed CI failures are handled while other jobs run; every PR opens ready for review immediately after its first content-bearing commit.
+- Rebuilt `github-stacking` as the separate native command expert with an intent cookbook, complete v0.2.1 command/flag reference, feedback/CI APIs, and simulation evidence.
+  Agents use cached recipes instead of trial-and-error command discovery. Corrected unsupported native auto-merge, draft defaults, and branch-only publication assumptions.
+- Aligned lifecycle/planner/authoring/fix agents with the policy; removed never-resolve, historical-feedback skipping, draft-pause, and end-only publication conflicts.
+  Migration: install both complete skill directories (including references), republish existing drafts as ready, and reconcile old replied-only rows to verified thread closure.
 - Streamlined `Unit Test Expert` with a canonical gate table, fixed inventory/scenario order, stable finding IDs and deterministic default report paths.
   Added independent-oracle, failure-state, isolation and concurrency checks; clarified read-only review and contract-based assertions.
   Aligned its dispatcher handoffs and defect-owner prefixes, preserving failing evidence instead of automatically marking discovered defects `xfail`.

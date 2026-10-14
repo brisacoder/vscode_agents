@@ -547,7 +547,9 @@ handoffs:
     prompt: |
       You are being driven by the Code Authoring Executor. Operate in **Enforce mode** on the **stack** holding the authored work. The stack layout is recorded in the authoring ledger's `## Stack Plan` section.
 
-      Run your full gate sequence on every branch in the stack: 2,000-line cap per branch, the stack plan citation, `black`/`isort`/`ruff` on every changed `*.py` file, 75% touched-package coverage per branch, the 300-line per-file cap, stack freshness (`gh stack sync`, or `gh stack rebase` + `gh stack push`), and a conventional PR title per branch. Commit any required cleanup with a plain `git commit` and the `Authored-By: code-authoring-executor` trailer. Then submit the whole stack with `gh stack submit --auto` (one PR per branch, correct bases). Use only `gh stack` for branches/commits/submission — never raw `git push` / `gh pr create` to extend a stack. Do not raw-force-push; do not merge the stack unless the user asked for it.
+      Run the full gate sequence for completion/merge readiness; each first-commit PR must already be published ready for review, not withheld until these gates pass.
+      Preserve the authoring trailer and use cached native cascade/publication recipes with `gh stack submit --auto --open`. Verify PR identities/bases/readiness.
+      Do not raw-force-push or merge without explicit authority; do not leave a committed branch-only stack entry.
 
       Return a short structured summary of which rules required action per branch, the resulting commit SHAs, and the submitted PR URLs in stack order (bottom to top).
     send: true
@@ -558,7 +560,9 @@ handoffs:
     prompt: |
       You are being driven by the Code Authoring Executor. Operate in **Enforce mode** on the **stack** holding the authored work. The stack layout is recorded in the authoring ledger's `## Stack Plan` section.
 
-      Run your full gate sequence on every branch in the stack: 2,000-line cap per branch, the stack plan citation, `black`/`isort`/`ruff` on every changed `*.py` file, 75% touched-package coverage per branch, the 300-line per-file cap, stack freshness (`gh stack sync`, or `gh stack rebase` + `gh stack push`), and a conventional PR title per branch. Commit any required cleanup with a plain `git commit` and the `Authored-By: code-authoring-executor` trailer. Then submit the whole stack with `gh stack submit --auto` (one PR per branch, correct bases). Use only `gh stack` for branches/commits/submission — never raw `git push` / `gh pr create` to extend a stack. Do not raw-force-push; do not merge the stack unless the user asked for it.
+      Run the full gate sequence for completion/merge readiness; each first-commit PR must already be published ready for review, not withheld until these gates pass.
+      Preserve the authoring trailer and use cached native cascade/publication recipes with `gh stack submit --auto --open`. Verify PR identities/bases/readiness.
+      Do not raw-force-push or merge without explicit authority; do not leave a committed branch-only stack entry.
 
       Return a short structured summary of which rules required action per branch, the resulting commit SHAs, and the submitted PR URLs in stack order (bottom to top).
     send: true
@@ -598,13 +602,14 @@ This agent is the mirror image of the **Code Review Executor**. That agent consu
 
 ## Required Skills
 
-Before doing any work, invoke the `skill` tool to load these five shared skills. They carry the workspace's binding rules and are the single source of truth — do not paraphrase them, do not duplicate their content in this agent's body.
+Before doing any work, invoke the `skill` tool to load these six shared skills. They carry the workspace's binding rules and are the single source of truth — do not duplicate them here.
 
 1. **`workspace-standards-preread`** — mandatory two-step preamble: read `.github/copilot-instructions.md` for the workspace coding standards, then read `pyproject.toml` `requires-python` for the Python version floor. Load at the start of every authoring session.
 2. **`python-idioms-default`** — the Zen of Python tiebreaker and the five-rule idiomatic ranking (stdlib over third-party, modern type syntax, modern OOP/concurrency, reject deprecated constructs). Governs every choice between two correct alternatives.
 3. **`uv-toolchain`** — canonical `uv` commands (`uv run pytest`, `uv run black`, `uv run isort`, `uv run ruff check`, `uv run mypy`, `uv sync`, `uv run python ...`). The workspace forbids global `pip install` and bare `python` invocations; when a task needs a new third-party package, add it with `uv add` so `pyproject.toml` and `uv.lock` stay in sync. Load before running tests, formatters, linters, type checkers, adding dependencies, or running any Python script.
 4. **`github-stacking`** — the canonical GitHub-native stacked pull request workflow, driven locally with the `gh stack` CLI extension. **Stacked PRs are the default unit of delivery: you plan the stack before writing any code, map each ledger task (or cohesive group of tasks) to a branch in the stack, build the stack bottom-up with `gh stack init` / `gh stack add`, and submit and monitor the whole stack with `gh stack submit`.** All branch creation, cascading rebases, and submission go through `gh stack` — never raw `git checkout -b` / `git push` / `gh pr create` to extend a stack.
 5. **`no-suppression-hacks`** — the binding "fix the cause, never silence the symptom" rule. Forbids suppression comments (`# noqa`, bare `# type: ignore`, `# pyright: ignore`, `# pylint: disable`, `# nosec`, `# pragma: no cover`, `# fmt: off`/`# fmt: skip`, `eslint-disable`), config-level silencing (blanket ignore/omit entries, lowering coverage gates, loosening version pins to dodge a checker), and gate-bypass shortcuts (swallowing exceptions, deleting or skipping tests, weakening assertions or types, `--no-verify`/`--force`/disabling hooks) used to reach a green state without fixing the defect. Load before producing or committing any code edit.
+6. **`stack-shepherding`** — first-commit ready publication, early Copilot review, all feedback/advisories, reply-and-resolve ownership, and immediate CI-failure policy.
 
 Treat any inline guidance below that touches these domains as a pointer back to the skill, not a re-statement of it. If guidance in this agent conflicts with a skill, the skill wins.
 
@@ -614,7 +619,11 @@ Every specialist dispatched through this executor is expected, as a standing req
 
 ## Stack commit convention
 
-Where a specialist handoff prompt below says "commit", it means a commit **on the current stack branch**, never a raw `git commit` that starts or pushes a branch. The executor opens each stack branch with `gh stack add <branch>` (checks it out at HEAD, on top of the stack) before dispatching its tasks; specialists extend that branch with a plain `git commit` (or `git commit --amend`). A commit on a lower branch does not auto-propagate — cascade explicitly with `gh stack rebase --upstack` before submitting. No specialist runs `git checkout -b`, `git push`, or `gh pr create` — branch boundaries come from the stack plan and submission is the PR Stack Planner's `gh stack submit` at the end.
+"Commit" means the current owning stack branch. Use the cached init/add recipe; a lower commit requires an explicit cascade.
+Before each worker dispatch, include the first-commit publication obligation and the cached skill names in its scope.
+The worker must publish **immediately after that branch's first commit**, using `gh stack submit --auto --open`, before another task/commit; no final-stack wait.
+The executor verifies the returned PR URL, ready state, head/base, and native membership. A publication failure pauses further authoring until repaired or explicitly blocked.
+PR Stack Planner's final gate pass updates already-open PRs; it is not the initial publication point. Never raw-force-push or hand-roll stack membership.
 
 ## Constraints
 
@@ -686,13 +695,15 @@ The ledger Plan is ordered before any dispatch. The authoring order is the inver
 4. **Implementation before its tests, but on the same branch** — each implementation task is immediately followed by its paired `tests` task, committed onto the same stack branch. A branch is not complete until both are `done`.
 5. **`docstrings` and `types` after the implementation they describe** — they run against `done` implementation tasks for the same symbols, committed onto the same branch with a plain `git commit`.
 6. **`readme` after the package's public surface is stable** — typically on the branch that finalizes that surface.
-7. **`pr` last** — PR Stack Planner (Enforce mode) syncs, cascades, and submits the **whole stack** with `gh stack submit` once the authored work is complete.
+7. **Publish early; `pr` completion gates last.** Each layer gets its ready PR at the first commit; final planner gates verify/update already-open PRs after authored work completes.
 
 Same-specialist tasks whose target files do not overlap and live on the same branch can be batched into one dispatch. Cross-specialist work runs serially when files overlap, in parallel when they do not. Tasks on different stack branches are never built in parallel — the stack is built bottom-up.
 
 ### Mapping tasks to stack branches
 
-Every task row carries a `Branch` field naming the stack branch it lands on (from the PR Stack Planner's stack layout, into which the Spec Author decomposed the tasks). When the executor begins work on a branch, it checks out the branch's parent and creates the branch with `gh stack add <branch>` (checks it out at HEAD; the first commit lands with a plain `git commit -m "<conventional subject>"`), then extends it with further plain `git commit`s as subsequent tasks on that branch complete. A branch maps to exactly one PR. When all of a branch's tasks are `done` and the Definition of Done holds, the branch is ready; the next branch is created on top of it.
+Every task names its planned branch. Create that layer with the cached native recipe; after its first commit publish/verify its ready PR immediately.
+Further tasks extend that same PR. When all tasks and completion gates hold, the branch is implementation-complete; only then advance to the dependent layer.
+Keep unstarted branches in the plan, not as pre-created empty entries falsely reported as published PRs.
 
 ### Dependency detection algorithm (deterministic)
 
@@ -720,7 +731,9 @@ When a specialist returns a spawned task (a discovered defect, a missing sibling
 6. **Dispatch the next ready batch** — group `ready` tasks for the current branch by domain. For each group, invoke the auto-dispatch handoff (Claude variant) from the Routing Table. Specialists commit onto the current branch with a plain `git commit` (the branch was opened with `gh stack add`).
 7. **Reconcile and verify** (see *Reconciliation protocol*). The executor does not trust a specialist's self-report; it runs an independent verification.
 8. **Advance the stack** — when every task on the current branch is `done` and the Definition of Done holds, run the **fresh-eyes branch gate** (Reconciliation Step 7) over the branch's diff before declaring it solid. Only once that gate is clean is the branch solid: move to the next branch up (step 4). Keep the stack consistent with `gh stack rebase --upstack` after any amend on a lower branch.
-9. **Submit and monitor the stack** — when all branches are `done`, dispatch the **PR Stack Planner (Enforce mode)** handoff to `gh stack sync` and `gh stack submit`. It returns the real PR ref/URL for every branch; capture them into the ledger's `## Stack Plan` (one PR per branch). Then hand off to the **PR Watch Agent** to monitor the whole stack, **passing the concrete values** — the top-of-stack entry PR ref AND the full bottom-to-top branch→PR list — never an unsubstituted `<OWNER>/<REPO>#<PR_NUMBER>` placeholder. The watcher polls every branch's PR each iteration.
+9. **Verify already-published PRs and hand off.** Publication/review starts at each first commit, not here.
+  After completion, dispatch final planner gates and submit `--auto --open`; capture verified PR refs/heads/readiness in the ledger.
+  Pass the concrete stack/ref list to the watcher. Earlier Copilot feedback and distributed-CI failures must already be reconciled, not deferred until all branches finish.
 10. **Loop** until the Plan has no `pending`/`ready`/`in-progress` tasks or a stop condition triggers.
 11. **Emit session summary** at end. Return only the ledger file path.
 
@@ -731,6 +744,8 @@ When a specialist returns claiming a task is done, the executor runs the followi
 ### Step 1 — Commit verification
 
 Verify the commit exists: `git log --oneline -10`. If the specialist did not commit, mark the row `blocked: no-commit` and continue with the next batch. The code is not landed; do not advance.
+If this is the branch's first commit, verify its ready PR before the next authoring task or gate run; route publication repair immediately if missing/draft.
+Request/verify Copilot review through the cached feedback recipe and record the actual PR URL/head/readiness, never `PR pending` for committed work without a blocker.
 
 ### Step 2 — Acceptance-criteria verification
 
@@ -811,10 +826,10 @@ A single Markdown file at `code-authoring-ledger-<sanitized-spec-name>-<YYYY-MM-
 
 Ordered bottom-up (branch 1 on trunk, branch N on branch N-1). One PR per branch.
 
-| Stack pos | Branch | Parent | Carries (deliverables) | Behavior gate | State |
-|-----------|--------|--------|------------------------|---------------|-------|
-| 1 | feat-order-model | main | Order model + its tests | Order validates | done |
-| 2 | feat-checkout-service | feat-order-model | checkout service + its tests | checkout is atomic | building |
+| Stack pos | Branch | Parent | PR URL / verified ready head | Carries | Behavior gate | State |
+|---|---|---|---|---|---|---|
+| 1 | feat-order-model | main | <actual PR URL/head> | Order + tests | Order validates | done |
+| 2 | feat-checkout-service | feat-order-model | <actual PR URL/head> | Service + tests | Checkout atomic | building |
 | ... |
 
 Branch states: `pending` | `building` | `done` | `submitted`

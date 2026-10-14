@@ -51,11 +51,24 @@ The agents in this repo are **not self-contained** — most of them load one or 
 | `no-suppression-hacks` | The 23 code-writing agents (not pure review/orchestrate/doc agents) |
 | `no-historical-narrative` | Every agent that writes or reviews documents (specs, READMEs, docstrings, diagrams, review reports) — present state only, no history |
 | `saturation-review-loop` | Every Review-mode specialist, to drive findings to zero-delta closure |
-| `github-stacking` | Any agent that creates branches, commits, or opens/updates/monitors pull requests |
-| `stack-shepherding` | PR Stack Planner, PR Watch Agent, PR Review Resolver — what "done" means once a stack is submitted |
+| `github-stacking` | Native command expert: direct insert/move/swap/fold/publication/recovery recipes and complete CLI/API references |
+| `stack-shepherding` | Authors, publishers, resolvers, watchers — first-commit ready PRs, all Copilot feedback, reply-and-resolve, immediate CI-failure action |
 | `consolidated-review-report` | Code Reviewer Agent, when assembling the final multi-specialist report |
 
 Without these installed, an agent that says "invoke the `skill` tool to load these N shared skills" will have nothing to load.
+
+## PR-lifecycle skill ownership
+
+- **Policy:** `stack-shepherding` defines what must happen and when. Address every Copilot comment/advisory; reply individually and resolve addressed conversations.
+	Failed jobs/checks are actionable while the rest of distributed CI runs. Publish every PR ready for review immediately after its first commit; final quality gates still block merging.
+- **Commands:** `github-stacking` is the separate native command expert. Its top-level intent table links to small, bundled cookbook, command, feedback/CI, and validation references.
+	Copy the **whole skill directory**, including `references/`, when installing. Agents use the cached recipe and one capability check, not command archaeology.
+- **Shape/quality:** PR Stack Planner owns decomposition and completion/merge gates; it cannot defer early ready publication.
+- **Closure owner:** PR Watch Agent or PR Review Resolver maps published fix evidence to individual replies, resolves addressed review threads, and reads back closure.
+	Code workers return verified fix SHAs; they do not silently substitute a code commit for conversation resolution.
+
+The command recipes target official `github/gh-stack` v0.2.1 and cite GitHub's PR how-to/CLI references. Native stacks currently do not support auto-merge.
+Thirteen real-CLI/Git/PTY cases and five document/API recipe checks passed using a local fixture API; live permissions, Copilot execution, and queues require project verification.
 
 
 # Why VSCode agents?

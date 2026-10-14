@@ -18,7 +18,10 @@ Choose the simplest honest annotation that preserves behavior and the public API
 
 ## Required Skills
 
-Before work, load these six shared skills. Their rules are authoritative; do not duplicate or relax them here.
+**FIRST load `implementation-first`. DO NOT create/change/run tests during implementation. Complete the scope, hand it to the user, then await test-phase approval.**
+Test/runtime-consumer execution below is approved-test-phase ONLY; inspect source/contracts without executing them and report deferred gates honestly.
+
+Then load these six remaining shared skills. Their rules are authoritative; do not duplicate or relax them here.
 
 1. **`workspace-standards-preread`** — consuming-project standards and Python floor.
 2. **`python-idioms-default`** — Zen of Python and supported modern typing idioms.
@@ -86,11 +89,11 @@ Do not promise bit-identical LLM output or established closure when the loop rea
 Record target/exclusions, mode/policy, revision plus current file contents, interpreter/checker versions, dependency/stub versions, and relevant configuration.
 Read CI commands, `pyproject.toml`, and checker-specific files/overrides to establish the project's actual checker list, strictness, and warning policy.
 For multiple checkers, use declared CI order; without a declared order, sort exact command strings lexicographically.
-Do not replace configured checkers, force stricter flags, or fetch a latest tool. Default to the configured test suite; narrow it only at the caller's explicit request.
+Do not replace configured checkers, force stricter flags, or fetch a latest tool. There is no default test-suite execution: the user-authorized phase/scope controls it.
 
 Run those commands with source and in-scope tests/stubs covered. Capture raw diagnostics, exit status, and separate source/test counts; read IDE diagnostics separately.
 Diagnostic identity includes checker, rule, severity, path, symbol, and offending span/expression, not just the count.
-Record formatter/linter/test commands and establish affected test baselines before repair. Unavailable configuration/tools mean Blocked, not an improvised installation.
+Record formatter/linter commands and inspect existing test contracts without execution. Run tests/baselines only in the explicitly approved test phase.
 If evidence changes during Review, or changes outside your own patch during Write, stop and re-baseline explicitly; do not combine snapshots.
 
 ### Step 2 — Documentation currency
@@ -162,7 +165,7 @@ If an annotation changes validation or another runtime contract, obtain behavior
 
 ### Step 9 — Format and verify
 
-In Review, run only check-only formatter/linter commands. In Write/Optimize, format only authorized files, then run the same recorded checks/tests/checkers.
+After the whole annotation batch, run only applicable static formatter/linter/checker commands. Test/runtime probes stay deferred until user approval; no per-hint suites.
 Map baseline diagnostic spans through the diff so shifted lines are not false regressions; compare rule, severity, symbol, and offending expression as well as totals.
 Compare IDE diagnostics separately; a clean editor is not proof that the configured checker passed.
 Inspect imports, docstring agreement, and the whole scoped diff. Fix or withdraw only your own failing changes, preserving existing user edits.

@@ -78,7 +78,9 @@ Resolve the operating mode deterministically from arguments and filesystem state
 
 ## Required Skills
 
-Before doing any work, invoke the `skill` tool to load these shared skills:
+**FIRST load `implementation-first`. DO NOT auto-plan/dispatch test tasks during implementation. Plan the whole code scope, user validation, then explicitly approved tests.**
+Keep later test scope concise and deferred; no exhaustive scenario matrices or per-function paired tests before user validation. Static document checks remain permitted.
+Then load these remaining shared skills:
 
 1. **`workspace-standards-preread`** -- mandatory two-step preamble: read `.github/copilot-instructions.md`
    for coding standards, then read `pyproject.toml` `requires-python` for Python version floor.

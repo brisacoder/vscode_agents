@@ -12,6 +12,8 @@ starts from the point it was added rather than reconstructing every prior change
 
 ### Added
 
+- `implementation-first` shared phase gate — imperative prohibition on automated test authoring/execution during implementation.
+  Complete the agreed code, hand it to the user for real validation, then address only explicitly authorized test scope; preserve existing tests/hooks/CI.
 - `no-historical-narrative` skill — the binding "present state only, no history" rule for
   every document an agent writes or reviews (design specs, functional specs, implementation
   plans, READMEs, docstrings, architecture diagrams, code-review reports). Forbids historical
@@ -40,6 +42,9 @@ starts from the point it was added rather than reconstructing every prior change
 
 ### Changed
 
+- Applied implementation-first gates to all agents and coding/delegation skills. Removed automatic baseline/per-finding suites, paired-test dispatch, and premature test/coverage completion blockers.
+  Authoring/fix ledgers separate `implemented`, user validation, and test authorization; migration/example/type workflows defer runtime checks. Approved tests stay minimal and behavior-level.
+  Migration: refresh agents/skills and install `implementation-first`; existing project merge requirements remain enforced, not silently weakened.
 - Reworked `stack-shepherding` into command-free lifecycle policy: all Copilot comments/advisories need individual answers and verified addressed-thread resolution;
   distributed CI failures are handled while other jobs run; every PR opens ready for review immediately after its first content-bearing commit.
 - Rebuilt `github-stacking` as the separate native command expert with an intent cookbook, complete v0.2.1 command/flag reference, feedback/CI APIs, and simulation evidence.
@@ -52,19 +57,15 @@ starts from the point it was added rather than reconstructing every prior change
 - Streamlined `Logic and Correctness Expert` with evidence-gated runtime checks, fixed coverage and finding-order/ID rules,
   contract-based severity, and compatible specialist reporting. Added batch, ownership, cancellation, replay, and result checks;
   removed speculative pattern alarms and blanket fix prescriptions.
-- Streamlined `Python Expert` (86 KB to 69 KB, including the embedded scanner) around one closed, version-gated rule catalogue (118 rows with
-  fixed severities, minimum Python versions, and `scan`/`read` detectors) and a detector-first Review mode:
-  an embedded scanner (stdlib plus `ruff` through `uv`/`uvx`) emits a sorted, byte-identical candidate list,
-  and verdicts, finding granularity, ordering, IDs (`PY-<letter>-<N>`), and the Issue and Recommended fix text
-  are mechanical. Independent trial reviews of the same code produced identical findings, severities,
-  locations, and fix text. Mode detection honors explicit mode phrases and fix/authoring ledgers before verb
-  matching, so executor handoffs no longer resolve to Review mode. Corrected rules that were wrong
-  (`CancelledError` is not caught by `except Exception`; positional `match` patterns without `__match_args__`
-  raise `TypeError`; `importlib.abc.Loader` is not removed in 3.14; `httpx` has a finite default timeout) and
-  added floor-syntax, `get_event_loop`, `tarfile` filter, JWT verification, constant-time comparison,
-  `argparse` `type=bool`, and stdlib-shadowing checks.
-  Removed the F plus `PY.module` double filing, subjective rules, the dangling "Execute Fixes" hand-off, the
-  Delegation Summary, the Out-of-Scope Observations and Prioritized Summary sections, and unrelated tools.
+- Streamlined `Python Expert` around 114 evidence-gated rules, behavior-preserving fixes, and mode-relevant skills.
+  Ruff/AST/text diagnostics are candidates, not automatic findings; blocked coverage is explicit.
+  The embedded static scanner emits source-free JSON, full hashed manifests, strict source decoding,
+  and pinned offline Ruff 0.16.10 results. Isolated Python startup, source-set revalidation, stable chunking,
+  node-qualified overlap reduction, and final survivor verification improve repeatability without promising identical LLM prose.
+  Added undefined/unbound-name checks; corrected task ownership, bounded fanout, timeout, trust-boundary,
+  tarfile-default, loop-creation, and per-API deprecation rules. Removed blanket ABC-to-Protocol,
+  slotted/frozen dataclass, gather-to-TaskGroup, and wait_for-to-timeout findings.
+  Fix handoffs stay scoped; report fields, `PY-<letter>-<N>` IDs, 17 idiom subsections, and six hunters remain compatible.
 - Migrated the stacked-PR workflow from the third-party Graphite CLI (`gt`) to GitHub's
   native stacked pull request feature, driven locally via the `gh stack` CLI extension.
   The `graphite-stacking` skill was replaced by `github-stacking`; every `gt <command>`

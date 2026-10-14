@@ -14,7 +14,8 @@ In your Vscode IDE if you click on the Copilot icon in the sidebar, you should s
 
 # Usage 
 
-**The code reviewer is autonomous and comprehensive.** It will delegate to all other agents as needed to create a comprehensive review document. It will review the code, run tests, check for security vulnerabilities, check for performance issues, check for code quality issues, check for documentation issues and check for any other issues it can find.
+**The code reviewer delegates source/static review to domain specialists.** Automated test runs, behavioral probes, and test authoring are not implicit in a review request.
+For new/changed code, finish the complete implementation first, let the user perform real validation, then start only the explicitly authorized test phase.
 
 Sub-agents do not consume the original contextual window so main agent will have access to the entire codebase and all the information it needs to create a comprehensive review document.
 
@@ -28,7 +29,8 @@ You can also provide the path to a single file, group of files, PR or a folder. 
 
 # Code Executor Agent
 
-The code executor agent can read the ouput of the code reviewer and fix everything, back to back. It is also autonomous and comprehensive. It will delegate to all other agents as needed to fix all the issues found by the code reviewer. It will fix the code, run tests, fix any issues found by the tests, fix any security vulnerabilities, fix any performance issues, fix any code quality issues, fix any documentation issues and fix any other issues it can find.
+The code executor reads a findings report and delegates the agreed production fixes as cohesive batches. It delivers the full implementation for user validation first.
+It does not alternate tiny edits with suite runs or generate a speculative test suite. Test work follows only with explicit user authorization and named scope.
 
 # Single Agents
 
@@ -45,6 +47,7 @@ The agents in this repo are **not self-contained** — most of them load one or 
 
 | Skill | Used by |
 |---|---|
+| `implementation-first` | Every agent and coding/delegation skill — complete agreed code, user real testing, then explicitly approved automated tests |
 | `workspace-standards-preread` | Every code-writing and code-reviewing agent, at the start of any Write/Optimize/Rewrite/Review pass |
 | `python-idioms-default` | Every agent that writes, reviews, or recommends Python code |
 | `uv-toolchain` | Every agent that runs tests, formatters, linters, type checkers, or scripts |
@@ -56,6 +59,16 @@ The agents in this repo are **not self-contained** — most of them load one or 
 | `consolidated-review-report` | Code Reviewer Agent, when assembling the final multi-specialist report |
 
 Without these installed, an agent that says "invoke the `skill` tool to load these N shared skills" will have nothing to load.
+
+## Implementation-first workflow
+
+1. Complete the **entire agreed implementation** across its planned layers, including required integration/types/docs. Use correctness reasoning and one focused final static pass.
+2. Hand off **implementation complete — awaiting user validation; automated tests deferred**, with changed scope, exercise instructions, known risks, and actual static evidence.
+3. Let the user test the real behavior; complete corrective source changes before generating tests around a moving design.
+4. Only after explicit test-phase authorization, write/run the smallest load-bearing public-contract/regression scope. No test-count quotas, private-wiring coupling, or repeated broad suites.
+
+Existing tests/hooks/CI remain intact; deferred tests are not passing tests and actual project merge requirements still apply.
+Migration: install `implementation-first` alongside refreshed agents/skills. Old per-edit suite, automatic paired-test, and pre-validation coverage instructions cannot override its phase gate.
 
 ## PR-lifecycle skill ownership
 

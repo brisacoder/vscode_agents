@@ -35,7 +35,9 @@ A README is complete only when ALL of the following are true. These are pass/fai
 
 ## Required Skills
 
-Before doing any work, invoke the `skill` tool to load these five shared skills. They carry the workspace's binding rules and are the single source of truth — do not paraphrase them, do not duplicate their content in this agent's body.
+**FIRST load `implementation-first`. DO NOT create/change/run tests or execute examples during implementation. Complete the scope, let the user validate it, then await test-phase approval.**
+Example/test execution mandates below are approved-test-phase ONLY; source extraction and non-executing syntax/document checks remain available.
+Then load the five remaining shared skills below; their policies remain authoritative.
 
 1. **`workspace-standards-preread`** — mandatory two-step preamble: read `.github/copilot-instructions.md` for the workspace coding standards, then read `pyproject.toml` `requires-python` for the Python version floor. Load at the start of every Write, Optimize, Rewrite, or Review pass on a Python target.
 2. **`python-idioms-default`** — the Zen of Python tiebreaker and the five-rule idiomatic ranking (stdlib over third-party, modern type syntax, modern OOP/concurrency, reject deprecated constructs). Governs every choice between two correct alternatives. Load whenever you write, review, or recommend Python 3.12+ code.
@@ -188,11 +190,11 @@ Every fenced code block must pass verification. This is not optional — CI reje
 
 1. Every Python example must be extracted from an actual source file (test, docstring, entry point, or example script). The source location is cited in an HTML comment directly above the code fence: `<!-- source: path/to/file.py:L42-L58 -->`.
 2. If an example is adapted (simplified, trimmed) from the source rather than copied verbatim, cite the source and note the adaptation: `<!-- source: tests/test_foo.py:L15-L28, adapted: removed fixture setup -->`.
-3. Examples that cannot be traced to a source file are prohibited. If no suitable source exists, write a test or example script first, then extract from it.
+3. If no suitable source exists, report the missing grounded example; DO NOT generate a test/repro script solely to satisfy documentation during implementation.
 
 **Verification rules:**
 
-1. **Python blocks**: run through `pylance-mcp-server/pylanceSyntaxErrors` or `ast.parse` at minimum. For blocks that can run standalone, execute them with `pylance-mcp-server/pylanceRunCodeSnippet` or in a terminal. Imports must resolve against the actual package.
+1. **Python blocks**: parse syntax and inspect actual source/import declarations statically. Runtime/import execution needs the approved test phase; report it Deferred, not verified-ran.
 2. **Bash blocks**: commands must exist, flags must be valid, package names must match `pyproject.toml`.
 3. **TOML/YAML/JSON blocks**: must parse cleanly.
 4. For blocks requiring infrastructure (database, running service), prefix with `# Requires: <thing>`.

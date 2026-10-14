@@ -30,7 +30,10 @@ Never edit production code. Mutation experiments require an explicit request and
 
 ## Required Skills
 
-Invoke the `skill` tool to load these six shared skills. Their rules are authoritative; do not duplicate their content here.
+**FIRST load `implementation-first`. DO NOT author/change/run tests until the complete implementation is user-validated and the user explicitly authorizes this test scope.**
+An explicit standalone test request for stable existing code is permitted. Generic coding/review handoffs and coverage targets are not authorization.
+
+Then load these six remaining shared skills. Their rules are authoritative; do not duplicate their content here.
 
 1. **`workspace-standards-preread`** — consuming-workspace instructions and Python version floor; every mode.
 2. **`python-idioms-default`** — Zen of Python and idiomatic choices; every Python pass.
@@ -61,7 +64,7 @@ These rules reduce variability; they do not guarantee bit-identical model output
      Use a fixture for resource/state lifecycle and a module-level helper only for repeated invocation wiring. Keep scenario differences visible; avoid speculative abstractions.
      Use scenario-derived parameter IDs, such as `empty`, `below-min`, `at-min`, `above-min`, `at-max`, `above-max` and `failure-after-progress`, in inventory order.
      Do not rewrite sufficient existing tests or unchanged artifacts on a rerun. Property tests follow the conditional rules below, not an automatic preference.
-5. **Evaluate evidence.** Establish the existing unit-suite baseline before edits; run each new/changed test and then the affected unit suite and quality checks.
+5. **Evaluate approved evidence.** Batch the named tests against stable behavior, then run the smallest authorized selection once—not each new case plus repeated suites.
      Fix broken setup/assertions, not legitimate failures. Never count collection alone as execution, line coverage as behavior proof, or a skipped/xfail case as requirement coverage.
      For each gate record **Pass**, **Fail**, **Blocked**, or **N/A** with evidence/reason. Distinguish baseline failures, coverage gaps, unresolved intent and discovered defects.
 6. **Canonicalize results.** Use `(relative path, qualified symbol, gate/requirement ID, scenario/root cause)` as the finding key throughout reflection.
@@ -79,7 +82,7 @@ Honor stricter consuming-project rules without weakening gates, suppressing fail
 | Gate | Section | Pass condition | Evidence |
 |---|---|---|---|
 | AC-1 | A | Exactly one effective category per collected case; operational markers may coexist. | Collected markers. |
-| AC-2 | L | At least 60% `business_logic` cases in each scoped unit-test file; no padding or relabeling. | Per-file numerator/denominator. |
+| AC-2 | L | Categories reflect actual contracts; no test-count/ratio quota, padding, or relabeling. | Requirements and minimal case set. |
 | AC-3 | U | Test docstrings state behavior, Business reason, Catches and requirement IDs. | Docstrings and requirement map. |
 | AC-4 | U | `# GIVEN / # WHEN / # THEN` expose setup, action and postcondition. | Test bodies. |
 | AC-5 | U | Names follow `test_<subject>_<outcome>_when_<scenario>` and describe the behavior. | Test names. |
@@ -87,7 +90,7 @@ Honor stricter consuming-project rules without weakening gates, suppressing fail
 | AC-7 | L | Independent oracle verifies a caller-visible outcome; structural-only checks require a structural contract. | Requirements and assertions. |
 | AC-8 | L | No mocking SUT logic/internal wiring; substitute only actual external or nondeterministic boundaries. | Dependency/call paths. |
 | AC-9 | A | Category markers registered; default unit selection excludes integration tests. | Active configuration/collection. |
-| AC-10 | L | At least 80% of grounded business requirements have effective tests; uncovered requirements remain in the denominator. | Requirement-to-test matrix. |
+| AC-10 | L | User-authorized load-bearing contracts/regressions have minimal effective cases; report unrequested gaps without auto-expansion. | Scoped requirement-to-test map. |
 | AC-11 | U | No unused imports or undefined names (F401/F821). | Executed lint check. |
 | AC-12 | U | Black/isort checks and other project-required lint/type checks pass. | Executed checker results. |
 | AC-13 | U | Zero applicable editor diagnostics; unavailable diagnostics are Blocked, not Pass. | Editor diagnostics. |
@@ -104,7 +107,7 @@ Honor stricter consuming-project rules without weakening gates, suppressing fail
 | AC-24 | F | Contractual import-time behavior is isolated; reloads do not leak registries or stale references. | Import/state test and cleanup. |
 | AC-25 | C | Contracted concurrency has a forced interleaving, bounded waits and awaited task cleanup. | Concurrency tests. |
 | AC-26 | U | Each test file is at most 300 lines; split by behavior and share only genuine common setup. | Measured line counts. |
-| AC-27 | L | Scoped source line coverage is at least 75%, or the stricter project floor; no omissions to inflate it. | Executed scoped coverage report. |
+| AC-27 | L | Authorized/required project coverage is measured honestly; no invented floor or omissions/padding to inflate it. | Actual approved coverage scope or Deferred. |
 
 ### Classification and Counts
 
@@ -144,8 +147,8 @@ Measure line coverage only for the requested source modules/package; classify un
     Shape/dtype may be a contract but cannot stand in for promised values or learning behavior. Keep model downloads, real inference services and wall-clock benchmarks outside unit tests.
 - **Properties:** use property tests only for grounded algebraic contracts and an available framework. Fix the strategy/profile, generation limits and deterministic settings.
     Honor project runtime policy; preserve a generated counterexample as a named fixed regression. Do not introduce a universal wall-clock cap or new dependency merely for a review.
-- **Order independence:** if pytest-randomly is installed, run with the plugin enabled and fixed seeds 0 and 1; otherwise run collected node IDs in forward and reverse order.
-    Record commands/results. A differing outcome is evidence to investigate, not permission to suppress the test or guess a production defect.
+- **Order independence:** additional seeds/order runs require that named approved scope or a concrete isolation failure; no automatic repeat-suite multiplier.
+    Preserve differing results as evidence without suppressing tests or guessing a production defect.
 
 ### Test Style
 
@@ -231,7 +234,8 @@ Write/Optimize plans use the same inventory and gate results; the defect log use
 Absent a stricter caller return contract, return artifact paths and a concise summary: collected/written cases by category, requirement/line coverage, uncovered scenarios, findings and blocked work.
 Keep dates, durations, machine-specific paths and conversational progress out of semantic report content. Timestamped filenames are allowed only when requested by the caller.
 
-Completion requires the affected unit suite and all applicable gates to pass, with actual command/diagnostic evidence. Blocked checks or production defects prevent a completion claim.
+Completion is measured against the authorized test task/selection, not an automatically widened suite. Preserve evidence and report deferred/unperformed gates without claiming Pass.
+DO NOT turn every public symbol or speculative edge into a separate test; prefer a minimal stable public-contract case set over private-wiring assertions and parameter explosions.
 Unresolved in-scope requirements also block completion of the affected test obligation; report partial work and its limitations instead.
 N/A requires a specific applicability reason. A capped review can deliver a report but must state incomplete convergence. Do not paste generated test code in chat.
 

@@ -14,6 +14,9 @@ context: inline
 These obligations bind the author, publisher, resolver, and watcher across the entire stack. A longer agent body cannot waive them.
 Load `github-stacking` for exact commands and its bundled cookbook/API recipes; do not put command syntax or stack-shape rules in this policy.
 
+Load `implementation-first` before delegating code. **DO NOT author/change/run automated tests during implementation; finish all agreed code, let the user test, then await approval.**
+Known CI failures are still triaged immediately; fix evidenced production defects, defer test-only maintenance, and preserve actual merge requirements and feedback obligations.
+
 ## 1. Address, reply, resolve, verify
 
 Enumerate feedback on **every PR**, including pre-existing, outdated, and newly posted feedback:

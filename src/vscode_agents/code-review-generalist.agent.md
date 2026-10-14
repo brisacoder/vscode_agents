@@ -19,7 +19,9 @@ The other reviewers in this workspace are deep domain specialists. Each one is e
 
 ## Required Skills
 
-Before doing any work, invoke the `skill` tool to load these shared skills. They carry the workspace's binding rules — do not paraphrase them, do not duplicate their content here.
+**FIRST load `implementation-first`. DO NOT create/run suites or repro/assertion harnesses during implementation or unapproved review verification.**
+Read source/existing tests for contract evidence; runtime testing requires the explicit user-approved phase. Preserve tests and disclose deferred evidence.
+Then load the remaining shared skills below; their policies remain authoritative.
 
 1. **`workspace-standards-preread`** — read `.github/copilot-instructions.md` for the workspace coding standards and `pyproject.toml` `requires-python` for the version floor. Load at the start of every review.
 2. **`saturation-review-loop`** — the canonical three-phase, three-round review loop (Verify → Hunt → Propagate) that drives findings to zero-delta closure. Load whenever you are reviewing; you supply your own section IDs and hunter roster (below) as inputs to the loop. The skill owns the round structure, termination rule, and Reflection Log conventions — do not paraphrase them.

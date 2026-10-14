@@ -9,6 +9,11 @@ context: inline
 
 This workspace is uv-managed. Every Python tool runs through `uv run` (which activates the project's locked virtual environment automatically) or `uv` itself. Do not invoke `python`, `pip`, `pytest`, `black`, `isort`, `ruff`, `mypy`, or `pyright` directly — those resolve against the wrong interpreter and miss locked dependencies.
 
+## Mandatory implementation-first gate
+
+Load `implementation-first` before coding or test execution. **DO NOT run/create/change tests during implementation; finish the agreed code and hand it to the user first.**
+Commands below are syntax references, not authorization. Baseline suites, doctests, coverage, collection, and per-edit test cycles require the approved test phase.
+
 ## Test execution
 
 - **Full test suite (concise)**: `uv run pytest --tb=line -q`
@@ -51,17 +56,18 @@ A file that would fail `black --check` or `isort --check` is not done. This appl
 - `uv run python -m py_compile <file>` — verify a file parses
 - `uv run <console-script>` — any console_scripts entry from `pyproject.toml`
 
-## Quality gate checklist (for any file you write or modify)
+## Phase-aware quality checks
 
-Before declaring work complete, run, in order, against the touched files:
+After the complete implementation batch, run necessary static checks on touched files:
 
 1. `uv run black <files>` (apply)
 2. `uv run isort <files>` (apply)
 3. `uv run ruff check --select F401,F821 <files>` (fix unused imports / undefined names)
-4. `uv run pytest -v <test-target>` (zero failures, or appropriately xfailed)
-5. `uv run pytest --cov=<package> --cov-report=term-missing --cov-fail-under=75 -q` when the change touches code in a package with a 75% coverage gate
+4. Hand off `implementation complete — awaiting user validation; automated tests deferred`.
 
-A change that fails any of these in CI fails here. Fix it before submitting.
+Only after user test-phase authorization: run the named affected selection once, then changed failing selections after corrective batches.
+Coverage/full-suite commands run only for explicitly authorized/required scope in that approved phase; respect the project's configured floor and preserve unsuppressed failures.
+An observed CI failure is evidence to diagnose, not permission to launch broad local suites or generate tests during implementation. Do not claim deferred checks passed.
 
 ## Forbidden invocations
 

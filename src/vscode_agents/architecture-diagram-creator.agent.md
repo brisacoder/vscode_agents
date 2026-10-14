@@ -44,6 +44,9 @@ Specification produced by the Spec Author.
 
 ## Programmatic Mode Resolution
 
+**FIRST load `implementation-first`. DO NOT create/run tests or behavioral probes while documenting implementation; source/static diagram checks remain permitted.**
+Any delegated code/test work must finish the agreed code first and await user validation plus explicit test-phase approval. Do not spawn tests to ground a diagram.
+
 Never prompt the user interactively. Interactive prompts fail in automated workflows and CI pipelines.
 Resolve the operating mode deterministically from arguments and filesystem state:
 

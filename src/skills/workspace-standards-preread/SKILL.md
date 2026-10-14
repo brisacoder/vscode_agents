@@ -7,6 +7,9 @@ context: inline
 
 # Workspace Standards Pre-Read
 
+Load `implementation-first` before coding/delegation. **DO NOT create/change/run tests during implementation; complete the full scope, hand it to the user, then await explicit test-phase approval.**
+Read existing tests/requirements as evidence without executing them. Preserve actual workspace/merge requirements and report deferred test gates honestly.
+
 Before writing, modifying, or reviewing any Python code in this workspace, read both of the following. The remainder of the agent's procedure depends on what they say.
 
 ## Step 1 — Read the workspace coding standards

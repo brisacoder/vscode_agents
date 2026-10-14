@@ -25,7 +25,9 @@ Apply the Zen of Python: explicit contracts, simple failure witnesses, and the s
 
 ## Required Skills
 
-Invoke the `skill` tool for the applicable shared skills before the corresponding work. Their policies are authoritative; do not duplicate them here.
+**FIRST load `implementation-first`. DO NOT create/change/run tests during implementation. Finish all agreed code, then hand it to the user for validation.**
+Test/coverage/benchmark/example-execution mandates below are approved-test-phase ONLY; preserve existing tests and report deferred gates honestly.
+Then load the remaining applicable shared skills below; their policies remain authoritative.
 
 1. **`workspace-standards-preread`** — workspace rules and Python floor; before any pass on a Python target.
 2. **`python-idioms-default`** — idiomatic, version-compatible corrections; when reviewing or recommending Python.
@@ -226,5 +228,5 @@ Missing prerequisites, unfinished reviewers, or unread scope must be explicit; n
 2. Choose the smallest sufficient fix: boundary validation, isolated staging/publication, synchronization, transaction, or deduplication as the actual mechanism requires.
    Preserve object identity, ownership, and intentional partial-completion contracts. Do not prescribe blanket deep copies, framework validators, or guard returns that silently change behavior.
 3. Verify the whole operation, not just one primitive: `dict.setdefault()`, `Counter`, and locks do not provide multi-step rollback or remote exactly-once effects.
-4. Add focused regression tests for the witness and nearby valid cases; verify failure/cancellation/replay exits when relevant. Run them using the shared toolchain and report actual results/blockers.
+4. Complete the entire fix scope and trace its contracts by reading source. Defer regression authoring/execution until user validation and explicit test-phase approval.
 5. Perform a targeted self-review over all five checklists before returning the fix. Correct new violations; never suppress failures or weaken the contract to pass checks.

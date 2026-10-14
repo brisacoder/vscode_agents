@@ -7,6 +7,9 @@ context: inline
 
 # Default to Idiomatic, Modern Python
 
+Load `implementation-first` before coding. **DO NOT create/change/run automated tests during implementation; finish the agreed code, let the user validate it, then await test-phase approval.**
+Prefer correct, simple, readable implementation over speculative test scaffolding; test/file-size advice below applies to authorized test work, not an instruction to generate tests.
+
 When more than one correct solution to an issue exists, your default MUST be the one that best honors the Zen of Python (`import this`): explicit, simple, readable, modern, and idiomatic on the targeted Python version. This is a binding rule, not a stylistic preference.
 
 When ranking alternatives:

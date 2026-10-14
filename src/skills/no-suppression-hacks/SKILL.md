@@ -7,6 +7,9 @@ context: fork
 
 # Fix the Cause, Never Silence the Symptom
 
+Load `implementation-first` before coding. **DO NOT create/change/run tests during implementation; hand the complete agreed code to the user before the approved test phase.**
+Deferring test work is not suppressing a failure: preserve existing tests/hooks/CI, record their actual evidence, and never claim unperformed checks passed.
+
 When a linter, type checker, security scanner, formatter, or test gate flags your
 code, the **only** acceptable response is to diagnose and fix the root cause. A
 warning is a signal that something is wrong — silencing the signal does not make

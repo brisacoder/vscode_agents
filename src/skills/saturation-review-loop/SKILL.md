@@ -7,6 +7,9 @@ context: fork
 
 # Saturation Loop — Canonical Review Mechanics
 
+Load `implementation-first` before dispatching reviewers. **DO NOT use Verify/Hunt/Propagate as permission to author/run tests or assertion/repro harnesses during implementation.**
+All workers inherit the phase and test authorization. Use source/static evidence; disclose deferred runtime proof instead of secretly multiplying test runs across personas/rounds.
+
 This is the binding loop every Review-mode specialist runs. The loop is the cure for the historical failure mode where running the same review a second time finds more issues than the first run. After the loop terminates, re-running the agent on the same input produces the same report.
 
 Each agent supplies two inputs of its own:

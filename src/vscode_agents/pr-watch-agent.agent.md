@@ -16,7 +16,7 @@ handoffs:
 
       The PR may be one branch in a GitHub-native **stack**. Each Action Queue row names the stack branch that owns the cited code. For each row tagged for you:
       1. `gh stack checkout <owning-branch>` and open the cited Location; apply the smallest fix that satisfies the request on the branch that owns the code (fix it on the lowest branch where the defect appears so cascading propagates it up).
-      2. Run the module's existing tests; add a regression test if the failure scenario was previously uncovered.
+      2. Follow `implementation-first`: complete the agreed source fix; DO NOT create/change/run tests without user test-phase approval.
       3. Commit onto that branch with a plain `git commit` (conventional-commits message referencing the comment URL: `fix(<scope>): <one-liner> -- addresses <comment-url>`). Then run `gh stack rebase --upstack` to cascade the change onto every branch above it.
       4. Re-submit with `gh stack submit --auto --open` and verify PR identities/readiness and published heads. Never raw `git push`.
       5. Return the published fix SHA and one-line explanation; the watcher owns the individual reply, thread resolution, and readback.
@@ -63,7 +63,9 @@ In a real background runner, reconcile the stack, act on pending work, then sche
 
 ## Required Skills
 
-Invoke the `skill` tool to load these two skills before the loop starts:
+**FIRST load `implementation-first`. DO NOT dispatch automated-test work during implementation; complete source fixes and await user validation/test-phase approval.**
+Triage existing CI evidence now, but distinguish production defects from test-only maintenance; the latter remains deferred and a truthful merge blocker.
+Then load these two remaining skills before the loop starts:
 
 1. **`github-stacking`** -- cached native command, publication, feedback-resolution, and distributed-CI recipes. Read the matching recipe; do not rediscover syntax.
 2. **`stack-shepherding`** -- binding feedback/CI/publication/completion policy. This agent is the lifecycle controller responsible for reply AND resolve AND verification.

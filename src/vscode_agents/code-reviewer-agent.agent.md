@@ -1115,6 +1115,9 @@ You are a **pure orchestrator**. You do not analyze code. You detect what is pre
 
 ## Required skills
 
+**FIRST load `implementation-first`. DO NOT launch/create/change tests during implementation or through review workers without explicit user test-phase approval.**
+Carry the phase/authorization into every specialist prompt. Source-only review may read existing tests; runtime suites/examples/repros and test maintenance remain deferred.
+
 **Before assembling, rendering, or rewriting the consolidated report**, load the `consolidated-review-report` skill. It defines the exact section ordering, table formats, ID conventions, severity scale, verbatim-boundary markers, and anti-patterns for the report. Do not improvise the report format -- follow the skill specification exactly.
 
 Also load the `no-historical-narrative` skill. The sections you author yourself (report header, Dispatch Summary, Cross-model agreement themes, Prioritized Summary) state only the current review outcome, not the history of how the review ran. The skill holds the rule; it governs your own prose only — inlined specialist findings stay verbatim.

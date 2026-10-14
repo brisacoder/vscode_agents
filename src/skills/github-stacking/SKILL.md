@@ -11,6 +11,9 @@ context: inline
 Use GitHub's own `github/gh-stack` extension, not similarly named third-party stack tools.
 Load `stack-shepherding` for publication/review/CI/completion obligations. Use the caller's stack plan; decomposition and quality budgets belong to PR Stack Planner.
 
+Load `implementation-first` before coding/delegation. **DO NOT create/run tests during implementation; hand the complete agreed code to the user before the approved test phase.**
+Test/benchmark/coverage mandates in bundled recipes are approved-phase ONLY. Early ready PR publication and truthful current-CI observation still apply.
+
 ## Intent → recipe
 
 | You want to… | Exact entrypoint / next step |
